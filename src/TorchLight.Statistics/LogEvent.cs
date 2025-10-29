@@ -1,148 +1,289 @@
-﻿using System.Text.RegularExpressions;
+﻿using TorchLight.Statistics.Configuration;
 
 namespace TorchLight.Statistics;
 
+/// <summary>
+/// 日誌行事件基類
+/// </summary>
 public abstract record LogEvent(DateTime Time, int ThreadId);
 
-public record BagModEvent(DateTime Time, int ThreadId, int PageId, int SlotId, int ConfigBaseId, int Num)
-    : LogEvent(Time, ThreadId);
+/// <summary>
+/// 背包修改事件
+/// </summary>
+public record BagModEvent(
+    DateTime Time,
+    int ThreadId,
+    int PageId,
+    int SlotId,
+    int ConfigBaseId,
+    int Num,
+    string ProtoName,
+    string Action
+) : LogEvent(Time, ThreadId);
 
+/// <summary>
+/// 區塊開始事件
+/// </summary>
 public record BlockStarted(DateTime Time, int ThreadId, string ProtoName) : LogEvent(Time, ThreadId);
+
+/// <summary>
+/// 區塊結束事件
+/// </summary>
 public record BlockEnded(DateTime Time, int ThreadId, string ProtoName) : LogEvent(Time, ThreadId);
 
+/// <summary>
+/// 物品變更區塊上下文（用於追蹤每個執行緒的區塊狀態）
+/// </summary>
 public sealed class ItemChangeBlockContext
 {
     public bool InBlock { get; set; }
-    public string ProtoName { get; set; } = "";
+    public string ProtoName { get; set; } = string.Empty;
     public DateTime StartTime { get; set; }
     public List<BagModEvent> Buffer { get; } = [];
+
+    public void Reset()
+    {
+        InBlock = false;
+        ProtoName = string.Empty;
+        StartTime = DateTime.MinValue;
+        Buffer.Clear();
+    }
 }
 
-public static partial class LineParsers
-{
-    private const string DtFormat = "yyyy.MM.dd-HH.mm.ss:fff";
-
-    // 共同：時間 + ThreadId
-    private const string UnrealTime = @"(?<time>\d{4}\.\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{2}:\d{3})";
-    private const string ThreadId = @"\[\s*(?<tid>\d+)\]";
-
-    // start/end
-    [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*?ItemChange@\s+ProtoName=(?<proto>\S+)\s+start", RegexOptions.Singleline)]
-    public static partial Regex StartLine();
-
-    [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*?ItemChange@\s+ProtoName=(?<proto>\S+)\s+end", RegexOptions.Singleline)]
-    public static partial Regex EndLine();
-
-    // 區塊中要抓的 BagMgr 修改
-    [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*?BagMgr@:\s*Modfy\s+BagItem\s+PageId\s*=\s*(?<page>\d+)\s+SlotId\s*=\s*(?<slot>\d+)\s+ConfigBaseId\s*=\s*(?<config>\d+)\s+Num\s*=\s*(?<num>\d+)", RegexOptions.Singleline)]
-    public static partial Regex BagModLine();
-}
-
+/// <summary>
+/// 物品變更區塊處理器
+/// 負責識別和處理 ItemChange 區塊（start/end）內的背包修改事件
+/// </summary>
 public sealed class ItemChangeBlockProcessor
 {
-    // 依 ThreadId 紀錄各自的區塊
-    private readonly Dictionary<int, ItemChangeBlockContext> _ctx = [];
+    /// <summary>
+    /// 依 ThreadId 記錄各自的區塊狀態
+    /// </summary>
+    private readonly Dictionary<int, ItemChangeBlockContext> _contexts = [];
 
-    // 回呼：你可以依需求只用其中幾個
-    public event Action<BlockStarted> OnBlockStarted;                   // 偵測到 start
-    public event Action<BagModEvent> OnBagModInsideBlock;               // 區塊內 BagMod（即時模式）
-    public event Action<BlockEnded, IReadOnlyList<BagModEvent>> OnBlockEndedWithBatch; // 彙整模式
+    /// <summary>
+    /// 目標協議名稱（只處理這些協議的區塊）
+    /// </summary>
+    private readonly HashSet<string> _targetProtocols = ["Spv3Open", "PickItems"];
 
-    // 只處理 ProtoName=PickItems 的區塊（其餘忽略）
-    private const string TargetProto = "PickItems";
+    #region 事件
 
+    /// <summary>
+    /// 當偵測到區塊開始時觸發
+    /// </summary>
+    public event Action<BlockStarted>? OnBlockStarted;
+
+    /// <summary>
+    /// 當區塊內發生背包修改時立即觸發（即時模式）
+    /// </summary>
+    public event Action<BagModEvent>? OnBagModInsideBlock;
+
+    /// <summary>
+    /// 當區塊結束時觸發，並提供該區塊內所有的背包修改事件（彙整模式）
+    /// </summary>
+    public event Action<BlockEnded, IReadOnlyList<BagModEvent>>? OnBlockEndedWithBatch;
+
+    #endregion
+
+    /// <summary>
+    /// 處理單行日誌
+    /// </summary>
     public void HandleLine(string line)
     {
-        // 1) start
-        var mStart = LineParsers.StartLine().Match(line);
-        if (mStart.Success)
+        // 1) 檢查區塊開始
+        if (TryParseBlockStart(line, out var startEvent))
         {
-            var t = DateTime.ParseExact(mStart.Groups["time"].Value, "yyyy.MM.dd-HH.mm.ss:fff", null);
-            var tid = int.Parse(mStart.Groups["tid"].Value);
-            var proto = mStart.Groups["proto"].Value;
-
-            var ctx = GetOrCreate(tid);
-
-            // 只針對 PickItems；其他 ProtoName 可視需求擴充
-            if (string.Equals(proto, TargetProto, StringComparison.OrdinalIgnoreCase))
-            {
-                ctx.InBlock = true;
-                ctx.ProtoName = proto;
-                ctx.StartTime = t;
-                ctx.Buffer.Clear();
-
-                OnBlockStarted?.Invoke(new BlockStarted(t, tid, proto));
-            }
+            HandleBlockStart(startEvent);
             return;
         }
 
-        // 2) end
-        var mEnd = LineParsers.EndLine().Match(line);
-        if (mEnd.Success)
+        // 2) 檢查區塊結束
+        if (TryParseBlockEnd(line, out var endEvent))
         {
-            var t = DateTime.ParseExact(mEnd.Groups["time"].Value, "yyyy.MM.dd-HH.mm.ss:fff", null).AddHours(8);
-            var tid = int.Parse(mEnd.Groups["tid"].Value);
-            var proto = mEnd.Groups["proto"].Value;
-
-            if (_ctx.TryGetValue(tid, out var ctx) && ctx.InBlock &&
-                string.Equals(ctx.ProtoName, TargetProto, StringComparison.OrdinalIgnoreCase))
-            {
-                ctx.InBlock = false;
-                var ended = new BlockEnded(t, tid, proto);
-                OnBlockEndedWithBatch?.Invoke(ended, ctx.Buffer.AsReadOnly());
-                ctx.Buffer.Clear(); // 清掉，等下一個區塊
-            }
+            HandleBlockEnd(endEvent);
             return;
         }
 
-        // 3) 區塊內的 BagMgr 修改
-        var mBag = LineParsers.BagModLine().Match(line);
-        if (mBag.Success)
+        // 3) 檢查背包修改
+        if (TryParseBagModification(line, out var bagEvent))
         {
-            var t = DateTime.ParseExact(mBag.Groups["time"].Value, "yyyy.MM.dd-HH.mm.ss:fff", null);
-            var tid = int.Parse(mBag.Groups["tid"].Value);
+            HandleBagModification(bagEvent);
+            return;
+        }
 
-            if (_ctx.TryGetValue(tid, out var ctx) && ctx.InBlock &&
-                string.Equals(ctx.ProtoName, TargetProto, StringComparison.OrdinalIgnoreCase))
-            {
-                var ev = new BagModEvent(
-                    t, tid,
-                    PageId: int.Parse(mBag.Groups["page"].Value),
-                    SlotId: int.Parse(mBag.Groups["slot"].Value),
-                    ConfigBaseId: int.Parse(mBag.Groups["config"].Value),
-                    Num: int.Parse(mBag.Groups["num"].Value)
-                );
-
-                // ✅ 即時模式：立刻通知
-                OnBagModInsideBlock?.Invoke(ev);
-
-                // ✅ 彙整模式：緩存到區塊，等 end 時一次吐
-                ctx.Buffer.Add(ev);
-            }
+        // 4) 檢查背包刪除
+        if (TryParseBagDeletion(line, out var deleteEvent))
+        {
+            HandleBagModification(deleteEvent);
         }
     }
 
-    private ItemChangeBlockContext GetOrCreate(int tid)
+    #region 解析方法
+
+    private bool TryParseBlockStart(string line, out BlockStarted? blockStarted)
     {
-        if (!_ctx.TryGetValue(tid, out var ctx))
-        {
-            ctx = new ItemChangeBlockContext();
-            _ctx[tid] = ctx;
-        }
-        return ctx;
+        blockStarted = null;
+        var match = LineRegex.StartLine().Match(line);
+        if (!match.Success) return false;
+
+        var time = ParseDateTime(match.Groups["time"].Value);
+        var threadId = int.Parse(match.Groups["tid"].Value);
+        var protoName = match.Groups["proto"].Value;
+
+        if (!_targetProtocols.Contains(protoName))
+            return false;
+
+        blockStarted = new BlockStarted(time, threadId, protoName);
+        return true;
     }
 
-    // 保護性機制（可選）：逾時自動結束區塊，避免漏掉 end
-    public void CloseStaleBlocks(TimeSpan timeout, DateTime nowUtc)
+    private bool TryParseBlockEnd(string line, out BlockEnded? blockEnded)
     {
-        foreach (var kvp in _ctx)
+        blockEnded = null;
+        var match = LineRegex.EndLine().Match(line);
+        if (!match.Success) return false;
+
+        var time = ParseDateTime(match.Groups["time"].Value);
+        var threadId = int.Parse(match.Groups["tid"].Value);
+        var protoName = match.Groups["proto"].Value;
+
+        blockEnded = new BlockEnded(time, threadId, protoName);
+        return true;
+    }
+
+    private bool TryParseBagModification(string line, out BagModEvent? bagEvent)
+    {
+        bagEvent = null;
+        var match = LineRegex.BagItemLine().Match(line);
+        if (!match.Success) return false;
+
+        var time = ParseDateTime(match.Groups["time"].Value);
+        var threadId = int.Parse(match.Groups["tid"].Value);
+
+        var context = GetContext(threadId);
+        if (!context.InBlock || !_targetProtocols.Contains(context.ProtoName))
+            return false;
+
+        bagEvent = new BagModEvent(
+            time,
+            threadId,
+            PageId: int.Parse(match.Groups["page"].Value),
+            SlotId: int.Parse(match.Groups["slot"].Value),
+            ConfigBaseId: int.Parse(match.Groups["config"].Success ? match.Groups["config"].Value : "0"),
+            Num: int.Parse(match.Groups["num"].Success ? match.Groups["num"].Value : "0"),
+            ProtoName: context.ProtoName,
+            Action: match.Groups["action"].Value
+        );
+
+        return true;
+    }
+
+    private bool TryParseBagDeletion(string line, out BagModEvent? deleteEvent)
+    {
+        deleteEvent = null;
+        var match = LineRegex.BagItemDeleteLine().Match(line);
+        if (!match.Success) return false;
+
+        var time = ParseDateTime(match.Groups["time"].Value);
+        var threadId = int.Parse(match.Groups["tid"].Value);
+
+        var context = GetContext(threadId);
+        if (!context.InBlock || !_targetProtocols.Contains(context.ProtoName))
+            return false;
+
+        deleteEvent = new BagModEvent(
+            time,
+            threadId,
+            PageId: int.Parse(match.Groups["page"].Value),
+            SlotId: int.Parse(match.Groups["slot"].Value),
+            ConfigBaseId: int.Parse(match.Groups["config"].Value),
+            Num: 0,
+            ProtoName: context.ProtoName,
+            Action: "RemoveBagItem"
+        );
+
+        return true;
+    }
+
+    #endregion
+
+    #region 事件處理
+
+    private void HandleBlockStart(BlockStarted startEvent)
+    {
+        var context = GetOrCreateContext(startEvent.ThreadId);
+        context.InBlock = true;
+        context.ProtoName = startEvent.ProtoName;
+        context.StartTime = startEvent.Time;
+        context.Buffer.Clear();
+
+        OnBlockStarted?.Invoke(startEvent);
+    }
+
+    private void HandleBlockEnd(BlockEnded endEvent)
+    {
+        if (!_contexts.TryGetValue(endEvent.ThreadId, out var context))
+            return;
+
+        if (!context.InBlock || !_targetProtocols.Contains(context.ProtoName))
+            return;
+
+        context.InBlock = false;
+        OnBlockEndedWithBatch?.Invoke(endEvent, context.Buffer.AsReadOnly());
+        context.Buffer.Clear();
+    }
+
+    private void HandleBagModification(BagModEvent bagEvent)
+    {
+        // 即時模式：立即通知
+        OnBagModInsideBlock?.Invoke(bagEvent);
+
+        // 彙整模式：緩存到區塊
+        var context = GetContext(bagEvent.ThreadId);
+        context.Buffer.Add(bagEvent);
+    }
+
+    #endregion
+
+    #region 輔助方法
+
+    private ItemChangeBlockContext GetContext(int threadId)
+    {
+        return _contexts.TryGetValue(threadId, out var ctx) ? ctx : new ItemChangeBlockContext();
+    }
+
+    private ItemChangeBlockContext GetOrCreateContext(int threadId)
+    {
+        if (!_contexts.TryGetValue(threadId, out var context))
         {
-            var ctx = kvp.Value;
-            if (ctx.InBlock && (nowUtc - ctx.StartTime.ToUniversalTime()) > timeout)
+            context = new ItemChangeBlockContext();
+            _contexts[threadId] = context;
+        }
+        return context;
+    }
+
+    private static DateTime ParseDateTime(string timeStr)
+    {
+        return DateTime.ParseExact(timeStr, AppConfiguration.UnrealLogTimeFormat, null)
+            .AddHours(AppConfiguration.TimeZoneOffsetHours);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// 保護性機制：自動關閉超時的區塊，避免因漏掉 end 而導致狀態異常
+    /// </summary>
+    public void CloseStaleBlocks(TimeSpan timeout)
+    {
+        var now = DateTime.UtcNow;
+        foreach (var (threadId, context) in _contexts)
+        {
+            if (context.InBlock && (now - context.StartTime.ToUniversalTime()) > timeout)
             {
-                ctx.InBlock = false;
-                OnBlockEndedWithBatch?.Invoke(new BlockEnded(DateTime.UtcNow, kvp.Key, ctx.ProtoName), ctx.Buffer.AsReadOnly());
-                ctx.Buffer.Clear();
+                context.InBlock = false;
+                var endEvent = new BlockEnded(DateTime.Now, threadId, context.ProtoName);
+                OnBlockEndedWithBatch?.Invoke(endEvent, context.Buffer.AsReadOnly());
+                context.Buffer.Clear();
             }
         }
     }

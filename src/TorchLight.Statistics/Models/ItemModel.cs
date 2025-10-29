@@ -8,5 +8,4 @@ public class ItemModel
     public int PageId { get; set; }
     public int SoltId { get; set; }
     public int Num { get; set; }
-
 }

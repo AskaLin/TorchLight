@@ -1,155 +1,87 @@
 ﻿using System.Text;
 using TorchLight.Statistics;
-using TorchLight.Statistics.Models;
+using TorchLight.Statistics.Configuration;
 
-Console.WriteLine("Hello, World!");
+Console.WriteLine("╔════════════════════════════════════════╗");
+Console.WriteLine("║  火炬之光無限 - 拾取物品統計工具       ║");
+Console.WriteLine("║  Torchlight Infinite Item Tracker      ║");
+Console.WriteLine("╚════════════════════════════════════════╝");
+Console.WriteLine();
 
-Dictionary<int, BagDataModel> tempBagData = [];
-Dictionary<int, BagDataModel> mapPickItemData = [];
-var idTable = IdTable.GetIdTable();
-var logFormater = new LogFormater();
-
-var proc = new ItemChangeBlockProcessor();
-// 即時模式：每讀到一條 BagMgr（且在 PickItems 區塊內）就觸發
-proc.OnBagModInsideBlock += ev =>
+try
 {
-    var itemModel = new ItemModel
-    {
-        Name = idTable.TryGetValue(ev.ConfigBaseId, out string itemName) ? itemName : "未知的物品",
-        Num = ev.Num
-    };
-    Console.WriteLine($"\t\t{ev.Time:yyyy/MM/dd HH:mm:ss.fff} {itemModel.Name} 在 slot:{ev.SlotId} 有 {itemModel.Num} 個");
+    // 初始化核心組件
+    Console.WriteLine("正在初始化...");
+    var itemIdTable = ItemIdTable.GetIdTable();
+    Console.WriteLine($"✓ 已載入 {itemIdTable.Count} 個物品定義");
 
-    if (tempBagData.TryGetValue(ev.ConfigBaseId, out BagDataModel value))
+    var lineParser = new LineParser(itemIdTable);
+    var itemChangeProcessor = new ItemChangeBlockProcessor();
+    var logProcessor = new GameLogProcessor(itemIdTable, lineParser, itemChangeProcessor);
+    Console.WriteLine("✓ 核心組件初始化完成");
+
+    // 設定日誌檔案路徑
+    var filePath = GetLogFilePath();
+    if (!File.Exists(filePath))
     {
-        Console.WriteLine($"\t\t背包之前有 {value.ItemName} {value.Total} 個");
-        if (value.Slots.TryGetValue(ev.SlotId, out int value2))
-        {
-            int newNum = ev.Num - value2;            
-            value.Slots[ev.SlotId] = ev.Num;
-            value.Total += newNum;
-            itemModel.Num = newNum;
-            Console.WriteLine($"\t\t其中在 solt:{ev.SlotId}, 有 {value2} 個, 所以是撿到 {newNum} 個, 現在全部有 {value.Total} 個\r\n\r\n");
-        }
-        else
-        {
-            value.Slots[ev.SlotId] = ev.Num;
-            value.Total += ev.Num;
-        }
+        Console.WriteLine($"\n[警告] 找不到日誌檔案: {filePath}");
+        Console.WriteLine("請確認遊戲是否已安裝，或手動設定日誌路徑。");
+        Console.WriteLine("\n按下 Enter 結束程式...");
+        Console.ReadLine();
+        return;
     }
 
-    Console.WriteLine("在這張地圖");
-    if (mapPickItemData.TryGetValue(ev.ConfigBaseId, out BagDataModel pickValue))
-    {
-        if (pickValue.Slots.TryGetValue(ev.SlotId, out int prevSlotCount))
-        {
-            // update existing slot
-            pickValue.Slots[ev.SlotId] = prevSlotCount + itemModel.Num;
-            pickValue.Total += itemModel.Num;
+    Console.WriteLine($"✓ 日誌檔案: {filePath}");
+    Console.WriteLine();
 
-            Console.WriteLine($"\t該物品在此欄位之前有 {prevSlotCount} 個，這次增加 {itemModel.Num} 個，現在該欄位有 {pickValue.Slots[ev.SlotId]} 個");
-            Console.WriteLine($"\t目前地圖上 {pickValue.ItemName} 總數量: {pickValue.Total}\r\n");
-        }
-        else
-        {
-            // new slot for this map
-            pickValue.Slots[ev.SlotId] = itemModel.Num;
-            pickValue.Total += itemModel.Num;
+    // 啟動日誌監聽器
+    using var tail = new SafeFileTailWatcher(
+        filePath,
+        Encoding.UTF8,
+        TimeSpan.FromMilliseconds(AppConfiguration.FileWatcherDebounceMs),
+        TimeSpan.FromSeconds(AppConfiguration.FilePollingIntervalSeconds),
+        startFromEnd: AppConfiguration.StartFromFileEnd);
 
-            Console.WriteLine($"\t該物品在此欄位之前沒有數量，這次新增 {itemModel.Num} 個 (slot:{ev.SlotId})");
-            Console.WriteLine($"\t目前地圖上 {pickValue.ItemName} 總數量: {pickValue.Total}\r\n");
-        }
-    }
-    else
-    {
-        var bagData = new BagDataModel
-        {
-            ItemName = itemModel.Name,
-            Total = itemModel.Num
-        };
-        bagData.Slots[ev.SlotId] = itemModel.Num;
-        mapPickItemData[ev.ConfigBaseId] = bagData;
+    tail.OnNewLine += logProcessor.ProcessLine;
+    tail.Start();
 
-        Console.WriteLine($"\t第一次在這張地圖撿到 {bagData.ItemName} {bagData.Total} 個 (slot:{ev.SlotId} = {itemModel.Num})\r\n");
-    }
-    // Console.WriteLine($"{ev.Time:yyyy/MM/dd HH:mm:ss.fff} 撿到 {itemModel.Name} {itemModel.Num} 個");
-};
+    Console.WriteLine("════════════════════════════════════════");
+    Console.WriteLine("監聽已啟動，等待遊戲事件...");
+    Console.WriteLine("提示：進入異界地圖後會自動開始統計拾取物品");
+    Console.WriteLine("════════════════════════════════════════");
+    Console.WriteLine();
+    Console.WriteLine("按下 Enter 鍵以停止監聽並結束程式");
+    Console.WriteLine();
 
+    Console.ReadLine();
 
-//var filePath = "D:\\Torchlight Infinite Game\\UE_game\\TorchLight\\Saved\\Logs\\UE_game.log";
-//var tail = new SafeFileTailWatcher(
-//    filePath,
-//    Encoding.UTF8,
-//    TimeSpan.FromMilliseconds(500),
-//    TimeSpan.FromSeconds(2),
-//    startFromEnd: true);
-
-//tail.OnNewLine += ProcessLineData;
-//tail.Start();
-
-using var fs = new FileStream("UE_game.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-using var streamReader = new StreamReader(fs, Encoding.UTF8);
-string line;
-while (!streamReader.EndOfStream)
+    tail.Stop();
+    Console.WriteLine("\n程式已結束。感謝使用！");
+}
+catch (Exception ex)
 {
-    line = streamReader.ReadLine();
-    ProcessLineData(line);
+    Console.WriteLine($"\n[嚴重錯誤] {ex.Message}");
+    Console.WriteLine($"詳細資訊: {ex}");
+    Console.WriteLine("\n按下 Enter 結束程式...");
+    Console.ReadLine();
 }
 
+// ==================== 輔助方法 ====================
 
-Console.WriteLine("監聽中，按下 Enter 離開...");
-Console.ReadLine();
-
-
-void ProcessLineData(string line)
+/// <summary>
+/// 獲取遊戲日誌檔案路徑
+/// </summary>
+static string GetLogFilePath()
 {
-    if (logFormater.IsInitBagData(line))
+    foreach (var path in AppConfiguration.CandidateLogPaths)
     {
-        InitBagItem(logFormater.GetItemData(line));
-        return;
-    }
-
-    if (line.Contains("LuaLoading@ NetData _LoadFunctionNetData Progress = 1.0"))
-    {
-        Console.WriteLine("初始化背包完成:");
-        foreach (var bagItem in tempBagData)
+        if (File.Exists(path))
         {
-            Console.WriteLine($"物品名稱: {bagItem.Value.ItemName}, 總數量: {bagItem.Value.Total}");
-            //foreach (var slot in bagItem.Value.Slots)
-            //{
-            //    Console.WriteLine($"\t欄位: {slot.Key}, 數量: {slot.Value}");
-            //}
+            return path;
         }
-        return;
     }
 
-    if (line.Contains("LuaLoading@ LoadUILogic STT!"))
-    {
-        Console.WriteLine("重新登入, 重置背包資料");
-        tempBagData = [];
-        mapPickItemData = []; // 切換地圖重置
-        return;
-    }
-
-    proc.HandleLine(line);
-}
-
-void InitBagItem(ItemModel item)
-{
-    if (tempBagData.TryGetValue(item.ConfigBaseId, out BagDataModel value))
-    {
-        value.Total += item.Num;
-        value.Slots[item.SoltId] = item.Num;
-        return;
-    }
-
-    var bagData = new BagDataModel
-    {
-        ItemName = item.Name,
-        Total = item.Num
-    };
-
-    bagData.Slots[item.SoltId] = item.Num;
-    tempBagData[item.ConfigBaseId] = bagData;
+    // 如果都找不到，返回第一個作為預設值
+    return AppConfiguration.CandidateLogPaths[0];
 }
 

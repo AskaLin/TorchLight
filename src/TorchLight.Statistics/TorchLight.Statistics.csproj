@@ -11,6 +11,9 @@
     <None Update="IdTable.conf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="ItemIdTable.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="UE_game.log">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
