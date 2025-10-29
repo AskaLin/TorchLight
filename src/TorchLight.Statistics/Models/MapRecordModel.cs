@@ -3,6 +3,11 @@
     public class MapRecordModel
     {
         /// <summary>
+        /// 唯一識別碼
+        /// </summary>
+        public Guid RecordId { get; set; } = Guid.NewGuid();
+
+        /// <summary>
         /// 地圖ID
         /// </summary>
         public string Id { get; set; }
@@ -16,6 +21,7 @@
         /// 使用門票
         /// </summary>
         public string MapTicket { get; set; }
+        
         private readonly string[] _compass = new string[4];
         /// <summary>
         /// 使用羅盤
@@ -31,6 +37,7 @@
         /// 主要是紀錄 BaseId 與數量, PickedItemDataModel 後續看要不要拿來取得價格
         /// </summary>
         public Dictionary<int, PickedItemDataModel> PickRecord { get; set; }
+        
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
 

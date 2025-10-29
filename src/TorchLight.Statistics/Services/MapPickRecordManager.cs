@@ -107,20 +107,20 @@ _pendingCompasses.Add(item.Name);
     /// </summary>
     public void EndMapRecord(string mapName, DateTime endTime)
     {
-        _currentMapRecord.EndTime = endTime;
+    _currentMapRecord.EndTime = endTime;
         _currentMapRecord.PickRecord = _currentMapPickData;
-   _mapRecords.Add(_currentMapRecord);
+        _mapRecords.Add(_currentMapRecord);
 
-    Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", 
-     endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
+        Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", 
+   endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
 
-   // 重置
-        _currentMapRecord = new();
-        _currentMapPickData = [];
-        IsInNetherrealmMap = false;
+    // 顯示當前地圖的拾取記錄
+        PrintCurrentMapRecord(_currentMapRecord);
 
-   // 顯示所有記錄
-        PrintAllRecords();
+        // 重置
+     _currentMapRecord = new();
+     _currentMapPickData = [];
+ IsInNetherrealmMap = false;
     }
 
     /// <summary>
@@ -218,19 +218,38 @@ _pendingCompasses.Add(item.Name);
     }
 
     /// <summary>
-    /// 顯示所有記錄
+    /// 顯示當前地圖的拾取記錄
+ /// </summary>
+    private void PrintCurrentMapRecord(MapRecordModel record)
+    {
+        if (record.PickRecord == null || record.PickRecord.Count == 0)
+        {
+Log.Information("本次地圖未拾取任何物品");
+            return;
+    }
+
+        Log.Information("═══ 本次地圖拾取統計 ═══");
+        Log.Information("地圖: {MapName} (用時: {Duration})", record.Name, record.UseTime);
+        
+        foreach (var item in record.PickRecord.OrderByDescending(x => x.Value.Total))
+ {
+       Log.Information("  {ItemName}: {Total} 個", item.Value.Name, item.Value.Total);
+        }
+        
+        Log.Information("═══════════════════════");
+    }
+
+    /// <summary>
+    /// 顯示所有記錄（用於 Debug）
     /// </summary>
     public void PrintAllRecords()
     {
- foreach (var record in _mapRecords)
-        {
-       Log.Debug("地圖記錄: {MapName} (用時: {Duration}), ID: {MapId}", 
-        record.Name, record.UseTime, record.Id);
-            foreach (var item in record.PickRecord)
-      {
-       Log.Debug("  {ItemName}: {Total} 個", item.Value.Name, item.Value.Total);
+        Log.Debug("所有地圖記錄統計 (共 {Count} 筆):", _mapRecords.Count);
+   foreach (var record in _mapRecords)
+     {
+            Log.Debug("  [{RecordId}] {MapName} (用時: {Duration})", 
+   record.RecordId, record.Name, record.UseTime);
  }
-        }
     }
 
     private string GetItemName(int configBaseId)
