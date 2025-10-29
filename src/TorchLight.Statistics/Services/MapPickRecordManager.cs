@@ -1,3 +1,4 @@
+using Serilog;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
@@ -31,32 +32,32 @@ public class MapPickRecordManager
     /// </summary>
     public void RecordMapMaterial(int configBaseId, ItemType itemType)
     {
-        if (!_itemTable.TryGetValue(configBaseId, out var item))
-            return;
+      if (!_itemTable.TryGetValue(configBaseId, out var item))
+     return;
 
-        switch (itemType)
+ switch (itemType)
+   {
+case ItemType.MapTicket:
+      case ItemType.BossTicket:
+ case ItemType.GameplayTicket:
+      _pendingMapTicket = item.Name;
+   Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
+      break;
+
+    case ItemType.Compass:
+     if (_pendingCompasses.Count < 4)
         {
-            case ItemType.MapTicket:
-            case ItemType.BossTicket:
-            case ItemType.GameplayTicket:
-                _pendingMapTicket = item.Name;
-                Console.WriteLine($"[開圖材料] 門票: {item.Name}");
-                break;
-
-            case ItemType.Compass:
-                if (_pendingCompasses.Count < 4)
-                {
-                    _pendingCompasses.Add(item.Name);
-                    Console.WriteLine($"[開圖材料] 羅盤 #{_pendingCompasses.Count}: {item.Name}");
-                }
-                break;
+_pendingCompasses.Add(item.Name);
+         Log.Debug("[開圖材料] 羅盤 #{Index}: {CompassName}", _pendingCompasses.Count, item.Name);
+         }
+   break;
 
             case ItemType.Probe:
-                _pendingProbe = item.Name;
-                Console.WriteLine($"[開圖材料] 探針: {item.Name}");
-                break;
+     _pendingProbe = item.Name;
+        Log.Debug("[開圖材料] 探針: {ProbeName}", item.Name);
+            break;
         }
-    }
+ }
 
     /// <summary>
     /// 開始記錄新地圖
@@ -80,25 +81,25 @@ public class MapPickRecordManager
 
         _currentMapPickData = [];
         IsInNetherrealmMap = true;
-        CurrentMapName = mapName;
+   CurrentMapName = mapName;
 
-        Console.WriteLine($"{startTime:yyyy/MM/dd HH:mm:ss}\t進入異界地圖 {mapName}");
+        Log.Information("{Time} 進入異界地圖: {MapName}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName);
+        
         if (!string.IsNullOrEmpty(_pendingMapTicket))
-        {
-            Console.WriteLine($"\t使用門票: {_pendingMapTicket}");
-        }
-        if (_pendingCompasses.Count > 0)
-        {
-            Console.WriteLine($"\t使用羅盤: {string.Join(", ", _pendingCompasses)}");
-        }
+   {
+          Log.Information("  使用門票: {Ticket}", _pendingMapTicket);
+    }
+   if (_pendingCompasses.Count > 0)
+ {
+   Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _pendingCompasses));
+ }
         if (!string.IsNullOrEmpty(_pendingProbe))
-        {
-            Console.WriteLine($"\t使用探針: {_pendingProbe}");
-        }
-        Console.WriteLine("\t開始統計拾取物品");
+ {
+ Log.Information("  使用探針: {Probe}", _pendingProbe);
+   }
 
-        // 清空暫存資料
-        ClearPendingMaterials();
+   // 清空暫存資料
+   ClearPendingMaterials();
     }
 
     /// <summary>
@@ -108,16 +109,17 @@ public class MapPickRecordManager
     {
         _currentMapRecord.EndTime = endTime;
         _currentMapRecord.PickRecord = _currentMapPickData;
-        _mapRecords.Add(_currentMapRecord);
+   _mapRecords.Add(_currentMapRecord);
 
-        Console.WriteLine($"{endTime:yyyy/MM/dd HH:mm:ss}\t離開異界地圖 {mapName} 紀錄拾取物品");
+    Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", 
+     endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
 
-        // 重置
+   // 重置
         _currentMapRecord = new();
         _currentMapPickData = [];
         IsInNetherrealmMap = false;
 
-        // 顯示所有記錄
+   // 顯示所有記錄
         PrintAllRecords();
     }
 
@@ -220,13 +222,14 @@ public class MapPickRecordManager
     /// </summary>
     public void PrintAllRecords()
     {
-        foreach (var record in _mapRecords)
+ foreach (var record in _mapRecords)
         {
-            Console.WriteLine($"地圖: {record.Name} ({record.UseTime}), ID: {record.Id}");
+       Log.Debug("地圖記錄: {MapName} (用時: {Duration}), ID: {MapId}", 
+        record.Name, record.UseTime, record.Id);
             foreach (var item in record.PickRecord)
-            {
-                Console.WriteLine($"\t{item.Value.Name}: {item.Value.Total}");
-            }
+      {
+       Log.Debug("  {ItemName}: {Total} 個", item.Value.Name, item.Value.Total);
+ }
         }
     }
 

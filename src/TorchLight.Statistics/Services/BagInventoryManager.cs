@@ -1,3 +1,4 @@
+using Serilog;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
@@ -111,10 +112,11 @@ public class BagInventoryManager
     /// </summary>
     public void PrintInitializedBag()
     {
-        Console.WriteLine("初始化背包完成:");
+        Log.Debug("背包初始化明細:");
         foreach (var bagItem in _bagData)
         {            
-            Console.WriteLine($"物品名稱: {bagItem.Value.Name}({bagItem.Value.BaseId}), 總數量: {bagItem.Value.Total}");
+            Log.Debug("  {ItemName}({ItemId}): {Total} 個", 
+      bagItem.Value.Name, bagItem.Value.BaseId, bagItem.Value.Total);
         }
     }
 

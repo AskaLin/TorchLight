@@ -1,38 +1,45 @@
 ﻿using System.Text;
+using Serilog;
 using TorchLight.Statistics;
 using TorchLight.Statistics.Configuration;
 
-Console.WriteLine("╔════════════════════════════════════════╗");
-Console.WriteLine("║  火炬之光無限 - 拾取物品統計工具       ║");
-Console.WriteLine("║  Torchlight Infinite Item Tracker      ║");
-Console.WriteLine("╚════════════════════════════════════════╝");
-Console.WriteLine();
+// 初始化 Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("logs/torchlight-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+Log.Information("╔════════════════════════════════════════╗");
+Log.Information("║  火炬之光無限 - 拾取物品統計工具  ║");
+Log.Information("║  Torchlight Infinite Item Tracker      ║");
+Log.Information("╚════════════════════════════════════════╝");
+Log.Information("");
 
 try
 {
     // 初始化核心組件
-    Console.WriteLine("正在初始化...");
+    Log.Information("正在初始化...");
     var itemTable = ItemIdTable.GetItemTable();
-    Console.WriteLine($"✓ 已載入 {itemTable.Count} 個物品定義");
+    Log.Information("已載入 {ItemCount} 個物品定義", itemTable.Count);
 
     var lineParser = new LineParser(itemTable);
     var itemChangeProcessor = new ItemChangeBlockProcessor();
     var logProcessor = new GameLogProcessor(itemTable, lineParser, itemChangeProcessor);
-    Console.WriteLine("✓ 核心組件初始化完成");
+    Log.Information("核心組件初始化完成");
 
     // 設定日誌檔案路徑
     var filePath = GetLogFilePath();
     if (!File.Exists(filePath))
     {
-        Console.WriteLine($"\n[警告] 找不到日誌檔案: {filePath}");
-        Console.WriteLine("請確認遊戲是否已安裝，或手動設定日誌路徑。");
-        Console.WriteLine("\n按下 Enter 結束程式...");
+        Log.Warning("找不到日誌檔案: {FilePath}", filePath);
+        Log.Information("請確認遊戲是否已安裝，或手動設定日誌路徑");
+        Log.Information("按下 Enter 結束程式...");
         Console.ReadLine();
         return;
     }
 
-    Console.WriteLine($"✓ 日誌檔案: {filePath}");
-    Console.WriteLine();
+    Log.Information("日誌檔案: {FilePath}", filePath);
 
     // 啟動日誌監聽器
     using var tail = new SafeFileTailWatcher(
@@ -45,25 +52,26 @@ try
     tail.OnNewLine += logProcessor.ProcessLine;
     tail.Start();
 
-    Console.WriteLine("════════════════════════════════════════");
-    Console.WriteLine("監聽已啟動，等待遊戲事件...");
-    Console.WriteLine("提示：進入異界地圖後會自動開始統計拾取物品");
-    Console.WriteLine("════════════════════════════════════════");
-    Console.WriteLine();
-    Console.WriteLine("按下 Enter 鍵以停止監聽並結束程式");
-    Console.WriteLine();
+    Log.Information("════════════════════════════════════════");
+    Log.Information("監聽已啟動，等待遊戲事件...");
+    Log.Information("提示：進入異界地圖後會自動開始統計拾取物品");
+    Log.Information("════════════════════════════════════════");
+    Log.Information("按下 Enter 鍵以停止監聽並結束程式");
 
     Console.ReadLine();
 
     tail.Stop();
-    Console.WriteLine("\n程式已結束。感謝使用！");
+    Log.Information("程式已結束。感謝使用！");
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"\n[嚴重錯誤] {ex.Message}");
-    Console.WriteLine($"詳細資訊: {ex}");
-    Console.WriteLine("\n按下 Enter 結束程式...");
+    Log.Fatal(ex, "程式發生嚴重錯誤");
+    Log.Information("按下 Enter 結束程式...");
     Console.ReadLine();
+}
+finally
+{
+    Log.CloseAndFlush();
 }
 
 // ==================== 輔助方法 ====================

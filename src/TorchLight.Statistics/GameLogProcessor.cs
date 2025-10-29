@@ -1,3 +1,4 @@
+using Serilog;
 using TorchLight.Statistics.Services;
 using TorchLight.Statistics.Models;
 
@@ -51,19 +52,21 @@ public class GameLogProcessor
                 // 只在第一次開始初始化時才重置背包
                 if (isFirstInit)
                 {
-                    Console.WriteLine("\n=== 偵測到背包初始化開始，重置背包資料 ===\n");
+                    Log.Information("偵測到背包初始化，重置背包資料");
                     _bagInventoryManager.Reset();
                 }
 
                 // 處理初始化背包物品
                 var itemData = _lineParser.GetItemData(line);
                 _bagInventoryManager.InitializeBagItem(itemData);
+                Log.Debug("初始化背包物品: {ItemName} x{Count}", itemData.Name, itemData.Num);
                 return;
             }
 
             if (isComplete)
             {
                 // 初始化完成
+                Log.Information("背包初始化完成，共 {Count} 種物品", _bagInventoryManager.BagData.Count);
                 _bagInventoryManager.PrintInitializedBag();
                 return;
             }
@@ -71,7 +74,7 @@ public class GameLogProcessor
             // 2. 登入開始 - 重置所有資料
             if (_lineParser.IsLoginStart(line))
             {
-                Console.WriteLine("\n=== 偵測到重新登入，重置所有資料 ===\n");
+                Log.Information("偵測到重新登入，重置所有資料");
                 _bagInventoryManager.Reset();
                 _mapPickRecordManager.Reset();
                 _lineParser.ResetInitializationState();
@@ -84,6 +87,7 @@ public class GameLogProcessor
                 var (time, fromPath, toPath, success) = _lineParser.GetMapPathData(line);
                 if (success)
                 {
+                    Log.Debug("地圖切換: {From} -> {To}", fromPath, toPath);
                     _mapTransitionHandler.HandleMapTransition(time, fromPath, toPath);
                 }
                 return;
@@ -94,8 +98,7 @@ public class GameLogProcessor
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[錯誤] 處理日誌行時發生錯誤: {ex.Message}");
-            Console.WriteLine($"[錯誤] 日誌內容: {line}");
+            Log.Error(ex, "處理日誌行時發生錯誤，日誌內容: {Line}", line);
         }
     }
 

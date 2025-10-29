@@ -1,3 +1,4 @@
+using Serilog;
 using TorchLight.Statistics.Services;
 
 namespace TorchLight.Statistics;
@@ -8,35 +9,27 @@ namespace TorchLight.Statistics;
 public class ConsoleLogger
 {
     /// <summary>
-    /// 記錄背包物品修改
+    /// 記錄背包物品修改事件
     /// </summary>
     public void LogBagModification(BagModEvent ev, ItemChangeResult result)
     {
-        Console.WriteLine($"{ev.Time:yyyy/MM/dd HH:mm:ss.fff}\t{ev.ProtoName} {ev.Action} - {result.ItemName}({result.ConfigBaseId}) 在 slot:{ev.SlotId} 有 {result.NewSlotCount} 個");
+        // Debug: 詳細資訊
+        Log.Debug("[{Protocol}] {Action} - 物品: {ItemName}({ItemId}), Slot: {SlotId}, 數量: {Count}",
+            ev.ProtoName, ev.Action, result.ItemName, result.ConfigBaseId, ev.SlotId, result.NewSlotCount);
 
+        Log.Debug("  變化詳情: 前={PrevTotal}, 變化={Change}, 後={NewTotal}",
+            result.PreviousTotalCount, result.QuantityChange, result.NewTotalCount);
+
+        // Info: 簡單結果
         if (result.IsNewItem)
         {
-            Console.WriteLine($"\t\t\t這是新物品，撿到 {result.QuantityChange} 個\r\n");
+            Log.Information("[背包] 新增 {ItemName} x{Count}", result.ItemName, result.QuantityChange);
             return;
         }
 
-        Console.WriteLine($"\t\t\t背包之前有 {result.ItemName} {result.PreviousTotalCount} 個");
-
-        if (result.IsNewSlot)
-        {
-            Console.WriteLine($"\t\t\t這是新欄位，撿到 {result.QuantityChange} 個，現在全部有 {result.NewTotalCount} 個\r\n");
-        }
-        else
-        {
-            if (ev.ProtoName == "Spv3Open")
-            {
-                Console.WriteLine($"\t\t\t原本在 slot:{ev.SlotId}, 有 {result.PreviousSlotCount} 個, 所以是使用 {Math.Abs(result.QuantityChange)} 個, 現在剩下 {result.NewTotalCount} 個\r\n");
-            }
-            else
-            {
-                Console.WriteLine($"\t\t\t其中在 slot:{ev.SlotId}, 有 {result.PreviousSlotCount} 個, 所以是撿到 {result.QuantityChange} 個, 現在全部有 {result.NewTotalCount} 個\r\n");
-            }
-        }
+        string action = result.QuantityChange > 0 ? "增加" : "減少";
+        Log.Information("[背包] {ItemName} {Action} {Change} (總計: {Total})",
+            result.ItemName, action, Math.Abs(result.QuantityChange), result.NewTotalCount);
     }
 
     /// <summary>
@@ -44,21 +37,22 @@ public class ConsoleLogger
     /// </summary>
     public void LogMapPickItem(string mapName, MapPickResult result)
     {
-        Console.Write($"在 {mapName} 地圖");
+        // Debug: 詳細資訊
+        Log.Debug("[地圖拾取] 地圖: {MapName}, 物品: {ItemName}, Slot: {SlotId}",
+            mapName, result.ItemName, result.SlotId);
+        Log.Debug("  拾取詳情: 前={PrevSlot}, 增加={Change}, 後={NewSlot}, 總計={Total}",
+            result.PreviousSlotCount, result.QuantityChange, result.NewSlotCount, result.NewTotalCount);
 
+        // Info: 簡單結果
         if (result.IsFirstTimeInMap)
         {
-            Console.WriteLine($"\t第一次在這張地圖撿到 {result.ItemName} {result.NewTotalCount} 個 (slot:{result.SlotId} = {result.NewSlotCount})\r\n");
+            Log.Information("[{MapName}] 拾取 {ItemName} x{Count}",
+                mapName, result.ItemName, result.NewTotalCount);
         }
-        else if (result.IsNewSlot)
+        else
         {
-            Console.WriteLine($"\t該物品在此欄位之前沒有數量，這次新增 {result.QuantityChange} 個 (slot:{result.SlotId})");
-            Console.WriteLine($"\t目前地圖上 {result.ItemName} 總數量: {result.NewTotalCount}\r\n");
-        }
-        else if (result.IsExistingSlot)
-        {
-            Console.WriteLine($"\t該物品在此欄位之前有 {result.PreviousSlotCount} 個，這次增加 {result.QuantityChange} 個，現在該欄位有 {result.NewSlotCount} 個");
-            Console.WriteLine($"\t\t\t目前地圖上 {result.ItemName} 總數量: {result.NewTotalCount}\r\n");
+            Log.Information("[{MapName}] {ItemName} +{Change} (總計: {Total})",
+                mapName, result.ItemName, result.QuantityChange, result.NewTotalCount);
         }
     }
 }
