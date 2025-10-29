@@ -12,12 +12,12 @@ try
 {
     // 初始化核心組件
     Console.WriteLine("正在初始化...");
-    var itemIdTable = ItemIdTable.GetIdTable();
-    Console.WriteLine($"✓ 已載入 {itemIdTable.Count} 個物品定義");
+    var itemTable = ItemIdTable.GetItemTable();
+    Console.WriteLine($"✓ 已載入 {itemTable.Count} 個物品定義");
 
-    var lineParser = new LineParser(itemIdTable);
+    var lineParser = new LineParser(itemTable);
     var itemChangeProcessor = new ItemChangeBlockProcessor();
-    var logProcessor = new GameLogProcessor(itemIdTable, lineParser, itemChangeProcessor);
+    var logProcessor = new GameLogProcessor(itemTable, lineParser, itemChangeProcessor);
     Console.WriteLine("✓ 核心組件初始化完成");
 
     // 設定日誌檔案路徑

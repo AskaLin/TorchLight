@@ -8,16 +8,21 @@ namespace TorchLight.Statistics;
 /// </summary>
 public partial class LineParser
 {
-    private readonly Dictionary<int, string> _itemIdTable;
+    private readonly Dictionary<int, ItemModel> _itemTable;
 
     /// <summary>
     /// 需要忽略的頁面ID（裝備欄與技能欄）
     /// </summary>
     private readonly HashSet<int> _ignorePageIds = [100, 101];
 
-    public LineParser(Dictionary<int, string> itemIdTable)
+    /// <summary>
+    /// 標記是否正在進行背包初始化
+    /// </summary>
+    private bool _isInitializingBag = false;
+
+    public LineParser(Dictionary<int, ItemModel> itemTable)
     {
-        _itemIdTable = itemIdTable ?? throw new ArgumentNullException(nameof(itemIdTable));
+        _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
     }
 
     #region 日誌行類型判斷
@@ -28,12 +33,57 @@ public partial class LineParser
     public bool IsLoginStart(string line) => line.Contains("LuaLoading@ LoadUILogic STT!");
 
     /// <summary>
-    /// 是否為初始化完成的日誌
+    /// 是否為初始化完成的日誌（已廢棄，改用 CheckBagInitializationState）
     /// </summary>
+    [Obsolete("請使用 CheckBagInitializationState 來判斷初始化狀態")]
     public bool IsInitFinished(string line) => line.Contains("LuaLoading@ NetData _LoadFunctionNetData Progress = 1.0");
 
     /// <summary>
-    /// 是否為初始化背包物品的日誌
+    /// 檢查並更新背包初始化狀態
+    /// </summary>
+    /// <param name="line">當前日誌行</param>
+    /// <returns>
+    /// (isInitLine, shouldProcess, isComplete, isFirstInit) 
+    /// - isInitLine: 是否為初始化行
+    /// - shouldProcess: 是否應該處理這行
+    /// - isComplete: 初始化是否完成
+    /// - isFirstInit: 是否為第一次開始初始化
+    /// </returns>
+    public (bool isInitLine, bool shouldProcess, bool isComplete, bool isFirstInit) CheckBagInitializationState(string line)
+    {
+        bool hasInitBagData = line.Contains("BagMgr@:InitBagData");
+        bool isIgnored = IsIgnoredPage(line);
+
+        if (!_isInitializingBag)
+        {
+            // 尚未開始初始化
+            if (hasInitBagData && !isIgnored)
+            {
+                // 開始初始化
+                _isInitializingBag = true;
+                return (isInitLine: true, shouldProcess: true, isComplete: false, isFirstInit: true);
+            }
+            return (isInitLine: false, shouldProcess: false, isComplete: false, isFirstInit: false);
+        }
+        else
+        {
+            // 正在初始化中
+            if (hasInitBagData && !isIgnored)
+            {
+                // 繼續初始化
+                return (isInitLine: true, shouldProcess: true, isComplete: false, isFirstInit: false);
+            }
+            else
+            {
+                // 初始化結束（下一行不是初始化行）
+                _isInitializingBag = false;
+                return (isInitLine: false, shouldProcess: false, isComplete: true, isFirstInit: false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 是否為初始化背包物品的日誌（保留用於相容性，但建議使用 CheckBagInitializationState）
     /// </summary>
     public bool IsInitBagItemData(string line) => line.Contains("BagMgr@:InitBagData") && !IsIgnoredPage(line);
 
@@ -51,6 +101,14 @@ public partial class LineParser
     /// 是否為地圖切換的日誌
     /// </summary>
     public bool IsMoveMap(string line) => line.Contains("PageApplyBase@ _UpdateGameEnd: LastSceneName = World'/Game/Art/Maps/");
+
+    /// <summary>
+    /// 重置初始化狀態（登入時使用）
+    /// </summary>
+    public void ResetInitializationState()
+    {
+        _isInitializingBag = false;
+    }
 
     #endregion
 
@@ -119,9 +177,7 @@ public partial class LineParser
     /// </summary>
     private string GetItemName(int configBaseId)
     {
-        return _itemIdTable.TryGetValue(configBaseId, out var name)
-             ? name
-                 : $"未知物品({configBaseId})";
+        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知物品({configBaseId})";
     }
 
     /// <summary>

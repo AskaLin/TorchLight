@@ -25,12 +25,12 @@ public class MapTransitionHandler
         _mapPickRecordManager.UpdateCurrentMapName(toMapName);
 
         // 從藏身處進入異界地圖
-        if (MapMapper.IsHideoutMap(fromPath) && MapMapper.IsNetherrealmMap(toPath))
+        if (MapMapper.IsHideoutMap(fromPath))// && MapMapper.IsNetherrealmMap(toPath))
         {
             _mapPickRecordManager.StartMapRecord(toPath, toMapName, time);
         }
         // 從異界地圖返回藏身處
-        else if (MapMapper.IsHideoutMap(toPath) && MapMapper.IsNetherrealmMap(fromPath))
+        else if (MapMapper.IsHideoutMap(toPath))// && MapMapper.IsNetherrealmMap(fromPath))
         {
             _mapPickRecordManager.EndMapRecord(fromMapName, time);
         }

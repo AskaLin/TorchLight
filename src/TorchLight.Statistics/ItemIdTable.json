@@ -1,1006 +1,1377 @@
-﻿{
-  "0": { "name": "未知物品(0)" },
-  "1001": {
+﻿[
+  {
+    "id": 0,
+    "name": "未知物品(0)",
+    "type": "Unknown"
+  },
+  {
+    "id": 1001,
     "name": "星星蛾火",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "1009": {
+  {
+    "id": 1009,
     "name": "寰空神隙",
-    "type": "神格石板"
+    "type": "DivinityTablet"
   },
-  "1010": { "name": "未知物品(1010)" },
-  "1011": {
+  {
+    "id": 1010,
+    "name": "未知物品(1010)",
+    "type": "Unknown"
+  },
+  {
+    "id": 1011,
     "name": "眾星歸所",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "1012": {
+  {
+    "id": 1012,
     "name": "蛾火燎原之刻",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "1719": { "name": "未知物品(1719)" },
-  "2019": { "name": "未知物品(2019)" },
-  "2219": { "name": "未知物品(2219)" },
-  "3411": { "name": "未知物品(3411)" },
-  "4637": { "name": "未知物品(4637)" },
-  "4649": { "name": "未知物品(4649)" },
-  "5011": {
+  {
+    "id": 1719,
+    "name": "未知物品(1719)",
+    "type": "Unknown"
+  },
+  {
+    "id": 2019,
+    "name": "未知物品(2019)",
+    "type": "Unknown"
+  },
+  {
+    "id": 2219,
+    "name": "未知物品(2219)",
+    "type": "Unknown"
+  },
+  {
+    "id": 3411,
+    "name": "未知物品(3411)",
+    "type": "Unknown"
+  },
+  {
+    "id": 4637,
+    "name": "未知物品(4637)",
+    "type": "Unknown"
+  },
+  {
+    "id": 4649,
+    "name": "未知物品(4649)",
+    "type": "Unknown"
+  },
+  {
+    "id": 5011,
     "name": "遺忘之水",
-    "type": "通貨"
+    "type": "Currency"
   },
-  "5028": {
+  {
+    "id": 5028,
     "name": "異界迴響",
-    "type": "通貨"
+    "type": "Currency"
   },
-  "5029": {
+  {
+    "id": 5029,
     "name": "逆轉發條",
-    "type": "通貨"
+    "type": "Currency"
   },
-  "5030": {
+  {
+    "id": 5030,
     "name": "孿生倒影",
-    "type": "特殊道具"
+    "type": "SpecialItem"
   },
-  "5031": {
+  {
+    "id": 5031,
     "name": "傳奇降生之綠芽",
-    "type": "特殊道具"
+    "type": "SpecialItem"
   },
-  "5080": {
+  {
+    "id": 5080,
     "name": "能量核心",
-    "type": "裝備材料"
+    "type": "EquipmentMaterial"
   },
-  "5140": {
+  {
+    "id": 5140,
     "name": "追憶碎絮",
-    "type": "追憶材料"
+    "type": "MemoryMaterial"
   },
-  "5141": {
+  {
+    "id": 5141,
     "name": "追憶遊絲-普通",
-    "type": "追憶材料"
+    "type": "MemoryMaterial"
   },
-  "5142": {
+  {
+    "id": 5142,
     "name": "追憶遊絲-魔法",
-    "type": "追憶材料"
+    "type": "MemoryMaterial"
   },
-  "5143": {
+  {
+    "id": 5143,
     "name": "追憶遊絲-稀有",
-    "type": "追憶材料"
+    "type": "MemoryMaterial"
   },
-  "5144": {
+  {
+    "id": 5144,
     "name": "追憶遊絲-卓越",
-    "type": "追憶材料"
+    "type": "MemoryMaterial"
   },
-  "5201": {
+  {
+    "id": 5201,
     "name": "神格殘片",
-    "type": "魔方材料"
+    "type": "CubeMaterial"
   },
-  "5202": {
+  {
+    "id": 5202,
     "name": "神格契約-殘片",
-    "type": "魔方材料"
+    "type": "CubeMaterial"
   },
-  "5210": {
+  {
+    "id": 5210,
     "name": "神威輝石",
-    "type": "魔方材料"
+    "type": "CubeMaterial"
   },
-  "5220": {
+  {
+    "id": 5220,
     "name": "昇華之楔（魔法）",
-    "type": "魔方材料"
+    "type": "CubeMaterial"
   },
-  "5230": {
+  {
+    "id": 5230,
     "name": "昇華之楔（稀有）",
-    "type": "魔方材料"
+    "type": "CubeMaterial"
   },
-  "5240": {
+  {
+    "id": 5240,
     "name": "歸一之楔",
-    "type": "魔方材料"
+    "type": "CubeMaterial"
   },
-  "5250": {
+  {
+    "id": 5250,
     "name": "昇華之楔（傳奇）",
-    "type": "魔方材料"
+    "type": "CubeMaterial"
   },
-  "5300": {
+  {
+    "id": 5300,
     "name": "永恆殘頁",
-    "type": "特殊道具"
+    "type": "SpecialItem"
   },
-  "5310": {
+  {
+    "id": 5310,
     "name": "迷城殘響-瞬息",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "5311": {
+  {
+    "id": 5311,
     "name": "迷城殘響-永恆",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "5401": {
+  {
+    "id": 5401,
     "name": "神格契約-巨力之神",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5402": {
+  {
+    "id": 5402,
     "name": "神格契約-勇者",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5403": {
+  {
+    "id": 5403,
     "name": "神格契約-猛襲者",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5404": {
+  {
+    "id": 5404,
     "name": "神格契約-督軍",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5405": {
+  {
+    "id": 5405,
     "name": "神格契約-狩獵之神",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5406": {
+  {
+    "id": 5406,
     "name": "神格契約-神射手",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5407": {
+  {
+    "id": 5407,
     "name": "神格契約-刀鋒行者",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5408": {
+  {
+    "id": 5408,
     "name": "神格契約-德魯伊",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5409": {
+  {
+    "id": 5409,
     "name": "神格契約-知識之神",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5410": {
+  {
+    "id": 5410,
     "name": "神格契約-魔導師",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5411": {
+  {
+    "id": 5411,
     "name": "神格契約-秘術師",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5412": {
+  {
+    "id": 5412,
     "name": "神格契約-元素師",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5413": {
+  {
+    "id": 5413,
     "name": "神格契約-征戰之神",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5414": {
+  {
+    "id": 5414,
     "name": "神格契約-影舞者",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5415": {
+  {
+    "id": 5415,
     "name": "神格契約-神行武士",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5416": {
+  {
+    "id": 5416,
     "name": "神格契約-遊俠",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5417": {
+  {
+    "id": 5417,
     "name": "神格契約-欺詐之神",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5418": {
+  {
+    "id": 5418,
     "name": "神格契約-奴影者",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5419": {
+  {
+    "id": 5419,
     "name": "神格契約-異能者",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5420": {
+  {
+    "id": 5420,
     "name": "神格契約-暗影術士",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5421": {
+  {
+    "id": 5421,
     "name": "神格契約-機械之神",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5422": {
+  {
+    "id": 5422,
     "name": "神格契約-機械師",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5423": {
+  {
+    "id": 5423,
     "name": "神格契約-鋼鐵先鋒",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5424": {
+  {
+    "id": 5424,
     "name": "神格契約-煉金術士",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5425": {
+  {
+    "id": 5425,
     "name": "神格契約-鬥士",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5426": {
+  {
+    "id": 5426,
     "name": "神格契約-刺客",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5427": {
+  {
+    "id": 5427,
     "name": "神格契約-先知",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5428": {
+  {
+    "id": 5428,
     "name": "神格契約-鐵衛",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5429": {
+  {
+    "id": 5429,
     "name": "神格契約-巫妖",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5430": {
+  {
+    "id": 5430,
     "name": "神格契約-巧匠",
-    "type": "神格契約"
+    "type": "DivinityContract"
   },
-  "5700": {
+  {
+    "id": 5700,
     "name": "高塔籌碼-能量",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "5701": {
+  {
+    "id": 5701,
     "name": "高塔籌碼-螢光",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "5702": {
+  {
+    "id": 5702,
     "name": "高塔籌碼-詞綴",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "5703": {
+  {
+    "id": 5703,
     "name": "高塔籌碼-未定宿命",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "5704": {
+  {
+    "id": 5704,
     "name": "高塔籌碼-侵蝕",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "5705": {
+  {
+    "id": 5705,
     "name": "高塔籌碼-珍品",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "6002": {
+  {
+    "id": 6002,
     "name": "寒淵的秘密",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6003": {
+  {
+    "id": 6003,
     "name": "烏鴉的悲鳴",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6004": {
+  {
+    "id": 6004,
     "name": "穆得的巧技",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6006": {
+  {
+    "id": 6006,
     "name": "徵兆之月",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6007": {
+  {
+    "id": 6007,
     "name": "遺落的密藏",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6008": {
+  {
+    "id": 6008,
     "name": "殘酷的代價",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6019": {
+  {
+    "id": 6019,
     "name": "日心的奇石",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6026": {
+  {
+    "id": 6026,
     "name": "安東尼奧之助",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6027": {
+  {
+    "id": 6027,
     "name": "日冕的奇石",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6054": {
+  {
+    "id": 6054,
     "name": "學者的奇思",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6055": {
+  {
+    "id": 6055,
     "name": "安東尼奧的研究",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6111": {
+  {
+    "id": 6111,
     "name": "超新星爆發",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6118": {
+  {
+    "id": 6118,
     "name": "萬神的回聲",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6119": {
+  {
+    "id": 6119,
     "name": "離群的螢火",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6125": {
+  {
+    "id": 6125,
     "name": "百倍橫財",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6127": {
+  {
+    "id": 6127,
     "name": "眾火俱焚",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6135": {
+  {
+    "id": 6135,
     "name": "褻瀆星群",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6139": {
+  {
+    "id": 6139,
     "name": "神抉超新星",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6141": {
+  {
+    "id": 6141,
     "name": "空心人之吻",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6143": {
+  {
+    "id": 6143,
     "name": "第二重神格",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6147": {
+  {
+    "id": 6147,
     "name": "窺伺著倒影的雙瞳",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6148": {
+  {
+    "id": 6148,
     "name": "未孵化的雛形",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6153": {
+  {
+    "id": 6153,
     "name": "明日的航向",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6205": {
+  {
+    "id": 6205,
     "name": "莫測的航向",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6216": {
+  {
+    "id": 6216,
     "name": "只影的絕跡",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6217": {
+  {
+    "id": 6217,
     "name": "無拘星群",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6218": {
+  {
+    "id": 6218,
     "name": "前塵的終日",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6219": {
+  {
+    "id": 6219,
     "name": "前塵的誕日",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6220": {
+  {
+    "id": 6220,
     "name": "星羅萬象",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "6221": {
+  {
+    "id": 6221,
     "name": "猶在鏡中",
-    "type": "記憶螢光"
+    "type": "MemoryFirefly"
   },
-  "8316": { "name": "未知物品(8316)" },
-  "8604": {
+  {
+    "id": 8316,
+    "name": "未知物品(8316)",
+    "type": "Unknown"
+  },
+  {
+    "id": 8604,
     "name": "精密-律己",
-    "type": "技能道具"
+    "type": "SkillItem"
   },
-  "8608": {
+  {
+    "id": 8608,
     "name": "精密-貫注增效",
-    "type": "技能道具"
+    "type": "SkillItem"
   },
-  "8611": {
+  {
+    "id": 8611,
     "name": "精密-超能共生",
-    "type": "技能道具"
+    "type": "SkillItem"
   },
-  "8614": {
+  {
+    "id": 8614,
     "name": "精密-節流",
-    "type": "技能道具"
+    "type": "SkillItem"
   },
-  "10001": {
+  {
+    "id": 10001,
     "name": "罪孽之劫掠羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10002": {
+  {
+    "id": 10002,
     "name": "罪孽之劫掠羅盤（遺珍）",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10003": {
+  {
+    "id": 10003,
     "name": "重罪之劫掠羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10010": {
+  {
+    "id": 10010,
     "name": "珍奇羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10011": {
+  {
+    "id": 10011,
     "name": "琳琅之珍奇羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10012": {
+  {
+    "id": 10012,
     "name": "破軍之珍奇羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10022": {
+  {
+    "id": 10022,
     "name": "小兵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10023": {
+  {
+    "id": 10023,
     "name": "眾武之小兵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10032": {
+  {
+    "id": 10032,
     "name": "精兵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10033": {
+  {
+    "id": 10033,
     "name": "克敵之精兵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10042": {
+  {
+    "id": 10042,
     "name": "勁敵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10043": {
+  {
+    "id": 10043,
     "name": "優渥的勁敵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10044": {
+  {
+    "id": 10044,
     "name": "富饒之勁敵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10046": {
+  {
+    "id": 10046,
     "name": "首領羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10050": {
+  {
+    "id": 10050,
     "name": "信標羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10051": {
+  {
+    "id": 10051,
     "name": "進益之信標羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10052": {
+  {
+    "id": 10052,
     "name": "黃道羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10053": {
+  {
+    "id": 10053,
     "name": "浩瀚之黃道羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10054": {
+  {
+    "id": 10054,
     "name": "榮升之黃道羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10060": {
+  {
+    "id": 10060,
     "name": "威名之利器羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10071": {
+  {
+    "id": 10071,
     "name": "武裝羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10072": {
+  {
+    "id": 10072,
     "name": "珍品之武裝羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10073": {
+  {
+    "id": 10073,
     "name": "飾品之武裝羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10081": {
+  {
+    "id": 10081,
     "name": "灰燼羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10082": {
+  {
+    "id": 10082,
     "name": "倍賞之灰燼羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10083": {
+  {
+    "id": 10083,
     "name": "甄選之灰燼羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10101": {
+  {
+    "id": 10101,
     "name": "螢光羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10102": {
+  {
+    "id": 10102,
     "name": "繽紛的螢光羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10103": {
+  {
+    "id": 10103,
     "name": "聚光之螢光羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10110": {
+  {
+    "id": 10110,
     "name": "繁榮之眾神羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10120": {
+  {
+    "id": 10120,
     "name": "征戰羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10122": {
+  {
+    "id": 10122,
     "name": "驍勇之征戰羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10130": {
+  {
+    "id": 10130,
     "name": "巨力羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10131": {
+  {
+    "id": 10131,
     "name": "繁榮之巨力羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10133": {
+  {
+    "id": 10133,
     "name": "神武之巨力羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10134": {
+  {
+    "id": 10134,
     "name": "機甲之巨力羅盤（遺珍）",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10140": {
+  {
+    "id": 10140,
     "name": "狩獵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10142": {
+  {
+    "id": 10142,
     "name": "將軍之狩獵羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10150": {
+  {
+    "id": 10150,
     "name": "機械羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10151": {
+  {
+    "id": 10151,
     "name": "輝煌之機械羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10153": {
+  {
+    "id": 10153,
     "name": "分化之機械羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10154": {
+  {
+    "id": 10154,
     "name": "巡航之機械羅盤（遺珍）",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10160": {
+  {
+    "id": 10160,
     "name": "黑潮羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10161": {
+  {
+    "id": 10161,
     "name": "匪首之黑潮羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10162": {
+  {
+    "id": 10162,
     "name": "神兵之黑潮羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10170": {
+  {
+    "id": 10170,
     "name": "黑帆羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10171": {
+  {
+    "id": 10171,
     "name": "複臨之黑帆羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10180": {
+  {
+    "id": 10180,
     "name": "魔方羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10181": {
+  {
+    "id": 10181,
     "name": "雙極之魔方羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10182": {
+  {
+    "id": 10182,
     "name": "極欲之魔方羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10190": {
+  {
+    "id": 10190,
     "name": "迷城羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10191": {
+  {
+    "id": 10191,
     "name": "眷族之迷城羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10200": {
+  {
+    "id": 10200,
     "name": "夢寐羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10210": {
+  {
+    "id": 10210,
     "name": "怪談羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10211": {
+  {
+    "id": 10211,
     "name": "異鄉客之怪談羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10220": {
+  {
+    "id": 10220,
     "name": "玩偶羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10221": {
+  {
+    "id": 10221,
     "name": "典藏之玩偶羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10222": {
+  {
+    "id": 10222,
     "name": "典藏之玩偶羅盤（遺珍）",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10230": {
+  {
+    "id": 10230,
     "name": "畫雪羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10231": {
+  {
+    "id": 10231,
     "name": "豐收之畫雪羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10240": {
+  {
+    "id": 10240,
     "name": "塔羅羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10241": {
+  {
+    "id": 10241,
     "name": "底牌之塔羅羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10242": {
+  {
+    "id": 10242,
     "name": "命定之塔羅羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10250": {
+  {
+    "id": 10250,
     "name": "大亨羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10260": {
+  {
+    "id": 10260,
     "name": "通緝羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10261": {
+  {
+    "id": 10261,
     "name": "懸賞之通緝羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10262": {
+  {
+    "id": 10262,
     "name": "警戒之通緝羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10270": {
+  {
+    "id": 10270,
     "name": "囚籠羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "10272": {
+  {
+    "id": 10272,
     "name": "黃金之囚籠羅盤",
-    "type": "探針"
+    "type": "Compass"
   },
-  "12000": {
+  {
+    "id": 12000,
     "name": "繁榮之幽邃探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12001": {
+  {
+    "id": 12001,
     "name": "繁榮之深空探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12010": {
+  {
+    "id": 12010,
     "name": "裝備之幽邃探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12011": {
+  {
+    "id": 12011,
     "name": "裝備之深空探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12020": {
+  {
+    "id": 12020,
     "name": "灰燼之幽邃探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12021": {
+  {
+    "id": 12021,
     "name": "灰燼之深空探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12030": {
+  {
+    "id": 12030,
     "name": "螢光之幽邃探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12031": {
+  {
+    "id": 12031,
     "name": "螢光之深空探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12040": {
+  {
+    "id": 12040,
     "name": "羅盤之幽邃探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12041": {
+  {
+    "id": 12041,
     "name": "羅盤之深空探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "12050": {
+  {
+    "id": 12050,
     "name": "信標之幽邃探針",
-    "type": "探針"
+    "type": "Probe"
   },
-  "71001": { "name": "未知物品(71001)" },
-  "71002": { "name": "未知物品(71002)" },
-  "100001": {
+  {
+    "id": 71001,
+    "name": "未知物品(71001)",
+    "type": "Unknown"
+  },
+  {
+    "id": 71002,
+    "name": "未知物品(71002)",
+    "type": "Unknown"
+  },
+  {
+    "id": 100001,
     "name": "罪孽之劫掠羅盤",
-    "type": "羅盤"
+    "type": "Compass"
   },
-  "100200": {
+  {
+    "id": 100200,
     "name": "初火靈砂",
-    "type": "通貨"
+    "type": "Currency"
   },
-  "100300": {
+  {
+    "id": 100300,
     "name": "初火源質",
-    "type": "通貨"
+    "type": "Currency"
   },
-  "112126": { "name": "未知物品(112126)" },
-  "112131": { "name": "未知物品(112131)" },
-  "112345": { "name": "未知物品(112345)" },
-  "112346": { "name": "未知物品(112346)" },
-  "112355": { "name": "未知物品(112355)" },
-  "112407": { "name": "未知物品(112407)" },
-  "112415": { "name": "未知物品(112415)" },
-  "112436": { "name": "未知物品(112436)" },
-  "113133": { "name": "未知物品(113133)" },
-  "113208": { "name": "未知物品(113208)" },
-  "113257": { "name": "未知物品(113257)" },
-  "113337": { "name": "未知物品(113337)" },
-  "140004": {
+  {
+    "id": 112126,
+    "name": "未知物品(112126)",
+    "type": "Unknown"
+  },
+  {
+    "id": 112131,
+    "name": "未知物品(112131)",
+    "type": "Unknown"
+  },
+  {
+    "id": 112345,
+    "name": "未知物品(112345)",
+    "type": "Unknown"
+  },
+  {
+    "id": 112346,
+    "name": "未知物品(112346)",
+    "type": "Unknown"
+  },
+  {
+    "id": 112355,
+    "name": "未知物品(112355)",
+    "type": "Unknown"
+  },
+  {
+    "id": 112407,
+    "name": "未知物品(112407)",
+    "type": "Unknown"
+  },
+  {
+    "id": 112415,
+    "name": "未知物品(112415)",
+    "type": "Unknown"
+  },
+  {
+    "id": 112436,
+    "name": "未知物品(112436)",
+    "type": "Unknown"
+  },
+  {
+    "id": 113133,
+    "name": "未知物品(113133)",
+    "type": "Unknown"
+  },
+  {
+    "id": 113208,
+    "name": "未知物品(113208)",
+    "type": "Unknown"
+  },
+  {
+    "id": 113257,
+    "name": "未知物品(113257)",
+    "type": "Unknown"
+  },
+  {
+    "id": 113337,
+    "name": "未知物品(113337)",
+    "type": "Unknown"
+  },
+  {
+    "id": 140004,
     "name": "淺白夢語-武器",
-    "type": "夢語材料"
+    "type": "DreamMaterial"
   },
-  "140005": {
+  {
+    "id": 140005,
     "name": "淺白夢語-防具",
-    "type": "夢語材料"
+    "type": "DreamMaterial"
   },
-  "140006": {
+  {
+    "id": 140006,
     "name": "淺白夢語-飾品",
-    "type": "夢語材料"
+    "type": "DreamMaterial"
   },
-  "200003": {
+  {
+    "id": 200003,
     "name": "優質灰燼",
-    "type": "裝備材料"
+    "type": "EquipmentMaterial"
   },
-  "200021": {
+  {
+    "id": 200021,
     "name": "真理化石",
-    "type": "裝備材料"
+    "type": "EquipmentMaterial"
   },
-  "200028": {
+  {
+    "id": 200028,
     "name": "珍貴灰燼",
-    "type": "裝備材料"
+    "type": "EquipmentMaterial"
   },
-  "200029": {
+  {
+    "id": 200029,
     "name": "稀世灰燼",
-    "type": "裝備材料"
+    "type": "EquipmentMaterial"
   },
-  "200030": {
+  {
+    "id": 200030,
     "name": "至臻灰燼",
-    "type": "裝備材料"
+    "type": "EquipmentMaterial"
   },
-  "210000": {
+  {
+    "id": 210000,
     "name": "異魔之核",
-    "type": "侵蝕材料"
+    "type": "CorrosionMaterial"
   },
-  "210001": {
+  {
+    "id": 210001,
     "name": "使魔之核",
-    "type": "侵蝕材料"
+    "type": "CorrosionMaterial"
   },
-  "210002": {
+  {
+    "id": 210002,
     "name": "腐朽軸心",
-    "type": "侵蝕材料"
+    "type": "CorrosionMaterial"
   },
-  "210003": {
+  {
+    "id": 210003,
     "name": "輝煌軸心",
-    "type": "侵蝕材料"
+    "type": "CorrosionMaterial"
   },
-  "300006": {
+  {
+    "id": 300006,
     "name": "神聖化石",
-    "type": "裝備材料"
+    "type": "EquipmentMaterial"
   },
-  "330001": {
+  {
+    "id": 330001,
     "name": "雪紙碎片",
-    "type": "特殊道具"
+    "type": "SpecialItem"
   },
-  "338002": {
+  {
+    "id": 338002,
     "name": "捕星網",
-    "type": "特殊道具"
+    "type": "SpecialItem"
   },
-  "339001": {
+  {
+    "id": 339001,
     "name": "瘋狂靈感素",
-    "type": "特殊道具"
+    "type": "SpecialItem"
   },
-  "350002": { "name": "未知物品(350002)" },
-  "350007": { "name": "未知物品(350007)" },
-  "350023": { "name": "未知物品(350023)" },
-  "350301": { "name": "未知物品(350301)" },
-  "350413": { "name": "未知物品(350413)" },
-  "350749": { "name": "未知物品(350749)" },
-  "360403": {
+  {
+    "id": 350002,
+    "name": "未知物品(350002)",
+    "type": "Unknown"
+  },
+  {
+    "id": 350007,
+    "name": "未知物品(350007)",
+    "type": "Unknown"
+  },
+  {
+    "id": 350023,
+    "name": "未知物品(350023)",
+    "type": "Unknown"
+  },
+  {
+    "id": 350301,
+    "name": "未知物品(350301)",
+    "type": "Unknown"
+  },
+  {
+    "id": 350413,
+    "name": "未知物品(350413)",
+    "type": "Unknown"
+  },
+  {
+    "id": 350749,
+    "name": "未知物品(350749)",
+    "type": "Unknown"
+  },
+  {
+    "id": 360403,
     "name": "基礎元件",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "360404": {
+  {
+    "id": 360404,
     "name": "擴展元件-術士",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "360405": {
+  {
+    "id": 360405,
     "name": "擴展元件-近衛",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "360406": {
+  {
+    "id": 360406,
     "name": "擴展元件-狙擊",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "360407": {
+  {
+    "id": 360407,
     "name": "擴展元件-重裝",
-    "type": "高塔材料"
+    "type": "TowerMaterial"
   },
-  "360501": { "name": "未知物品(360501)" },
-  "360502": { "name": "未知物品(360502)" },
-  "360701": { "name": "未知物品(360701)" },
-  "370101": {
+  {
+    "id": 360501,
+    "name": "未知物品(360501)",
+    "type": "Unknown"
+  },
+  {
+    "id": 360502,
+    "name": "未知物品(360502)",
+    "type": "Unknown"
+  },
+  {
+    "id": 360701,
+    "name": "未知物品(360701)",
+    "type": "Unknown"
+  },
+  {
+    "id": 370101,
     "name": "棱鏡校尺-稀有",
-    "type": "疊界材料"
+    "type": "OverlayMaterial"
   },
-  "370201": {
+  {
+    "id": 370201,
     "name": "棱鏡校尺-傳奇",
-    "type": "疊界材料"
+    "type": "OverlayMaterial"
   },
-  "400006": {
+  {
+    "id": 400006,
     "name": "冰封寒淵的信標（時刻7）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400007": {
+  {
+    "id": 400007,
     "name": "冰封寒淵的信標（時刻8）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400008": {
+  {
+    "id": 400008,
     "name": "深空信標",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400014": {
+  {
+    "id": 400014,
     "name": "沸湧炎海的信標（時刻7）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400015": {
+  {
+    "id": 400015,
     "name": "沸湧炎海的信標（時刻8）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400021": {
+  {
+    "id": 400021,
     "name": "鋼鐵煉境的信標（時刻7）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400022": {
+  {
+    "id": 400022,
     "name": "鋼鐵煉境的信標（時刻8）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400027": {
+  {
+    "id": 400027,
     "name": "雷鳴廢土的信標（時刻7）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400028": {
+  {
+    "id": 400028,
     "name": "雷鳴廢土的信標（時刻8）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400032": {
+  {
+    "id": 400032,
     "name": "幽夜暗域的信標（時刻7）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "400033": {
+  {
+    "id": 400033,
     "name": "幽夜暗域的信標（時刻8）",
-    "type": "地圖門票"
+    "type": "MapTicket"
   },
-  "410101": {
+  {
+    "id": 410101,
     "name": "敕令：達提",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410102": {
+  {
+    "id": 410102,
     "name": "敕令：迪沃",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410103": {
+  {
+    "id": 410103,
     "name": "敕令：魯因",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410104": {
+  {
+    "id": 410104,
     "name": "敕令：杜姆",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410201": {
+  {
+    "id": 410201,
     "name": "虛海請柬-渴求",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410202": {
+  {
+    "id": 410202,
     "name": "虛海請柬-狂喜",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410203": {
+  {
+    "id": 410203,
     "name": "虛海請柬-哀怮",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410301": {
+  {
+    "id": 410301,
     "name": "欲念原核-記錄",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410302": {
+  {
+    "id": 410302,
     "name": "欲念原核-造物",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410303": {
+  {
+    "id": 410303,
     "name": "欲念原核-毀滅",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410401": {
+  {
+    "id": 410401,
     "name": "王后燭芯-囚困",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410402": {
+  {
+    "id": 410402,
     "name": "王后燭芯-追逐",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410403": {
+  {
+    "id": 410403,
     "name": "王后燭芯-雪恨",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410501": {
+  {
+    "id": 410501,
     "name": "女王恩寵-征伐",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410502": {
+  {
+    "id": 410502,
     "name": "女王恩寵-權力",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "410503": {
+  {
+    "id": 410503,
     "name": "女王恩寵-美欲",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "430000": {
+  {
+    "id": 430000,
     "name": "原初伊始",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "430001": {
+  {
+    "id": 430001,
     "name": "原初終末",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "430002": {
+  {
+    "id": 430002,
     "name": "終末之初",
-    "type": "BOSS 門票"
+    "type": "BossTicket"
   },
-  "440001": {
+  {
+    "id": 440001,
     "name": "神威紋章-機械",
-    "type": "神威紋章"
+    "type": "DivineCrest"
   },
-  "440002": {
+  {
+    "id": 440002,
     "name": "神威紋章-巨力",
-    "type": "神威紋章"
+    "type": "DivineCrest"
   },
-  "440003": {
+  {
+    "id": 440003,
     "name": "神威紋章-征戰",
-    "type": "神威紋章"
+    "type": "DivineCrest"
   },
-  "440004": {
+  {
+    "id": 440004,
     "name": "神威紋章-狩獵",
-    "type": "神威紋章"
+    "type": "DivineCrest"
   },
-  "990005": {
+  {
+    "id": 990005,
     "name": "迷霧的本質",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "990007": {
+  {
+    "id": 990007,
     "name": "居民的眼睛",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "990091": {
+  {
+    "id": 990091,
     "name": "征伐灰記",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "3000001": {
+  {
+    "id": 3000001,
     "name": "勇者之證I",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "3000002": {
+  {
+    "id": 3000002,
     "name": "勇者之證II",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "3000003": {
+  {
+    "id": 3000003,
     "name": "勇者之證III",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "3000004": {
+  {
+    "id": 3000004,
     "name": "勇者之證IV",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   },
-  "3000005": {
+  {
+    "id": 3000005,
     "name": "勇者之證V",
-    "type": "玩法門票"
+    "type": "GameplayTicket"
   }
-}
+]

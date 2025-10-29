@@ -1,4 +1,5 @@
 using TorchLight.Statistics.Services;
+using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics;
 
@@ -13,16 +14,18 @@ public class GameLogProcessor
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly MapTransitionHandler _mapTransitionHandler;
     private readonly ConsoleLogger _logger;
+    private readonly Dictionary<int, ItemModel> _itemTable;
 
     public GameLogProcessor(
-           Dictionary<int, string> itemIdTable,
+           Dictionary<int, ItemModel> itemTable,
            LineParser lineParser,
            ItemChangeBlockProcessor itemChangeProcessor)
     {
         _lineParser = lineParser ?? throw new ArgumentNullException(nameof(lineParser));
         _itemChangeProcessor = itemChangeProcessor ?? throw new ArgumentNullException(nameof(itemChangeProcessor));
-        _bagInventoryManager = new BagInventoryManager(itemIdTable);
-        _mapPickRecordManager = new MapPickRecordManager(itemIdTable);
+        _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
+        _bagInventoryManager = new BagInventoryManager(itemTable);
+        _mapPickRecordManager = new MapPickRecordManager(itemTable);
         _mapTransitionHandler = new MapTransitionHandler(_mapPickRecordManager);
         _logger = new ConsoleLogger();
 
@@ -40,31 +43,42 @@ public class GameLogProcessor
 
         try
         {
-            // 1. 初始化背包物品
-            if (_lineParser.IsInitBagItemData(line))
+            // 1. 檢查背包初始化狀態
+            var (isInitLine, shouldProcess, isComplete, isFirstInit) = _lineParser.CheckBagInitializationState(line);
+
+            if (isInitLine && shouldProcess)
             {
+                // 只在第一次開始初始化時才重置背包
+                if (isFirstInit)
+                {
+                    Console.WriteLine("\n=== 偵測到背包初始化開始，重置背包資料 ===\n");
+                    _bagInventoryManager.Reset();
+                }
+
+                // 處理初始化背包物品
                 var itemData = _lineParser.GetItemData(line);
                 _bagInventoryManager.InitializeBagItem(itemData);
                 return;
             }
 
-            // 2. 初始化完成
-            if (_lineParser.IsInitFinished(line))
+            if (isComplete)
             {
+                // 初始化完成
                 _bagInventoryManager.PrintInitializedBag();
                 return;
             }
 
-            // 3. 登入開始 - 重置所有資料
+            // 2. 登入開始 - 重置所有資料
             if (_lineParser.IsLoginStart(line))
             {
                 Console.WriteLine("\n=== 偵測到重新登入，重置所有資料 ===\n");
                 _bagInventoryManager.Reset();
                 _mapPickRecordManager.Reset();
+                _lineParser.ResetInitializationState();
                 return;
             }
 
-            // 4. 地圖切換
+            // 3. 地圖切換
             if (_lineParser.IsMoveMap(line))
             {
                 var (time, fromPath, toPath, success) = _lineParser.GetMapPathData(line);
@@ -75,7 +89,7 @@ public class GameLogProcessor
                 return;
             }
 
-            // 5. 處理物品變更（區塊處理）
+            // 4. 處理物品變更（區塊處理）
             _itemChangeProcessor.HandleLine(line);
         }
         catch (Exception ex)
@@ -92,6 +106,18 @@ public class GameLogProcessor
     {
         try
         {
+            // 處理 Spv3Open 事件（開圖材料）
+            if (ev.ProtoName == "Spv3Open" && _itemTable.TryGetValue(ev.ConfigBaseId, out var item))
+            {
+                // 記錄羅盤、探針和門票作為開圖材料
+                if (item.Type == ItemType.Compass || item.Type == ItemType.Probe || 
+                    item.Type == ItemType.MapTicket || item.Type == ItemType.BossTicket || 
+                    item.Type == ItemType.GameplayTicket)
+                {
+                    _mapPickRecordManager.RecordMapMaterial(ev.ConfigBaseId, item.Type);
+                }
+            }
+
             // 更新背包庫存
             var bagResult = _bagInventoryManager.UpdateBagItem(ev);
 
@@ -101,11 +127,7 @@ public class GameLogProcessor
             // 如果是增加物品（拾取），且在異界地圖中，則記錄拾取
             if (bagResult.QuantityChange > 0 && ev.ProtoName == "PickItems")
             {
-                var mapResult = _mapPickRecordManager.RecordPickedItem(
-               ev.ConfigBaseId,
-                    ev.SlotId,
-                  bagResult.QuantityChange);
-
+                var mapResult = _mapPickRecordManager.RecordPickedItem(ev.ConfigBaseId, ev.SlotId, bagResult.QuantityChange);
                 if (mapResult != null)
                 {
                     _logger.LogMapPickItem(_mapPickRecordManager.CurrentMapName, mapResult);

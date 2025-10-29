@@ -10,16 +10,53 @@ public class MapPickRecordManager
     private readonly List<MapRecordModel> _mapRecords = [];
     private MapRecordModel _currentMapRecord = new();
     private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
-    private readonly Dictionary<int, string> _itemIdTable;
+    private readonly Dictionary<int, ItemModel> _itemTable;
 
-    public MapPickRecordManager(Dictionary<int, string> itemIdTable)
+    // 暫存開圖材料
+    private string _pendingMapTicket = string.Empty;
+    private readonly List<string> _pendingCompasses = [];
+    private string _pendingProbe = string.Empty;
+
+    public MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     {
-        _itemIdTable = itemIdTable;
+        _itemTable = itemTable;
     }
 
     public bool IsInNetherrealmMap { get; private set; }
     public string CurrentMapName { get; private set; } = string.Empty;
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
+
+    /// <summary>
+    /// 記錄開圖材料（從 Spv3Open 事件）
+    /// </summary>
+    public void RecordMapMaterial(int configBaseId, ItemType itemType)
+    {
+        if (!_itemTable.TryGetValue(configBaseId, out var item))
+            return;
+
+        switch (itemType)
+        {
+            case ItemType.MapTicket:
+            case ItemType.BossTicket:
+            case ItemType.GameplayTicket:
+                _pendingMapTicket = item.Name;
+                Console.WriteLine($"[開圖材料] 門票: {item.Name}");
+                break;
+
+            case ItemType.Compass:
+                if (_pendingCompasses.Count < 4)
+                {
+                    _pendingCompasses.Add(item.Name);
+                    Console.WriteLine($"[開圖材料] 羅盤 #{_pendingCompasses.Count}: {item.Name}");
+                }
+                break;
+
+            case ItemType.Probe:
+                _pendingProbe = item.Name;
+                Console.WriteLine($"[開圖材料] 探針: {item.Name}");
+                break;
+        }
+    }
 
     /// <summary>
     /// 開始記錄新地圖
@@ -30,13 +67,38 @@ public class MapPickRecordManager
         {
             Id = mapId,
             Name = mapName,
-            StartTime = startTime
+            StartTime = startTime,
+            MapTicket = _pendingMapTicket,
+            Probe = _pendingProbe
         };
+
+        // 複製羅盤資料到陣列
+        for (int i = 0; i < _pendingCompasses.Count && i < 4; i++)
+        {
+            _currentMapRecord.Compass[i] = _pendingCompasses[i];
+        }
+
         _currentMapPickData = [];
         IsInNetherrealmMap = true;
         CurrentMapName = mapName;
 
-        Console.WriteLine($"{startTime:yyyy/MM/dd HH:mm:ss}\t進入異界地圖 {mapName} 開始統計拾取物品");
+        Console.WriteLine($"{startTime:yyyy/MM/dd HH:mm:ss}\t進入異界地圖 {mapName}");
+        if (!string.IsNullOrEmpty(_pendingMapTicket))
+        {
+            Console.WriteLine($"\t使用門票: {_pendingMapTicket}");
+        }
+        if (_pendingCompasses.Count > 0)
+        {
+            Console.WriteLine($"\t使用羅盤: {string.Join(", ", _pendingCompasses)}");
+        }
+        if (!string.IsNullOrEmpty(_pendingProbe))
+        {
+            Console.WriteLine($"\t使用探針: {_pendingProbe}");
+        }
+        Console.WriteLine("\t開始統計拾取物品");
+
+        // 清空暫存資料
+        ClearPendingMaterials();
     }
 
     /// <summary>
@@ -139,6 +201,18 @@ public class MapPickRecordManager
         _currentMapPickData = [];
         IsInNetherrealmMap = false;
         CurrentMapName = string.Empty;
+
+        ClearPendingMaterials();
+    }
+
+    /// <summary>
+    /// 清空暫存的開圖材料
+    /// </summary>
+    private void ClearPendingMaterials()
+    {
+        _pendingMapTicket = string.Empty;
+        _pendingCompasses.Clear();
+        _pendingProbe = string.Empty;
     }
 
     /// <summary>
@@ -158,7 +232,7 @@ public class MapPickRecordManager
 
     private string GetItemName(int configBaseId)
     {
-        return _itemIdTable.TryGetValue(configBaseId, out string itemName) ? itemName : $"未知的物品({configBaseId})";
+        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})";
     }
 }
 

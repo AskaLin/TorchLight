@@ -12,7 +12,10 @@
         /// </summary>
         public string Name { get; set; }
 
-
+        /// <summary>
+        /// 使用門票
+        /// </summary>
+        public string MapTicket { get; set; }
         private readonly string[] _compass = new string[4];
         /// <summary>
         /// 使用羅盤

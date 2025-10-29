@@ -14,7 +14,14 @@ public class MapMapper
     {
         { "XZ_YuJinZhiXiBiNanSuo200", "餘燼之息避難所" },
         { "GeBuLinCunLuo01", "隔壁林村落01" },
-        { "YJ_TaiYangWangTing200", "長明宮城" }
+        { "YJ_TaiYangWangTing200", "長明宮城" },
+        { "SQ_JingJiHuiTu100" , "荊棘穢土" },
+        { "KD_AiRenDiErCeng01", "悲鳴礦區" },
+        { "DD_DiDuTingYuan000", "聖教庭院" },
+        { "DD_DiDuTingYuan200", "暗夜王庭" },
+        { "JH_ShengDeLanXiuDaoYuan000", "懺悔學院" },
+        { "KD_RongHuoHeXin000", "熔鐵工廠" },
+        { "YL_KuangReYuLin100", "微光沼澤" }
     };
 
     /// <summary>
@@ -31,7 +38,14 @@ public class MapMapper
     private static readonly HashSet<string> _netherrealmMapIds =
     [
         "GeBuLinCunLuo01",
-        "YJ_TaiYangWangTing200"
+        "YJ_TaiYangWangTing200",
+        "SQ_JingJiHuiTu100",
+        "KD_AiRenDiErCeng01",
+        "DD_DiDuTingYuan000",
+        "JH_ShengDeLanXiuDaoYuan000",
+        "KD_RongHuoHeXin000",
+        "DD_DiDuTingYuan200",
+        "YL_KuangReYuLin100"
     ];
 
     /// <summary>

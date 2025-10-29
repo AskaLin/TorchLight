@@ -65,6 +65,10 @@ public sealed class ItemChangeBlockProcessor
     /// 目標協議名稱（只處理這些協議的區塊）
     /// </summary>
     private readonly HashSet<string> _targetProtocols = ["Spv3Open", "PickItems"];
+    // 暫時理解 Spv3Open 是開啟地圖扣除地圖耗材(迴響，羅盤探針)
+    // 拍賣場: XchgForSale
+    // 整理包包排序: ResetItemsLayout
+
 
     #region 事件
 

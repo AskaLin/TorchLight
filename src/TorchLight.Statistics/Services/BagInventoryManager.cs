@@ -8,11 +8,11 @@ namespace TorchLight.Statistics.Services;
 public class BagInventoryManager
 {
     private readonly Dictionary<int, PickedItemDataModel> _bagData = [];
-    private readonly Dictionary<int, string> _itemIdTable;
+    private readonly Dictionary<int, ItemModel> _itemTable;
 
-    public BagInventoryManager(Dictionary<int, string> itemIdTable)
+    public BagInventoryManager(Dictionary<int, ItemModel> itemTable)
     {
-        _itemIdTable = itemIdTable;
+        _itemTable = itemTable;
     }
 
     public IReadOnlyDictionary<int, PickedItemDataModel> BagData => _bagData;
@@ -120,7 +120,7 @@ public class BagInventoryManager
 
     private string GetItemName(int configBaseId)
     {
-        return _itemIdTable.TryGetValue(configBaseId, out string itemName) ? itemName : $"未知的物品({configBaseId})";
+        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})";
     }
 }
 

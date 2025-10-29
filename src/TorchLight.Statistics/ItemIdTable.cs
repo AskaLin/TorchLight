@@ -1,16 +1,69 @@
 ﻿using System.Text;
-using System.Text.RegularExpressions;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics
 {
     public partial class ItemIdTable
-    {        
+    {
+        /// <summary>
+        /// 讀取 ItemIdTable.json 並回傳 Dictionary&lt;int, ItemModel&gt;
+        /// </summary>
+        public static Dictionary<int, ItemModel> GetItemTable()
+        {
+            var items = LoadItemsFromJson();
+            return items.ToDictionary(
+                i => i.Id,
+                i => new ItemModel
+                {
+                    ConfigBaseId = i.Id,
+                    Name = i.Name,
+                    Type = i.Type
+                });
+        }
+
+        /// <summary>
+        /// 讀取 ItemIdTable.json 並回傳 Dictionary&lt;int, string&gt; (僅名稱)
+        /// </summary>
         public static Dictionary<int, string> GetIdTable()
         {
-            var fileName = "ItemIdTable.json";
+            var items = LoadItemsFromJson();
+            return items.ToDictionary(i => i.Id, i => i.Name);
+        }
 
-            // Candidate locations to look for the config file (runtime and development layouts)
+        /// <summary>
+        /// 從 JSON 檔案載入物品清單
+        /// </summary>
+        private static List<ItemBaseModel> LoadItemsFromJson()
+        {
+            const string fileName = "ItemIdTable.json";
+            var foundPath = FindConfigFile(fileName);
+
+            if (foundPath == null)
+            {
+                throw new FileNotFoundException($"Could not find '{fileName}' in expected locations.");
+            }
+
+            var json = File.ReadAllText(foundPath, Encoding.UTF8);
+            
+            // 設定 JSON 反序列化選項
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,  // 不區分大小寫
+                Converters = { new JsonStringEnumConverter() }  // 支援字串轉 Enum
+            };
+            
+            var items = JsonSerializer.Deserialize<List<ItemBaseModel>>(json, options);
+
+            return items ?? new List<ItemBaseModel>();
+        }
+
+        /// <summary>
+        /// 尋找設定檔案的路徑
+        /// </summary>
+        private static string FindConfigFile(string fileName)
+        {
             var candidates = new[]
             {
                 Path.Combine(AppContext.BaseDirectory, fileName),
@@ -19,67 +72,7 @@ namespace TorchLight.Statistics
                 Path.Combine(Directory.GetCurrentDirectory(), "src", "TorchLight.Statistics", fileName)
             };
 
-            string foundPath = null;
-            foreach (var p in candidates)
-            {
-                if (File.Exists(p))
-                {
-                    foundPath = p;
-                    break;
-                }
-            }
-
-            if (foundPath == null)
-            {
-                throw new FileNotFoundException($"Could not find '{fileName}' in expected locations.");
-            }
-
-            var json = File.ReadAllText(foundPath, Encoding.UTF8);
-
-            var result = new Dictionary<int, string>();
-
-            try
-            {
-                var doc = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                if (doc != null)
-                {
-                    foreach (var kv in doc)
-                    {
-                        if (!int.TryParse(kv.Key.Trim(), out var id))
-                            continue;
-
-                        string name = null;
-                        var el = kv.Value;
-
-                        if (el.ValueKind == JsonValueKind.String)
-                        {
-                            name = el.GetString();
-                        }
-                        else if (el.ValueKind == JsonValueKind.Object)
-                        {
-                            if (el.TryGetProperty("name", out var nameProp) && nameProp.ValueKind == JsonValueKind.String)
-                                name = nameProp.GetString();
-                            else if (el.TryGetProperty("Name", out var nameProp2) && nameProp2.ValueKind == JsonValueKind.String)
-                                name = nameProp2.GetString();
-                        }
-
-                        if (string.IsNullOrWhiteSpace(name))
-                            continue;
-
-                        if (!result.ContainsKey(id))
-                            result[id] = name;
-                    }
-                }
-            }
-            catch
-            {
-                // ignore and return what we have (possibly empty)
-            }
-
-            return result;
-        }
-
-        [GeneratedRegex(@"^\s*(\d+)\s+(.+)$")]
-        private static partial Regex IdTableRegex();
+            return candidates.FirstOrDefault(File.Exists);
+        }        
     }
 }
