@@ -19,10 +19,10 @@ public class MainWindow : Form
     public MainWindow(MapPickRecordManager mapPickRecordManager, GameLogProcessor gameLogProcessor)
     {
         _mapPickRecordManager = mapPickRecordManager ?? throw new ArgumentNullException(nameof(mapPickRecordManager));
-      _gameLogProcessor = gameLogProcessor ?? throw new ArgumentNullException(nameof(gameLogProcessor));
+        _gameLogProcessor = gameLogProcessor ?? throw new ArgumentNullException(nameof(gameLogProcessor));
 
-     // 設定視窗
-     Text = "火炬之光無限 - 拾取物品統計工具";
+        // 設定視窗
+        Text = "火炬之光無限 - 拾取物品統計工具";
         Width = 1200;
         Height = 800;
         StartPosition = FormStartPosition.CenterScreen;
@@ -30,55 +30,54 @@ public class MainWindow : Form
         // 創建 WebView2
         _webView = new WebView2
         {
-  Dock = DockStyle.Fill
-  };
+            Dock = DockStyle.Fill
+        };
 
         Controls.Add(_webView);
 
         // 初始化 WebView2
-   InitializeAsync();
+        InitializeAsync();
     }
 
     private async void InitializeAsync()
     {
-    try
+        try
         {
-     // 設定 WebView2 環境
-      var userDataFolder = Path.Combine(
-    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-  "TorchLight.Statistics"
-   );
+            // 設定 WebView2 環境
+            var userDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "TorchLight.Statistics");
 
-  var env = await CoreWebView2Environment.CreateAsync(
-             userDataFolder: userDataFolder
-          );
+            var env = await CoreWebView2Environment.CreateAsync(
+                       userDataFolder: userDataFolder
+                    );
 
             await _webView.EnsureCoreWebView2Async(env);
 
-        // 註冊 JavaScript 與 C# 的橋接
+            // 註冊 JavaScript 與 C# 的橋接
             RegisterJavaScriptBridge();
 
-          // 載入前端頁面
-       var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html");
-          
-     if (File.Exists(wwwrootPath))
+            // 載入前端頁面
+            var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html");
+
+            if (File.Exists(wwwrootPath))
             {
- _webView.CoreWebView2.Navigate($"file:///{wwwrootPath.Replace("\\", "/")}");
-     }
-     else
+                _webView.CoreWebView2.Navigate($"file:///{wwwrootPath.Replace("\\", "/")}");
+            }
+            else
             {
-    // 開發模式：使用 Vite 開發伺服器
-       _webView.CoreWebView2.Navigate("http://localhost:5173");
-     }
+                // 開發模式：使用 Vite 開發伺服器
+                _webView.CoreWebView2.Navigate("http://localhost:5173");
+            }
 
             _isInitialized = true;
             Log.Information("WebView2 初始化完成");
         }
-   catch (Exception ex)
+        catch (Exception ex)
         {
-       Log.Error(ex, "WebView2 初始化失敗");
+            Log.Error(ex, "WebView2 初始化失敗");
             MessageBox.Show($"WebView2 初始化失敗：{ex.Message}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
-     }
+        }
     }
 
     /// <summary>
@@ -89,15 +88,15 @@ public class MainWindow : Form
         // 從 JavaScript 呼叫 C# 方法
         _webView.CoreWebView2.AddHostObjectToScript("csharpApi", new WebViewApi(_mapPickRecordManager, _gameLogProcessor, this));
 
-    // 啟用開發者工具（僅開發模式）
+        // 啟用開發者工具（僅開發模式）
 #if DEBUG
-  _webView.CoreWebView2.Settings.AreDevToolsEnabled = true;
+        _webView.CoreWebView2.Settings.AreDevToolsEnabled = true;
 #else
   _webView.CoreWebView2.Settings.AreDevToolsEnabled = false;
 #endif
 
         _webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
-  _webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
+        _webView.CoreWebView2.Settings.IsStatusBarEnabled = false;
     }
 
     /// <summary>
@@ -105,21 +104,21 @@ public class MainWindow : Form
     /// </summary>
     public async Task CallJavaScriptAsync(string functionName, params object[] args)
     {
-  if (!_isInitialized)
- return;
+        if (!_isInitialized)
+            return;
 
-  try
-   {
-   var argsJson = args.Length > 0 
-          ? string.Join(", ", args.Select(a => JsonSerializer.Serialize(a)))
-     : "";
+        try
+        {
+            var argsJson = args.Length > 0
+                   ? string.Join(", ", args.Select(a => JsonSerializer.Serialize(a)))
+              : "";
 
             var script = $"{functionName}({argsJson})";
-         await _webView.CoreWebView2.ExecuteScriptAsync(script);
-   }
+            await _webView.CoreWebView2.ExecuteScriptAsync(script);
+        }
         catch (Exception ex)
         {
-   Log.Error(ex, "呼叫 JavaScript 方法失敗：{FunctionName}", functionName);
+            Log.Error(ex, "呼叫 JavaScript 方法失敗：{FunctionName}", functionName);
         }
     }
 
@@ -128,9 +127,9 @@ public class MainWindow : Form
     /// </summary>
     public async Task NotifyNewMapRecord()
     {
- if (_isInitialized)
+        if (_isInitialized)
         {
-   await CallJavaScriptAsync("window.onNewMapRecord");
+            await CallJavaScriptAsync("window.onNewMapRecord");
         }
     }
 
@@ -138,10 +137,10 @@ public class MainWindow : Form
     /// 通知前端：物品拾取
     /// </summary>
     public async Task NotifyItemPicked(string itemName, int quantity)
- {
+    {
         if (_isInitialized)
-      {
- await CallJavaScriptAsync("window.onItemPicked", itemName, quantity);
-}
+        {
+            await CallJavaScriptAsync("window.onItemPicked", itemName, quantity);
+        }
     }
 }

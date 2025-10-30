@@ -1,15 +1,15 @@
-/**
- * API ©I¥s¤u¨ã - »P C# WebView API ³q°T
+ï»¿/**
+ * API å‘¼å«å·¥å…· - èˆ‡ C# WebView API é€šè¨Š
  */
 
 export async function apiCall(methodName, ...args) {
   try {
-    // ÀË¬d¬O§_¦b WebView2 Àô¹Ò¤¤
+    // æª¢æŸ¥æ˜¯å¦åœ¨ WebView2 ç’°å¢ƒä¸­
     if (window.chrome && window.chrome.webview) {
- // ³z¹L C# API ©I¥s
+ // é€é C# API å‘¼å«
     const result = await window.chrome.webview.hostObjects.csharpApi[methodName](...args)
       
-   // ¸ÑªR JSON µ²ªG
+   // è§£æ JSON çµæœ
       if (typeof result === 'string') {
         const data = JSON.parse(result)
         if (data.error) {
@@ -20,7 +20,7 @@ export async function apiCall(methodName, ...args) {
       
       return result
     } else {
-      // ¶}µo¼Ò¦¡¡G¨Ï¥Î¼ÒÀÀ¸ê®Æ
+      // é–‹ç™¼æ¨¡å¼ï¼šä½¿ç”¨æ¨¡æ“¬è³‡æ–™
       console.warn(`API call in dev mode: ${methodName}`, args)
       return getMockData(methodName, args)
     }
@@ -31,7 +31,7 @@ export async function apiCall(methodName, ...args) {
 }
 
 /**
- * ¶}µo¼Ò¦¡ªº¼ÒÀÀ¸ê®Æ
+ * é–‹ç™¼æ¨¡å¼çš„æ¨¡æ“¬è³‡æ–™
  */
 function getMockData(methodName, args) {
   switch (methodName) {
@@ -40,10 +40,10 @@ function getMockData(methodName, args) {
         {
        recordId: '123e4567-e89b-12d3-a456-426614174000',
           id: 'GeBuLinCunLuo01',
-          name: '¹j¾ÀªL§ø¸¨01',
-          mapTicket: '´d»ïÄq°Ïªù²¼',
-          compass: ['Ã¹½L1', 'Ã¹½L2'],
-          probe: '±´°wA',
+          name: 'éš”å£æ—æ‘è½01',
+          mapTicket: 'æ‚²é³´ç¤¦å€é–€ç¥¨',
+          compass: ['ç¾…ç›¤1', 'ç¾…ç›¤2'],
+          probe: 'æ¢é‡A',
         startTime: '2025-10-29T03:31:16',
       endTime: '2025-10-29T03:45:20',
      useTime: '00:14:04',
@@ -62,17 +62,17 @@ function getMockData(methodName, args) {
     return {
         recordId: args[0],
         id: 'GeBuLinCunLuo01',
-        name: '¹j¾ÀªL§ø¸¨01',
-        mapTicket: '´d»ïÄq°Ïªù²¼',
-        compass: ['Ã¹½L1', 'Ã¹½L2'],
-        probe: '±´°wA',
+        name: 'éš”å£æ—æ‘è½01',
+        mapTicket: 'æ‚²é³´ç¤¦å€é–€ç¥¨',
+        compass: ['ç¾…ç›¤1', 'ç¾…ç›¤2'],
+        probe: 'æ¢é‡A',
         startTime: '2025-10-29T03:31:16',
         endTime: '2025-10-29T03:45:20',
         useTime: '00:14:04',
         items: [
-     { baseId: 1001, name: '©R¹B¥d¤ù', total: 50, slots: { 1: 50 } },
-          { baseId: 1002, name: '³q³f', total: 100, slots: { 2: 100 } },
-   { baseId: 1003, name: '¸Ë³Æ', total: 95, slots: { 3: 45, 4: 50 } }
+     { baseId: 1001, name: 'å‘½é‹å¡ç‰‡', total: 50, slots: { 1: 50 } },
+          { baseId: 1002, name: 'é€šè²¨', total: 100, slots: { 2: 100 } },
+   { baseId: 1003, name: 'è£å‚™', total: 95, slots: { 3: 45, 4: 50 } }
     ]
   }
     
@@ -83,8 +83,8 @@ function getMockData(methodName, args) {
         totalQuantity: 2450,
    totalPlayTime: '02:30:45',
         mostPickedItems: [
-       { baseId: 1001, name: '©R¹B¥d¤ù', totalQuantity: 500 },
-      { baseId: 1002, name: '³q³f', totalQuantity: 1000 }
+       { baseId: 1001, name: 'å‘½é‹å¡ç‰‡', totalQuantity: 500 },
+      { baseId: 1002, name: 'é€šè²¨', totalQuantity: 1000 }
         ]
    }
     

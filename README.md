@@ -1,98 +1,98 @@
-# ?? ¤õ¬²¤§¥úµL­­ - ¬B¨úª««~²Î­p¤u¨ã
+ï»¿# ?? ç«ç‚¬ä¹‹å…‰ç„¡é™ - æ‹¾å–ç‰©å“çµ±è¨ˆå·¥å…·
 
-> **Torchlight Infinite Item Tracker** - §Y®ÉºÊ±±¹CÀ¸¬B¨úª««~ªº±M·~¤u¨ã
+> **Torchlight Infinite Item Tracker** - å³æ™‚ç›£æ§éŠæˆ²æ‹¾å–ç‰©å“çš„å°ˆæ¥­å·¥å…·
 
-## ?? ±M®×Â²¤¶
+## ?? å°ˆæ¡ˆç°¡ä»‹
 
-³o¬O¤@­Ó¥Î©ó¡m¤õ¬²¤§¥ú¡GµL­­¡nªº¬B¨úª««~²Î­p¤u¨ã¡A³z¹L¤ÀªR¹CÀ¸¤é»xÀÉ®×¡A¦Û°Ê°O¿ıª±®a¦b²§¬É¦a¹Ï¤¤ªº©Ò¦³¬B¨ú¦æ¬°¡A¨Ã´£¨Ñ¸Ô²Óªº²Î­p¸ê°T¡C
+é€™æ˜¯ä¸€å€‹ç”¨æ–¼ã€Šç«ç‚¬ä¹‹å…‰ï¼šç„¡é™ã€‹çš„æ‹¾å–ç‰©å“çµ±è¨ˆå·¥å…·ï¼Œé€éåˆ†æéŠæˆ²æ—¥èªŒæª”æ¡ˆï¼Œè‡ªå‹•è¨˜éŒ„ç©å®¶åœ¨ç•°ç•Œåœ°åœ–ä¸­çš„æ‰€æœ‰æ‹¾å–è¡Œç‚ºï¼Œä¸¦æä¾›è©³ç´°çš„çµ±è¨ˆè³‡è¨Šã€‚
 
-### ¥D­n¥\¯à
+### ä¸»è¦åŠŸèƒ½
 
-? **§Y®ÉºÊ±±** - «ùÄòºÊÅ¥¹CÀ¸¤é»x¡A§Y®É°lÂÜª««~ÅÜ¤Æ  
-? **­I¥]ºŞ²z** - §¹¾ã°lÂÜ­I¥]¤¤©Ò¦³ª««~ªº¼Æ¶qÅÜ¤Æ  
-? **¦a¹Ï°O¿ı** - ¦Û°ÊÃÑ§O²§¬É¦a¹Ï¡A°O¿ı¨C±i¦a¹Ïªº¬B¨ú²Î­p  
-? **ª««~ÃÑ§O** - ¤º«Ø 300+ ºØª««~ªº¤¤¤å¦WºÙ  
-? **¸Ô²Ó¤é»x** - ´£¨Ñ®É¶¡¡B¼Æ¶q¡BÄæ¦ìµ¥§¹¾ã¸ê°T  
+? **å³æ™‚ç›£æ§** - æŒçºŒç›£è½éŠæˆ²æ—¥èªŒï¼Œå³æ™‚è¿½è¹¤ç‰©å“è®ŠåŒ–  
+? **èƒŒåŒ…ç®¡ç†** - å®Œæ•´è¿½è¹¤èƒŒåŒ…ä¸­æ‰€æœ‰ç‰©å“çš„æ•¸é‡è®ŠåŒ–  
+? **åœ°åœ–è¨˜éŒ„** - è‡ªå‹•è­˜åˆ¥ç•°ç•Œåœ°åœ–ï¼Œè¨˜éŒ„æ¯å¼µåœ°åœ–çš„æ‹¾å–çµ±è¨ˆ  
+? **ç‰©å“è­˜åˆ¥** - å…§å»º 300+ ç¨®ç‰©å“çš„ä¸­æ–‡åç¨±  
+? **è©³ç´°æ—¥èªŒ** - æä¾›æ™‚é–“ã€æ•¸é‡ã€æ¬„ä½ç­‰å®Œæ•´è³‡è¨Š  
 
-## ?? §Ö³t¶}©l
+## ?? å¿«é€Ÿé–‹å§‹
 
-### ¨t²Î»İ¨D
+### ç³»çµ±éœ€æ±‚
 - Windows 10/11
 - .NET 8.0 Runtime
-- ¤õ¬²¤§¥ú¡GµL­­¹CÀ¸
+- ç«ç‚¬ä¹‹å…‰ï¼šç„¡é™éŠæˆ²
 
-### °õ¦æ¨BÆJ
-1. ¦w¸Ë [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
-2. ±Ò°Ê¡m¤õ¬²¤§¥ú¡GµL­­¡n¹CÀ¸
-3. °õ¦æ `TorchLight.Statistics.exe`
-4. ¶i¤J²§¬É¦a¹Ï¶}©l¨ê¹Ï
+### åŸ·è¡Œæ­¥é©Ÿ
+1. å®‰è£ [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+2. å•Ÿå‹•ã€Šç«ç‚¬ä¹‹å…‰ï¼šç„¡é™ã€‹éŠæˆ²
+3. åŸ·è¡Œ `TorchLight.Statistics.exe`
+4. é€²å…¥ç•°ç•Œåœ°åœ–é–‹å§‹åˆ·åœ–
 
-## ?? ¨Ï¥Î¬yµ{
+## ?? ä½¿ç”¨æµç¨‹
 
 ```
-±Ò°Êµ{¦¡ ¡÷ ¸ü¤Jª««~©w¸q ¡÷ ¶}©lºÊÅ¥¤é»x
-   ¡õ
-       ¶i¤J²§¬É¦a¹Ï¡]¦Û°Ê¶}©l°O¿ı¡^
-      ¡õ
-       ¬B¨úª««~¡]§Y®ÉÅã¥Ü²Î­p¡^
-¡õ
-      Â÷¶}¦a¹Ï¡]Åã¥Ü§¹¾ã³øªí¡^
+å•Ÿå‹•ç¨‹å¼ â†’ è¼‰å…¥ç‰©å“å®šç¾© â†’ é–‹å§‹ç›£è½æ—¥èªŒ
+   â†“
+       é€²å…¥ç•°ç•Œåœ°åœ–ï¼ˆè‡ªå‹•é–‹å§‹è¨˜éŒ„ï¼‰
+      â†“
+       æ‹¾å–ç‰©å“ï¼ˆå³æ™‚é¡¯ç¤ºçµ±è¨ˆï¼‰
+â†“
+      é›¢é–‹åœ°åœ–ï¼ˆé¡¯ç¤ºå®Œæ•´å ±è¡¨ï¼‰
 ```
 
-## ?? ±M®×¬[ºc
+## ?? å°ˆæ¡ˆæ¶æ§‹
 
-¥»±M®×±Ä¥Î**¼Ò²Õ¤Æ³]­p**¡AÂ¾³d²M´·¤ÀÂ÷¡G
+æœ¬å°ˆæ¡ˆæ¡ç”¨**æ¨¡çµ„åŒ–è¨­è¨ˆ**ï¼Œè·è²¬æ¸…æ™°åˆ†é›¢ï¼š
 
-### ®Ö¤ß²Õ¥ó
+### æ ¸å¿ƒçµ„ä»¶
 
-| ²Õ¥ó | Â¾³d | ¦ì¸m |
+| çµ„ä»¶ | è·è²¬ | ä½ç½® |
 |------|------|------|
-| **GameLogProcessor** | ¥D±±¨î¾¹¡A²ÎÄw©Ò¦³³B²zÅŞ¿è | `GameLogProcessor.cs` |
-| **BagInventoryManager** | ºŞ²z­I¥]®w¦s | `Services/` |
-| **MapPickRecordManager** | °O¿ı¦a¹Ï¬B¨ú | `Services/` |
-| **MapTransitionHandler** | ³B²z¦a¹Ï¤Á´« | `Services/` |
-| **LineParser** | ¸ÑªR¤é»x¦æ | `LineParser.cs` |
-| **ItemChangeBlockProcessor** | ³B²zª««~ÅÜ§ó°Ï¶ô | `LogEvent.cs` |
-| **SafeFileTailWatcher** | ºÊÅ¥ÀÉ®×ÅÜ¤Æ | `SafeFileTailWatcher.cs` |
+| **GameLogProcessor** | ä¸»æ§åˆ¶å™¨ï¼Œçµ±ç±Œæ‰€æœ‰è™•ç†é‚è¼¯ | `GameLogProcessor.cs` |
+| **BagInventoryManager** | ç®¡ç†èƒŒåŒ…åº«å­˜ | `Services/` |
+| **MapPickRecordManager** | è¨˜éŒ„åœ°åœ–æ‹¾å– | `Services/` |
+| **MapTransitionHandler** | è™•ç†åœ°åœ–åˆ‡æ› | `Services/` |
+| **LineParser** | è§£ææ—¥èªŒè¡Œ | `LineParser.cs` |
+| **ItemChangeBlockProcessor** | è™•ç†ç‰©å“è®Šæ›´å€å¡Š | `LogEvent.cs` |
+| **SafeFileTailWatcher** | ç›£è½æª”æ¡ˆè®ŠåŒ– | `SafeFileTailWatcher.cs` |
 
-### ¸ê®Æ¬yµ{
+### è³‡æ–™æµç¨‹
 
 ```
-¤é»xÀÉ®× (UE_game.log)
-    ¡õ 
-SafeFileTailWatcher (ÀÉ®×ºÊÅ¥)
-    ¡õ
-GameLogProcessor (¥D³B²z¾¹)
-    ¢u¡÷ LineParser (¸ÑªR)
-    ¢u¡÷ BagInventoryManager (­I¥]ºŞ²z)
-    ¢u¡÷ MapPickRecordManager (¦a¹Ï°O¿ı)
-    ¢|¡÷ ConsoleLogger (¿é¥X)
+æ—¥èªŒæª”æ¡ˆ (UE_game.log)
+    â†“ 
+SafeFileTailWatcher (æª”æ¡ˆç›£è½)
+    â†“
+GameLogProcessor (ä¸»è™•ç†å™¨)
+    â”œâ†’ LineParser (è§£æ)
+    â”œâ†’ BagInventoryManager (èƒŒåŒ…ç®¡ç†)
+    â”œâ†’ MapPickRecordManager (åœ°åœ–è¨˜éŒ„)
+    â””â†’ ConsoleLogger (è¼¸å‡º)
 ```
 
-## ?? §Ş³N«GÂI
+## ?? æŠ€è¡“äº®é»
 
-### 1. Âù­«ÀÉ®×ºÊÅ¥¾÷¨î
-- **FileSystemWatcher**: §Y®ÉºÊÅ¥ÀÉ®×ÅÜ¤Æ
-- **½ü¸ß¾÷¨î**: ©w´ÁÀË¬d¡A¨¾¤î¿òº|¨Æ¥ó
-- **Debounce**: ¨¾¤îµu®É¶¡¦h¦¸Ä²µo
+### 1. é›™é‡æª”æ¡ˆç›£è½æ©Ÿåˆ¶
+- **FileSystemWatcher**: å³æ™‚ç›£è½æª”æ¡ˆè®ŠåŒ–
+- **è¼ªè©¢æ©Ÿåˆ¶**: å®šæœŸæª¢æŸ¥ï¼Œé˜²æ­¢éºæ¼äº‹ä»¶
+- **Debounce**: é˜²æ­¢çŸ­æ™‚é–“å¤šæ¬¡è§¸ç™¼
 
-### 2. °Ï¶ô³B²z¾÷¨î
-¨Ï¥Î `Dictionary<ThreadId, Context>` °lÂÜ¨C­Ó°õ¦æºüªº°Ï¶ôª¬ºA¡A¤ä´©¡G
-- §Y®É¼Ò¦¡¡]¥ß§Y³B²z¡^
-- ·J¾ã¼Ò¦¡¡]§å¦¸³B²z¡^
-- ¶W®É«OÅ@
+### 2. å€å¡Šè™•ç†æ©Ÿåˆ¶
+ä½¿ç”¨ `Dictionary<ThreadId, Context>` è¿½è¹¤æ¯å€‹åŸ·è¡Œç·’çš„å€å¡Šç‹€æ…‹ï¼Œæ”¯æ´ï¼š
+- å³æ™‚æ¨¡å¼ï¼ˆç«‹å³è™•ç†ï¼‰
+- å½™æ•´æ¨¡å¼ï¼ˆæ‰¹æ¬¡è™•ç†ï¼‰
+- è¶…æ™‚ä¿è­·
 
-### 3. ¥¿«hªí¹F¦¡Àu¤Æ
-¨Ï¥Î .NET 8 ªº **Source Generator** ¯S©Ê¡G
+### 3. æ­£å‰‡è¡¨é”å¼å„ªåŒ–
+ä½¿ç”¨ .NET 8 çš„ **Source Generator** ç‰¹æ€§ï¼š
 ```csharp
 [GeneratedRegex(@"pattern", RegexOptions.Singleline)]
 public static partial Regex BagItemLine();
 ```
-? ½sÄ¶®É¥Í¦¨¡A®Ä¯à§ó¨Î  
-? Á×§K°õ¦æ®É½sÄ¶¶}¾P  
+? ç·¨è­¯æ™‚ç”Ÿæˆï¼Œæ•ˆèƒ½æ›´ä½³  
+? é¿å…åŸ·è¡Œæ™‚ç·¨è­¯é–‹éŠ·  
 
 ### 4. Record Types
-¨Ï¥Î C# 10 ªº Record ©w¸q¨Æ¥ó¡G
+ä½¿ç”¨ C# 10 çš„ Record å®šç¾©äº‹ä»¶ï¼š
 ```csharp
 public record BagModEvent(
     DateTime Time,
@@ -102,129 +102,129 @@ public record BagModEvent(
     string Action
 ) : LogEvent(Time, ThreadId);
 ```
-? ¤£¥iÅÜ©Ê¡]Immutable¡^  
-? ­È¬Ûµ¥¤ñ¸û  
-? Â²¼ä»yªk  
+? ä¸å¯è®Šæ€§ï¼ˆImmutableï¼‰  
+? å€¼ç›¸ç­‰æ¯”è¼ƒ  
+? ç°¡æ½”èªæ³•  
 
-### 5. ¨Æ¥óÅX°Ê¬[ºc
+### 5. äº‹ä»¶é©…å‹•æ¶æ§‹
 ```csharp
 public event Action<BagModEvent>? OnBagModInsideBlock;
 ```
-? ­°§C½¢¦X«×  
-? ¤ä´©¦h­q¾\ªÌ  
-? ©ö©óÂX®i  
+? é™ä½è€¦åˆåº¦  
+? æ”¯æ´å¤šè¨‚é–±è€…  
+? æ˜“æ–¼æ“´å±•  
 
-## ?? ±M®×µ²ºc
+## ?? å°ˆæ¡ˆçµæ§‹
 
 ```
 TorchLight.Statistics/
-¢u¢w¢w Configuration/   # °t¸mºŞ²z
-¢x   ¢|¢w¢w AppConfiguration.cs
-¢u¢w¢w Core/           # ®Ö¤ß©w¸q
-¢x¢|¢w¢w MapInfo.cs
-¢u¢w¢w Models/                 # ¸ê®Æ¼Ò«¬
-¢x   ¢u¢w¢w ItemModel.cs
-¢x   ¢u¢w¢w PickedItemDataModel.cs
-¢x   ¢|¢w¢w MapRecordModel.cs
-¢u¢w¢w Services/   # ·~°ÈªA°È
-¢x ¢u¢w¢w BagInventoryManager.cs
-¢x   ¢u¢w¢w MapPickRecordManager.cs
-¢x   ¢|¢w¢w MapTransitionHandler.cs
-¢u¢w¢w GameLogProcessor.cs     # ¥D³B²z¾¹
-¢u¢w¢w LineParser.cs     # ¤é»x¸ÑªR
-¢u¢w¢w LogEvent.cs# ¨Æ¥ó©w¸q
-¢u¢w¢w MapMapper.cs # ¦a¹Ï¬M®g
-¢u¢w¢w ItemIdTable.cs          # ª««~ªí³B²z
-¢u¢w¢w SafeFileTailWatcher.cs  # ÀÉ®×ºÊÅ¥
-¢u¢w¢w ConsoleLogger.cs        # ¤é»x¿é¥X
-¢|¢w¢w Program.cs  # µ{¦¡¤J¤f
+â”œâ”€â”€ Configuration/   # é…ç½®ç®¡ç†
+â”‚   â””â”€â”€ AppConfiguration.cs
+â”œâ”€â”€ Core/           # æ ¸å¿ƒå®šç¾©
+â”‚â””â”€â”€ MapInfo.cs
+â”œâ”€â”€ Models/                 # è³‡æ–™æ¨¡å‹
+â”‚   â”œâ”€â”€ ItemModel.cs
+â”‚   â”œâ”€â”€ PickedItemDataModel.cs
+â”‚   â””â”€â”€ MapRecordModel.cs
+â”œâ”€â”€ Services/   # æ¥­å‹™æœå‹™
+â”‚ â”œâ”€â”€ BagInventoryManager.cs
+â”‚   â”œâ”€â”€ MapPickRecordManager.cs
+â”‚   â””â”€â”€ MapTransitionHandler.cs
+â”œâ”€â”€ GameLogProcessor.cs     # ä¸»è™•ç†å™¨
+â”œâ”€â”€ LineParser.cs     # æ—¥èªŒè§£æ
+â”œâ”€â”€ LogEvent.cs# äº‹ä»¶å®šç¾©
+â”œâ”€â”€ MapMapper.cs # åœ°åœ–æ˜ å°„
+â”œâ”€â”€ ItemIdTable.cs          # ç‰©å“è¡¨è™•ç†
+â”œâ”€â”€ SafeFileTailWatcher.cs  # æª”æ¡ˆç›£è½
+â”œâ”€â”€ ConsoleLogger.cs        # æ—¥èªŒè¼¸å‡º
+â””â”€â”€ Program.cs  # ç¨‹å¼å…¥å£
 ```
 
-## ?? ³]­p­ì«h
+## ?? è¨­è¨ˆåŸå‰‡
 
-### SOLID ­ì«h
-- ? **³æ¤@Â¾³d (SRP)**: ¨C­ÓÃş§O¥u­t³d¤@­Ó¥\¯à
-- ? **¶}©ñ«Ê³¬ (OCP)**: ©ö©óÂX®i¡AµL»İ­×§ï²{¦³µ{¦¡½X
-- ? **¨Ì¿à¤ÏÂà (DIP)**: ¨Ì¿à©â¶H¦Ó«D¨ãÅé¹ê§@
+### SOLID åŸå‰‡
+- ? **å–®ä¸€è·è²¬ (SRP)**: æ¯å€‹é¡åˆ¥åªè² è²¬ä¸€å€‹åŠŸèƒ½
+- ? **é–‹æ”¾å°é–‰ (OCP)**: æ˜“æ–¼æ“´å±•ï¼Œç„¡éœ€ä¿®æ”¹ç¾æœ‰ç¨‹å¼ç¢¼
+- ? **ä¾è³´åè½‰ (DIP)**: ä¾è³´æŠ½è±¡è€Œéå…·é«”å¯¦ä½œ
 
-### ³]­p¼Ò¦¡
-- **Æ[¹îªÌ¼Ò¦¡ (Observer)**: ¨Æ¥óÅX°Ê¬[ºc
-- **µ¦²¤¼Ò¦¡ (Strategy)**: ¤£¦Pªº¤é»x³B²zµ¦²¤
-- **³æ¨Ò¼Ò¦¡ (Singleton)**: °t¸mºŞ²z
+### è¨­è¨ˆæ¨¡å¼
+- **è§€å¯Ÿè€…æ¨¡å¼ (Observer)**: äº‹ä»¶é©…å‹•æ¶æ§‹
+- **ç­–ç•¥æ¨¡å¼ (Strategy)**: ä¸åŒçš„æ—¥èªŒè™•ç†ç­–ç•¥
+- **å–®ä¾‹æ¨¡å¼ (Singleton)**: é…ç½®ç®¡ç†
 
-## ?? ¶}µo«ü«n
+## ?? é–‹ç™¼æŒ‡å—
 
-### «Ø¸m±M®×
+### å»ºç½®å°ˆæ¡ˆ
 ```bash
 dotnet restore
 dotnet build
 dotnet run --project src/TorchLight.Statistics
 ```
 
-### ·s¼Wª««~©w¸q
-½s¿è `ItemIdTable.json`:
+### æ–°å¢ç‰©å“å®šç¾©
+ç·¨è¼¯ `ItemIdTable.json`:
 ```json
 {
-  "ª««~ID": {
-    "name": "ª««~¦WºÙ",
-    "type": "ª««~Ãş«¬"
+  "ç‰©å“ID": {
+    "name": "ç‰©å“åç¨±",
+    "type": "ç‰©å“é¡å‹"
   }
 }
 ```
 
-### ·s¼W¦a¹Ï¤ä´©
-¦b `MapMapper.cs` ¤¤²K¥[¡G
+### æ–°å¢åœ°åœ–æ”¯æ´
+åœ¨ `MapMapper.cs` ä¸­æ·»åŠ ï¼š
 ```csharp
 private static readonly Dictionary<string, string> _mapNameMapping = new()
 {
- { "¦a¹ÏID", "¦a¹Ï¦WºÙ" }
+ { "åœ°åœ–ID", "åœ°åœ–åç¨±" }
 };
 ```
 
-## ?? ¥¼¨Ó­pµe
+## ?? æœªä¾†è¨ˆç•«
 
-- [ ] ¸ê®Æ«ù¤[¤Æ¡]¸ê®Æ®w/ÀÉ®×¡^
-- [ ] Web API ¤¶­±
-- [ ] §Y®É³qª¾¥\¯à
-- [ ] ¹Ï§Î¤Æ¤¶­±¡]WPF/Avalonia¡^
-- [ ] ²Î­p¤ÀªR¥\¯à
-- [ ] ¦h»y¨¥¤ä´©
+- [ ] è³‡æ–™æŒä¹…åŒ–ï¼ˆè³‡æ–™åº«/æª”æ¡ˆï¼‰
+- [ ] Web API ä»‹é¢
+- [ ] å³æ™‚é€šçŸ¥åŠŸèƒ½
+- [ ] åœ–å½¢åŒ–ä»‹é¢ï¼ˆWPF/Avaloniaï¼‰
+- [ ] çµ±è¨ˆåˆ†æåŠŸèƒ½
+- [ ] å¤šèªè¨€æ”¯æ´
 
-## ? ±`¨£°İÃD
+## ? å¸¸è¦‹å•é¡Œ
 
-**Q: §ä¤£¨ì¤é»xÀÉ®×¡H**  
-A: ­×§ï `AppConfiguration.cs` ¤¤ªº `CandidateLogPaths`
+**Q: æ‰¾ä¸åˆ°æ—¥èªŒæª”æ¡ˆï¼Ÿ**  
+A: ä¿®æ”¹ `AppConfiguration.cs` ä¸­çš„ `CandidateLogPaths`
 
-**Q: ª««~Åã¥Ü¡u¥¼ª¾ª««~¡v¡H**  
-A: ¸Óª««~ID©|¥¼¥[¤J `ItemIdTable.json`¡A¥i¤â°Ê²K¥[
+**Q: ç‰©å“é¡¯ç¤ºã€ŒæœªçŸ¥ç‰©å“ã€ï¼Ÿ**  
+A: è©²ç‰©å“IDå°šæœªåŠ å…¥ `ItemIdTable.json`ï¼Œå¯æ‰‹å‹•æ·»åŠ 
 
-**Q: ·|¼vÅT¹CÀ¸®Ä¯à¶Ü¡H**  
-A: ¤£·|¡Aµ{¦¡¥uÅª¨ú¤é»xÀÉ®×¡A¤£¼vÅT¹CÀ¸
+**Q: æœƒå½±éŸ¿éŠæˆ²æ•ˆèƒ½å—ï¼Ÿ**  
+A: ä¸æœƒï¼Œç¨‹å¼åªè®€å–æ—¥èªŒæª”æ¡ˆï¼Œä¸å½±éŸ¿éŠæˆ²
 
-## ?? §ó·s¤é»x
+## ?? æ›´æ–°æ—¥èªŒ
 
 ### v2.0.0 (2024-01)
-- ? §¹¥ş­«ºc±M®×¬[ºc
-- ?? ¼Ò²Õ¤Æ³]­p
-- ?? §ï¶i¿é¥X®æ¦¡
-- ?? ­×´_¤wª¾°İÃD
-- ?? §¹¾ã¤å¥ó
+- ? å®Œå…¨é‡æ§‹å°ˆæ¡ˆæ¶æ§‹
+- ?? æ¨¡çµ„åŒ–è¨­è¨ˆ
+- ?? æ”¹é€²è¼¸å‡ºæ ¼å¼
+- ?? ä¿®å¾©å·²çŸ¥å•é¡Œ
+- ?? å®Œæ•´æ–‡ä»¶
 
-## ?? ±ÂÅv
+## ?? æˆæ¬Š
 
 MIT License
 
-## ?? °^Äm
+## ?? è²¢ç»
 
-Åwªï´£¥æ Issue ©M Pull Request¡I
+æ­¡è¿æäº¤ Issue å’Œ Pull Requestï¼
 
-## ?? Ápµ¸
+## ?? è¯çµ¡
 
 - GitHub: [@AskaLin](https://github.com/AskaLin)
-- ±M®×: [TorchLight](https://github.com/AskaLin/TorchLight)
+- å°ˆæ¡ˆ: [TorchLight](https://github.com/AskaLin/TorchLight)
 
 ---
 
-**?? ´£¥Ü**: ¦pªG³o­Ó¤u¨ã¹ï§A¦³À°§U¡A½Ğµ¹­Ó¬P¬P ?¡I
+**?? æç¤º**: å¦‚æœé€™å€‹å·¥å…·å°ä½ æœ‰å¹«åŠ©ï¼Œè«‹çµ¦å€‹æ˜Ÿæ˜Ÿ ?ï¼
 
-§ó¦h¸Ô²Ó¤å¥ó½Ğ°Ñ¾\ [ARCHITECTURE.md](src/TorchLight.Statistics/ARCHITECTURE.md)
+æ›´å¤šè©³ç´°æ–‡ä»¶è«‹åƒé–± [ARCHITECTURE.md](src/TorchLight.Statistics/ARCHITECTURE.md)

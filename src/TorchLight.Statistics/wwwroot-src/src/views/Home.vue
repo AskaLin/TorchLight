@@ -1,15 +1,15 @@
-<template>
+﻿<template>
   <div class="home">
     <div class="welcome-card">
-<h2>�w��ϥάB�����~�έp�u��</h2>
-      <p>���u��|�۰ʺʱ��C����x�A�έp�z�b���ɦa�Ϥ��B�������~</p>
+<h2>歡迎使用拾取物品統計工具</h2>
+      <p>此工具會自動監控遊戲日誌，統計您在異界地圖中拾取的物品</p>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">???</div>
         <div class="stat-content">
-    <div class="stat-label">�`�a�ϼ�</div>
+    <div class="stat-label">總地圖數</div>
           <div class="stat-value">{{ mapStore.totalMaps }}</div>
         </div>
       </div>
@@ -17,7 +17,7 @@
       <div class="stat-card">
         <div class="stat-icon">??</div>
         <div class="stat-content">
-        <div class="stat-label">�`���~����</div>
+        <div class="stat-label">總物品種類</div>
           <div class="stat-value">{{ mapStore.totalItems }}</div>
         </div>
 </div>
@@ -25,33 +25,33 @@
       <div class="stat-card">
         <div class="stat-icon">?</div>
       <div class="stat-content">
-          <div class="stat-label">���A</div>
+          <div class="stat-label">狀態</div>
     <div class="stat-value status">{{ statusText }}</div>
       </div>
       </div>
     </div>
 
  <div class="quick-actions">
-      <h3>�ֳt�ާ@</h3>
+      <h3>快速操作</h3>
    <div class="action-buttons">
       <router-link to="/maps" class="action-btn">
           <span class="btn-icon">??</span>
-          <span>�d�ݦa�ϰO��</span>
+          <span>查看地圖記錄</span>
         </router-link>
  
         <router-link to="/statistics" class="action-btn">
        <span class="btn-icon">??</span>
-        <span>�d�ݲέp���</span>
+        <span>查看統計資料</span>
         </router-link>
 
         <button @click="exportRecords" class="action-btn">
           <span class="btn-icon">??</span>
-          <span>�ץX�O��</span>
+          <span>匯出記錄</span>
         </button>
 
         <button @click="clearRecords" class="action-btn danger">
           <span class="btn-icon">???</span>
- <span>�M���Ҧ��O��</span>
+ <span>清除所有記錄</span>
  </button>
       </div>
  </div>
@@ -66,29 +66,29 @@ const mapStore = useMapStore()
 
 const statusText = computed(() => {
   return mapStore.currentMapInfo.isInMap 
-    ? `�i�椤: ${mapStore.currentMapInfo.mapName}` 
-    : '�ݾ���'
+    ? `進行中: ${mapStore.currentMapInfo.mapName}` 
+    : '待機中'
 })
 
 const exportRecords = async () => {
   const success = await mapStore.exportRecords()
   if (success) {
-    alert('�O���w�ץX')
+    alert('記錄已匯出')
   } else {
-    alert('�ץX����')
+    alert('匯出失敗')
   }
 }
 
 const clearRecords = async () => {
-  if (!confirm('�T�w�n�M���Ҧ��O���ܡH���ާ@�L�k�_��I')) {
+  if (!confirm('確定要清除所有記錄嗎？此操作無法復原！')) {
     return
   }
   
 const success = await mapStore.clearAllRecords()
   if (success) {
-    alert('�w�M���Ҧ��O��')
+    alert('已清除所有記錄')
   } else {
-    alert('�M������')
+    alert('清除失敗')
   }
 }
 </script>

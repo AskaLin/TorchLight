@@ -1,4 +1,4 @@
-import { defineStore } from 'pinia'
+ï»¿import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiCall } from '../utils/api'
 
@@ -8,7 +8,7 @@ export const useMapStore = defineStore('map', () => {
   const loading = ref(false)
   const error = ref(null)
 
-  // Àò¨ú©Ò¦³¦a¹Ï°O¿ý
+  // ç²å–æ‰€æœ‰åœ°åœ–è¨˜éŒ„
   const refreshRecords = async () => {
     loading.value = true
     error.value = null
@@ -23,7 +23,7 @@ export const useMapStore = defineStore('map', () => {
     }
   }
 
-  // Àò¨ú·í«e¦a¹Ï¸ê°T
+  // ç²å–ç•¶å‰åœ°åœ–è³‡è¨Š
   const refreshCurrentMap = async () => {
     try {
       const data = await apiCall('GetCurrentMapInfo')
@@ -33,7 +33,7 @@ export const useMapStore = defineStore('map', () => {
     }
   }
 
-  // Àò¨ú¦a¹Ï¸Ô±¡
+  // ç²å–åœ°åœ–è©³æƒ…
   const getMapDetail = async (recordId) => {
     loading.value = true
     error.value = null
@@ -49,7 +49,7 @@ export const useMapStore = defineStore('map', () => {
     }
   }
 
-  // ²M°£©Ò¦³°O¿ý
+  // æ¸…é™¤æ‰€æœ‰è¨˜éŒ„
   const clearAllRecords = async () => {
     try {
       const result = await apiCall('ClearAllRecords')
@@ -64,7 +64,7 @@ return false
     }
   }
 
-  // ¶×¥X°O¿ý
+  // åŒ¯å‡ºè¨˜éŒ„
   const exportRecords = async () => {
     try {
       const data = await apiCall('ExportRecordsJson')

@@ -1,4 +1,4 @@
-* {
+ï»¿* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -14,7 +14,7 @@ body {
   overflow: hidden;
 }
 
-/* ºu°Ê±ø¼Ë¦¡ */
+/* æ»¾å‹•æ¢æ¨£å¼ */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -33,12 +33,12 @@ body {
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* ³q¥Î«ö¶s¼Ë¦¡ */
+/* é€šç”¨æŒ‰éˆ•æ¨£å¼ */
 button {
   font-family: inherit;
 }
 
-/* °Êµe */
+/* å‹•ç•« */
 @keyframes fadeIn {
   from {
     opacity: 0;

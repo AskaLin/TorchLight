@@ -1,20 +1,20 @@
-<template>
+﻿<template>
   <div class="map-list">
     <div class="list-header">
-   <h2>�a�ϰO���C��</h2>
+   <h2>地圖記錄列表</h2>
       <button @click="refreshList" class="btn-refresh" :disabled="mapStore.loading">
-  <span v-if="!mapStore.loading">?? ���s���J</span>
-        <span v-else>���J��...</span>
+  <span v-if="!mapStore.loading">?? 重新載入</span>
+        <span v-else>載入中...</span>
     </button>
     </div>
 
     <div v-if="mapStore.loading && mapStore.mapRecords.length === 0" class="loading">
-      ���J��...
+      載入中...
     </div>
 
     <div v-else-if="mapStore.mapRecords.length === 0" class="empty">
-      <p>�ثe�S���a�ϰO��</p>
-      <p>�i�J�C�������ɦa�ϫ�A�t�η|�۰ʶ}�l�O��</p>
+      <p>目前沒有地圖記錄</p>
+      <p>進入遊戲的異界地圖後，系統會自動開始記錄</p>
   </div>
 
     <div v-else class="records-grid">
@@ -31,32 +31,32 @@
 
  <div class="record-info">
  <div v-if="record.mapTicket" class="info-item">
-     <span class="label">?? ����:</span>
+     <span class="label">?? 門票:</span>
             <span class="value">{{ record.mapTicket }}</span>
  </div>
 
         <div v-if="record.compass && record.compass.length > 0" class="info-item">
-            <span class="label">?? ù�L:</span>
+            <span class="label">?? 羅盤:</span>
    <span class="value">{{ record.compass.join(', ') }}</span>
 </div>
 
 <div v-if="record.probe" class="info-item">
-       <span class="label">?? ���w:</span>
+       <span class="label">?? 探針:</span>
        <span class="value">{{ record.probe }}</span>
           </div>
       </div>
 
     <div class="record-stats">
    <div class="stat-item">
-  <span class="stat-label">�ή�</span>
+  <span class="stat-label">用時</span>
             <span class="stat-value">{{ record.useTime }}</span>
     </div>
           <div class="stat-item">
-            <span class="stat-label">���~����</span>
+            <span class="stat-label">物品種類</span>
             <span class="stat-value">{{ record.itemCount }}</span>
        </div>
    <div class="stat-item">
- <span class="stat-label">�`�ƶq</span>
+ <span class="stat-label">總數量</span>
          <span class="stat-value">{{ record.totalQuantity }}</span>
           </div>
         </div>

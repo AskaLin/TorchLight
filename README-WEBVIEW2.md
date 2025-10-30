@@ -1,136 +1,136 @@
-# ¤õ¬²¤§¥úµL­­ - ¬B¨úª««~²Î­p¤u¨ã
+# ç«ç‚¬ä¹‹å…‰ç„¡é™ - æ‹¾å–ç‰©å“çµ±è¨ˆå·¥å…·
 
-³o¬O¤@­Ó¨Ï¥Î WebView2 + Vue3 + Vite ºc«Øªº¹CÀ¸¬B¨úª««~²Î­p¤u¨ã¡C
+é€™æ˜¯ä¸€å€‹ä½¿ç”¨ WebView2 + Vue3 + Vite æ§‹å»ºçš„éŠæˆ²æ‹¾å–ç‰©å“çµ±è¨ˆå·¥å…·ã€‚
 
-## ¥\¯à¯S¦â
+## åŠŸèƒ½ç‰¹è‰² 
 
-- ?? ¦Û°ÊºÊ±±¹CÀ¸¤é»xÀÉ®×
-- ?? ¹ê®É²Î­p²§¬É¦a¹Ï¬B¨úª««~
-- ?? °O¿ıªù²¼¡BÃ¹½L¡B±´°wµ¥¶}¹Ï§÷®Æ
-- ?? ´£¨Ñ¸Ô²Óªº²Î­p³øªí
-- ?? ²{¥N¤Æªº UI ¤¶­±
+- ?? è‡ªå‹•ç›£æ§éŠæˆ²æ—¥èªŒæª”æ¡ˆ
+- ?? å¯¦æ™‚çµ±è¨ˆç•°ç•Œåœ°åœ–æ‹¾å–ç‰©å“
+- ?? è¨˜éŒ„é–€ç¥¨ã€ç¾…ç›¤ã€æ¢é‡ç­‰é–‹åœ–ææ–™
+- ?? æä¾›è©³ç´°çš„çµ±è¨ˆå ±è¡¨
+- ?? ç¾ä»£åŒ–çš„ UI ä»‹é¢
 
-## §Ş³N¬[ºc
+## æŠ€è¡“æ¶æ§‹
 
-### «áºİ
+### å¾Œç«¯
 - .NET 8
 - WebView2
 - WinForms
 
-### «eºİ
+### å‰ç«¯
 - Vue 3
 - Vite
-- Pinia (ª¬ºAºŞ²z)
+- Pinia (ç‹€æ…‹ç®¡ç†)
 - Vue Router
 
-## ¶}µoÀô¹Ò³]¸m
+## é–‹ç™¼ç’°å¢ƒè¨­ç½®
 
-### 1. ¦w¸Ë Node.js ¨Ì¿à
+### 1. å®‰è£ Node.js ä¾è³´
 
 ```bash
 cd src/TorchLight.Statistics/wwwroot-src
 npm install
 ```
 
-### 2. ¶}µo¼Ò¦¡
+### 2. é–‹ç™¼æ¨¡å¼
 
-¦b¤@­Ó²×ºİ¤¤±Ò°Ê Vite ¶}µo¦øªA¾¹¡G
+åœ¨ä¸€å€‹çµ‚ç«¯ä¸­å•Ÿå‹• Vite é–‹ç™¼ä¼ºæœå™¨ï¼š
 
 ```bash
 cd src/TorchLight.Statistics/wwwroot-src
 npm run dev
 ```
 
-¦b¥t¤@­Ó²×ºİ¤¤±Ò°Ê .NET À³¥Îµ{¦¡¡G
+åœ¨å¦ä¸€å€‹çµ‚ç«¯ä¸­å•Ÿå‹• .NET æ‡‰ç”¨ç¨‹å¼ï¼š
 
 ```bash
 cd src/TorchLight.Statistics
 dotnet run
 ```
 
-À³¥Îµ{¦¡·|¦Û°Ê³s±µ¨ì Vite ¶}µo¦øªA¾¹ (http://localhost:5173)¡C
+æ‡‰ç”¨ç¨‹å¼æœƒè‡ªå‹•é€£æ¥åˆ° Vite é–‹ç™¼ä¼ºæœå™¨ (http://localhost:5173)ã€‚
 
-### 3. ¥Í²£ºc«Ø
+### 3. ç”Ÿç”¢æ§‹å»º
 
-­º¥ıºc«Ø«eºİ¸ê·½¡G
+é¦–å…ˆæ§‹å»ºå‰ç«¯è³‡æºï¼š
 
 ```bash
 cd src/TorchLight.Statistics/wwwroot-src
 npm run build
 ```
 
-³o·|±Nºc«Øªº¤å¥ó¿é¥X¨ì `src/TorchLight.Statistics/wwwroot` ¥Ø¿ı¡C
+é€™æœƒå°‡æ§‹å»ºçš„æ–‡ä»¶è¼¸å‡ºåˆ° `src/TorchLight.Statistics/wwwroot` ç›®éŒ„ã€‚
 
-µM«áºc«Ø .NET À³¥Îµ{¦¡¡G
+ç„¶å¾Œæ§‹å»º .NET æ‡‰ç”¨ç¨‹å¼ï¼š
 
 ```bash
 cd src/TorchLight.Statistics
 dotnet publish -c Release
 ```
 
-## ±M®×µ²ºc
+## å°ˆæ¡ˆçµæ§‹
 
 ```
 src/TorchLight.Statistics/
-¢u¢w¢w UI/           # WebView2 UI ¼h
-¢x   ¢u¢w¢w MainWindow.cs           # ¥Dµøµ¡
-¢x ¢|¢w¢w WebViewApi.cs           # JavaScript ¾ô±µ API
-¢u¢w¢w Services/        # ·~°ÈÅŞ¿èªA°È
-¢u¢w¢w Models/                 # ¸ê®Æ¼Ò«¬
-¢u¢w¢w wwwroot/          # ºc«Ø«áªº«eºİ¸ê·½ (¦Û°Ê¥Í¦¨)
-¢|¢w¢w wwwroot-src/         # Vue3 «eºİ·½½X
-    ¢u¢w¢w src/
-    ¢x   ¢u¢w¢w components/      # Vue ¤¸¥ó
-    ¢x   ¢u¢w¢w views/      # ­¶­±µø¹Ï
-    ¢x   ¢u¢w¢w stores/       # Pinia ª¬ºAºŞ²z
-    ¢x   ¢u¢w¢w router/# ¸ô¥Ñ°t¸m
-    ¢x   ¢u¢w¢w utils/              # ¤u¨ã¨ç¼Æ
-    ¢x   ¢|¢w¢w styles/             # ¼Ë¦¡¤å¥ó
-    ¢u¢w¢w package.json
-    ¢u¢w¢w vite.config.js
-    ¢|¢w¢w index.html
+â”œâ”€â”€ UI/           # WebView2 UI å±¤
+â”‚   â”œâ”€â”€ MainWindow.cs           # ä¸»è¦–çª—
+â”‚ â””â”€â”€ WebViewApi.cs           # JavaScript æ©‹æ¥ API
+â”œâ”€â”€ Services/        # æ¥­å‹™é‚è¼¯æœå‹™
+â”œâ”€â”€ Models/                 # è³‡æ–™æ¨¡å‹
+â”œâ”€â”€ wwwroot/          # æ§‹å»ºå¾Œçš„å‰ç«¯è³‡æº (è‡ªå‹•ç”Ÿæˆ)
+â””â”€â”€ wwwroot-src/         # Vue3 å‰ç«¯æºç¢¼
+    â”œâ”€â”€ src/
+    â”‚   â”œâ”€â”€ components/      # Vue å…ƒä»¶
+    â”‚   â”œâ”€â”€ views/      # é é¢è¦–åœ–
+    â”‚   â”œâ”€â”€ stores/       # Pinia ç‹€æ…‹ç®¡ç†
+    â”‚   â”œâ”€â”€ router/# è·¯ç”±é…ç½®
+    â”‚   â”œâ”€â”€ utils/              # å·¥å…·å‡½æ•¸
+    â”‚   â””â”€â”€ styles/             # æ¨£å¼æ–‡ä»¶
+    â”œâ”€â”€ package.json
+    â”œâ”€â”€ vite.config.js
+    â””â”€â”€ index.html
 ```
 
-## API ±µ¤f
+## API æ¥å£
 
-«eºİ¥i¥H³q¹L `window.chrome.webview.hostObjects.csharpApi` ½Õ¥Î¥H¤U C# ¤èªk¡G
+å‰ç«¯å¯ä»¥é€šé `window.chrome.webview.hostObjects.csharpApi` èª¿ç”¨ä»¥ä¸‹ C# æ–¹æ³•ï¼š
 
-### ¦a¹Ï°O¿ı¬ÛÃö
-- `GetMapRecords()` - Àò¨ú©Ò¦³¦a¹Ï°O¿ı
-- `GetMapRecordDetail(recordId)` - Àò¨ú¦a¹Ï¸Ô±¡
-- `GetCurrentMapInfo()` - Àò¨ú·í«e¦a¹Ï¸ê°T
+### åœ°åœ–è¨˜éŒ„ç›¸é—œ
+- `GetMapRecords()` - ç²å–æ‰€æœ‰åœ°åœ–è¨˜éŒ„
+- `GetMapRecordDetail(recordId)` - ç²å–åœ°åœ–è©³æƒ…
+- `GetCurrentMapInfo()` - ç²å–ç•¶å‰åœ°åœ–è³‡è¨Š
 
-### ²Î­p¬ÛÃö
-- `GetStatistics()` - Àò¨ú²Î­p¸ê®Æ
+### çµ±è¨ˆç›¸é—œ
+- `GetStatistics()` - ç²å–çµ±è¨ˆè³‡æ–™
 
-### ¾Ş§@¬ÛÃö
-- `ClearAllRecords()` - ²M°£©Ò¦³°O¿ı
-- `ExportRecordsJson()` - ¶×¥X°O¿ı¬° JSON
-- `MinimizeWindow()` - ³Ì¤p¤Æµøµ¡
-- `CloseApplication()` - Ãö³¬À³¥Îµ{¦¡
+### æ“ä½œç›¸é—œ
+- `ClearAllRecords()` - æ¸…é™¤æ‰€æœ‰è¨˜éŒ„
+- `ExportRecordsJson()` - åŒ¯å‡ºè¨˜éŒ„ç‚º JSON
+- `MinimizeWindow()` - æœ€å°åŒ–è¦–çª—
+- `CloseApplication()` - é—œé–‰æ‡‰ç”¨ç¨‹å¼
 
-## C# ½Õ¥Î JavaScript
+## C# èª¿ç”¨ JavaScript
 
-±q C# ¥i¥H½Õ¥Î¥H¤U JavaScript ¨ç¼Æ¡G
+å¾ C# å¯ä»¥èª¿ç”¨ä»¥ä¸‹ JavaScript å‡½æ•¸ï¼š
 
-- `window.onNewMapRecord()` - ·í¦³·s¦a¹Ï°O¿ı®ÉÄ²µo
-- `window.onItemPicked(itemName, quantity)` - ·í¬B¨úª««~®ÉÄ²µo
+- `window.onNewMapRecord()` - ç•¶æœ‰æ–°åœ°åœ–è¨˜éŒ„æ™‚è§¸ç™¼
+- `window.onItemPicked(itemName, quantity)` - ç•¶æ‹¾å–ç‰©å“æ™‚è§¸ç™¼
 
-## ±`¨£°İÃD
+## å¸¸è¦‹å•é¡Œ
 
-### Q: WebView2 ªì©l¤Æ¥¢±Ñ¡H
-A: ½Ğ½T«O¤w¦w¸Ë Microsoft Edge WebView2 Runtime¡C¥i¥H±q [Microsoft ©xºô](https://developer.microsoft.com/microsoft-edge/webview2/) ¤U¸ü¡C
+### Q: WebView2 åˆå§‹åŒ–å¤±æ•—ï¼Ÿ
+A: è«‹ç¢ºä¿å·²å®‰è£ Microsoft Edge WebView2 Runtimeã€‚å¯ä»¥å¾ [Microsoft å®˜ç¶²](https://developer.microsoft.com/microsoft-edge/webview2/) ä¸‹è¼‰ã€‚
 
-### Q: ¶}µo¼Ò¦¡¤UµLªk³s±µ¨ì Vite ¦øªA¾¹¡H
-A: ½T«O Vite ¶}µo¦øªA¾¹¥¿¦b¹B¦æ (http://localhost:5173)¡A¨ÃÀË¬d¨¾¤õÀğ³]¸m¡C
+### Q: é–‹ç™¼æ¨¡å¼ä¸‹ç„¡æ³•é€£æ¥åˆ° Vite ä¼ºæœå™¨ï¼Ÿ
+A: ç¢ºä¿ Vite é–‹ç™¼ä¼ºæœå™¨æ­£åœ¨é‹è¡Œ (http://localhost:5173)ï¼Œä¸¦æª¢æŸ¥é˜²ç«ç‰†è¨­ç½®ã€‚
 
-### Q: ºc«Ø«á§ä¤£¨ì wwwroot ¸ê·½¡H
-A: ½T«O¥ı°õ¦æ `npm run build` ºc«Ø«eºİ¸ê·½¡C
+### Q: æ§‹å»ºå¾Œæ‰¾ä¸åˆ° wwwroot è³‡æºï¼Ÿ
+A: ç¢ºä¿å…ˆåŸ·è¡Œ `npm run build` æ§‹å»ºå‰ç«¯è³‡æºã€‚
 
-## ±ÂÅv
+## æˆæ¬Š
 
 MIT License
 
-## °^Äm
+## è²¢ç»
 
-Åwªï´£¥æ Issue ©M Pull Request¡I
+æ­¡è¿æäº¤ Issue å’Œ Pull Requestï¼

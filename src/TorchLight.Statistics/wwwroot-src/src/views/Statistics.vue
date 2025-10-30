@@ -1,8 +1,8 @@
-<template>
+ï»¿<template>
   <div class="statistics">
-    <h2>²Î­p¸ê®Æ</h2>
+    <h2>çµ±è¨ˆè³‡æ–™</h2>
 
-    <div v-if="loading" class="loading">¸ü¤J¤¤...</div>
+    <div v-if="loading" class="loading">è¼‰å…¥ä¸­...</div>
 
     <div v-else-if="stats" class="stats-container">
      <div class="stats-overview">
@@ -10,7 +10,7 @@
           <div class="stat-icon">???</div>
   <div class="stat-content">
      <div class="stat-value">{{ stats.totalMaps }}</div>
-      <div class="stat-label">Á`¦a¹Ï¼Æ</div>
+      <div class="stat-label">ç¸½åœ°åœ–æ•¸</div>
      </div>
       </div>
 
@@ -18,7 +18,7 @@
    <div class="stat-icon">??</div>
       <div class="stat-content">
       <div class="stat-value">{{ stats.totalItems }}</div>
-  <div class="stat-label">Á`ª««~ºØÃş</div>
+  <div class="stat-label">ç¸½ç‰©å“ç¨®é¡</div>
     </div>
         </div>
 
@@ -26,7 +26,7 @@
        <div class="stat-icon">??</div>
       <div class="stat-content">
  <div class="stat-value">{{ stats.totalQuantity }}</div>
-       <div class="stat-label">Á`¬B¨ú¼Æ¶q</div>
+       <div class="stat-label">ç¸½æ‹¾å–æ•¸é‡</div>
     </div>
    </div>
 
@@ -34,13 +34,13 @@
 <div class="stat-icon">??</div>
     <div class="stat-content">
      <div class="stat-value">{{ stats.totalPlayTime }}</div>
-   <div class="stat-label">Á`¹CÀ¸®É¶¡</div>
+   <div class="stat-label">ç¸½éŠæˆ²æ™‚é–“</div>
        </div>
         </div>
       </div>
 
    <div v-if="stats.mostPickedItems && stats.mostPickedItems.length > 0" class="most-picked">
-        <h3>³Ì±`¬B¨úª««~ Top 10</h3>
+        <h3>æœ€å¸¸æ‹¾å–ç‰©å“ Top 10</h3>
      <div class="items-list">
      <div 
           v-for="(item, index) in stats.mostPickedItems" 

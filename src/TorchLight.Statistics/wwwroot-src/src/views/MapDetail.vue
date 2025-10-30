@@ -1,39 +1,39 @@
-<template>
+п»ї<template>
   <div class="map-detail">
   <div class="detail-header">
-     <button @click="goBack" class="btn-back">Ўц Єр¦^¦CЄн</button>
+     <button @click="goBack" class="btn-back">в†ђ иї”е›ће€—иЎЁ</button>
     </div>
 
- <div v-if="loading" class="loading">ёь¤J¤¤...</div>
+ <div v-if="loading" class="loading">иј‰е…Ґдё­...</div>
 
     <div v-else-if="detail" class="detail-content">
       <div class="detail-card">
 <h2>{{ detail.name }}</h2>
 
   <div class="detail-section">
- <h3>°тҐ»ёк°T</h3>
+ <h3>еџєжњ¬иі‡иЁЉ</h3>
    <div class="info-grid">
    <div class="info-item">
-<span class="label">¦a№ПID:</span>
+<span class="label">ењ°ењ–ID:</span>
        <span class="value">{{ detail.id }}</span>
             </div>
             <div class="info-item">
-              <span class="label">¶}©l®Й¶Ў:</span>
+              <span class="label">й–‹е§‹ж™‚й–“:</span>
   <span class="value">{{ formatDateTime(detail.startTime) }}</span>
             </div>
             <div class="info-item">
-     <span class="label">µІ§ф®Й¶Ў:</span>
+     <span class="label">зµђжќџж™‚й–“:</span>
               <span class="value">{{ formatDateTime(detail.endTime) }}</span>
          </div>
   <div class="info-item">
-              <span class="label">ҐО®Й:</span>
+              <span class="label">з”Ёж™‚:</span>
          <span class="value">{{ detail.useTime }}</span>
        </div>
      </div>
      </div>
 
 <div v-if="detail.mapTicket || detail.compass.length > 0 || detail.probe" class="detail-section">
- <h3>ЁПҐО§ч®Ж</h3>
+ <h3>дЅїз”Ёжќђж–™</h3>
  <div class="materials">
             <div v-if="detail.mapTicket" class="material-item">
        <span class="material-icon">??</span>
@@ -51,12 +51,12 @@
  </div>
 
 <div v-if="detail.items && detail.items.length > 0" class="detail-section">
-      <h3>¬BЁъЄ««~ (¦@ {{ detail.items.length }} єШ)</h3>
+      <h3>ж‹ѕеЏ–з‰©е“Ѓ (е…± {{ detail.items.length }} зЁ®)</h3>
   <div class="items-table">
        <div class="table-header">
-          <div class="col-name">Є««~¦WєЩ</div>
-   <div class="col-quantity">јЖ¶q</div>
-              <div class="col-slots">Дж¦м¤АҐ¬</div>
+          <div class="col-name">з‰©е“ЃеђЌзЁ±</div>
+   <div class="col-quantity">ж•ёй‡Џ</div>
+              <div class="col-slots">ж¬„дЅЌе€†еёѓ</div>
             </div>
             <div 
   v-for="item in detail.items" 
@@ -71,7 +71,7 @@
     :key="slotId"
        class="slot-badge"
 >
-            Дж¦м{{ slotId }}: {{ count }}
+            ж¬„дЅЌ{{ slotId }}: {{ count }}
             </span>
        </div>
             </div>
@@ -79,7 +79,7 @@
         </div>
 
     <div v-else class="detail-section">
-          <p class="empty-message">Ґ»¦ё¦a№ПҐј¬BЁъҐф¦уЄ««~</p>
+          <p class="empty-message">жњ¬ж¬Ўењ°ењ–жњЄж‹ѕеЏ–д»»дЅ•з‰©е“Ѓ</p>
      </div>
       </div>
     </div>

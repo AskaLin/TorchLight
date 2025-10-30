@@ -1,4 +1,4 @@
-<template>
+ï»¿<template>
   <div id="app" class="app-container">
     <Header />
     <main class="main-content">
@@ -15,7 +15,7 @@ import { useMapStore } from './stores/mapStore'
 const mapStore = useMapStore()
 
 onMounted(() => {
-  // ³]©w¥ş°ì¨Æ¥ó³B²z¾¹
+  // è¨­å®šå…¨åŸŸäº‹ä»¶è™•ç†å™¨
   window.onNewMapRecord = () => {
     console.log('New map record detected')
     mapStore.refreshRecords()
@@ -26,7 +26,7 @@ onMounted(() => {
     mapStore.refreshCurrentMap()
   }
 
-  // ªì©l¸ü¤J¸ê®Æ
+  // åˆå§‹è¼‰å…¥è³‡æ–™
   mapStore.refreshRecords()
   mapStore.refreshCurrentMap()
 })

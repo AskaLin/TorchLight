@@ -1,166 +1,166 @@
-# ?? §Ö³t°Ñ¦Ò«ü«n
+ï»¿# ?? å¿«é€Ÿåƒè€ƒæŒ‡å—
 
-## ?? ÀÉ®×¾ÉÄı
+## ?? æª”æ¡ˆå°è¦½
 
-### ?? ®Ö¤ßÀÉ®×
-- **Program.cs** - µ{¦¡¶i¤JÂI
-  - ªì©l¤Æ©Ò¦³²Õ¥ó
-  - ±Ò°ÊÀÉ®×ºÊÅ¥¾¹
-  - ³B²zµ{¦¡¥Í©R¶g´Á
+### ?? æ ¸å¿ƒæª”æ¡ˆ
+- **Program.cs** - ç¨‹å¼é€²å…¥é»
+  - åˆå§‹åŒ–æ‰€æœ‰çµ„ä»¶
+  - å•Ÿå‹•æª”æ¡ˆç›£è½å™¨
+  - è™•ç†ç¨‹å¼ç”Ÿå‘½é€±æœŸ
 
-- **GameLogProcessor.cs** - ¥D±±¨î¾¹
-  - ²ÎÄw©Ò¦³¤é»x³B²z
-  - ¨ó½Õ¦U­ÓºŞ²z¾¹
-  - ¨Æ¥ó¤Àµo
+- **GameLogProcessor.cs** - ä¸»æ§åˆ¶å™¨
+  - çµ±ç±Œæ‰€æœ‰æ—¥èªŒè™•ç†
+  - å”èª¿å„å€‹ç®¡ç†å™¨
+  - äº‹ä»¶åˆ†ç™¼
 
-### ?? ªA°È¼h (Services/)
-- **BagInventoryManager.cs** - ­I¥]ºŞ²z
-  - `InitializeBagItem()` - ªì©l¤Æ­I¥]ª««~
-  - `UpdateBagItem()` - §ó·sª««~¼Æ¶q
-  - `Reset()` - ­«¸m­I¥]
+### ?? æœå‹™å±¤ (Services/)
+- **BagInventoryManager.cs** - èƒŒåŒ…ç®¡ç†
+  - `InitializeBagItem()` - åˆå§‹åŒ–èƒŒåŒ…ç‰©å“
+  - `UpdateBagItem()` - æ›´æ–°ç‰©å“æ•¸é‡
+  - `Reset()` - é‡ç½®èƒŒåŒ…
 
-- **MapPickRecordManager.cs** - ¦a¹Ï°O¿ı
-  - `StartMapRecord()` - ¶}©l°O¿ı¦a¹Ï
-  - `RecordPickedItem()` - °O¿ı¬B¨ú
-  - `EndMapRecord()` - µ²§ô°O¿ı
+- **MapPickRecordManager.cs** - åœ°åœ–è¨˜éŒ„
+  - `StartMapRecord()` - é–‹å§‹è¨˜éŒ„åœ°åœ–
+  - `RecordPickedItem()` - è¨˜éŒ„æ‹¾å–
+  - `EndMapRecord()` - çµæŸè¨˜éŒ„
 
-- **MapTransitionHandler.cs** - ¦a¹Ï¤Á´«
-  - `HandleMapTransition()` - ³B²z¦a¹Ï¤Á´«
+- **MapTransitionHandler.cs** - åœ°åœ–åˆ‡æ›
+  - `HandleMapTransition()` - è™•ç†åœ°åœ–åˆ‡æ›
 
-### ?? ¸ÑªR¼h
-- **LineParser.cs** - ¤é»x¦æ¸ÑªR
-  - `IsLoginStart()` - §PÂ_µn¤J
-  - `IsInitFinished()` - §PÂ_ªì©l¤Æ§¹¦¨
-  - `IsMoveMap()` - §PÂ_¦a¹Ï¤Á´«
-  - `GetItemData()` - ¸ÑªRª««~¸ê®Æ
+### ?? è§£æå±¤
+- **LineParser.cs** - æ—¥èªŒè¡Œè§£æ
+  - `IsLoginStart()` - åˆ¤æ–·ç™»å…¥
+  - `IsInitFinished()` - åˆ¤æ–·åˆå§‹åŒ–å®Œæˆ
+  - `IsMoveMap()` - åˆ¤æ–·åœ°åœ–åˆ‡æ›
+  - `GetItemData()` - è§£æç‰©å“è³‡æ–™
 
-- **LogEvent.cs** - ¨Æ¥ó©w¸q»P³B²z
-  - `ItemChangeBlockProcessor` - °Ï¶ô³B²z¾¹
-  - `BagModEvent` - ­I¥]­×§ï¨Æ¥ó
+- **LogEvent.cs** - äº‹ä»¶å®šç¾©èˆ‡è™•ç†
+  - `ItemChangeBlockProcessor` - å€å¡Šè™•ç†å™¨
+  - `BagModEvent` - èƒŒåŒ…ä¿®æ”¹äº‹ä»¶
 
-### ??? ¤u¨ã¼h
-- **MapMapper.cs** - ¦a¹Ï¬M®g
-  - `GetMapInfo()` - Àò¨ú¦a¹Ï¸ê°T
-  - `IsHideoutMap()` - §PÂ_ÂÃ¨­³B
-  - `IsNetherrealmMap()` - §PÂ_²§¬É¦a¹Ï
+### ??? å·¥å…·å±¤
+- **MapMapper.cs** - åœ°åœ–æ˜ å°„
+  - `GetMapInfo()` - ç²å–åœ°åœ–è³‡è¨Š
+  - `IsHideoutMap()` - åˆ¤æ–·è—èº«è™•
+  - `IsNetherrealmMap()` - åˆ¤æ–·ç•°ç•Œåœ°åœ–
 
-- **ItemIdTable.cs** - ª««~IDªí
-  - `GetIdTable()` - ¸ü¤Jª««~©w¸q
+- **ItemIdTable.cs** - ç‰©å“IDè¡¨
+  - `GetIdTable()` - è¼‰å…¥ç‰©å“å®šç¾©
 
-- **SafeFileTailWatcher.cs** - ÀÉ®×ºÊÅ¥
-  - Âù­«¾÷¨î¡]ºÊÅ¥ + ½ü¸ß¡^
-  - ¨¾§İ°Ê³B²z
+- **SafeFileTailWatcher.cs** - æª”æ¡ˆç›£è½
+  - é›™é‡æ©Ÿåˆ¶ï¼ˆç›£è½ + è¼ªè©¢ï¼‰
+  - é˜²æŠ–å‹•è™•ç†
 
-- **ConsoleLogger.cs** - ¤é»x¿é¥X
-  - `LogBagModification()` - °O¿ı­I¥]­×§ï
-  - `LogMapPickItem()` - °O¿ı¦a¹Ï¬B¨ú
+- **ConsoleLogger.cs** - æ—¥èªŒè¼¸å‡º
+  - `LogBagModification()` - è¨˜éŒ„èƒŒåŒ…ä¿®æ”¹
+  - `LogMapPickItem()` - è¨˜éŒ„åœ°åœ–æ‹¾å–
 
-### ?? °t¸m¼h
+### ?? é…ç½®å±¤
 - **Configuration/AppConfiguration.cs**
-  - ©Ò¦³°t¸m±`¼Æ
-  - ¤é»x¸ô®|
-  - ®É¶¡®æ¦¡
+  - æ‰€æœ‰é…ç½®å¸¸æ•¸
+  - æ—¥èªŒè·¯å¾‘
+  - æ™‚é–“æ ¼å¼
 
-## ?? ¸ê®Æ¼Ò«¬ (Models/)
-- **ItemModel** - ª««~°ò¥»¸ê°T
-- **PickedItemDataModel** - ¬B¨úª««~¸Ô²Ó¸ê®Æ
-- **MapRecordModel** - ¦a¹Ï°O¿ı
+## ?? è³‡æ–™æ¨¡å‹ (Models/)
+- **ItemModel** - ç‰©å“åŸºæœ¬è³‡è¨Š
+- **PickedItemDataModel** - æ‹¾å–ç‰©å“è©³ç´°è³‡æ–™
+- **MapRecordModel** - åœ°åœ–è¨˜éŒ„
 
-## ?? °õ¦æ¬yµ{
+## ?? åŸ·è¡Œæµç¨‹
 
-### ±Ò°Ê¶¥¬q
+### å•Ÿå‹•éšæ®µ
 ```
 Program.cs
-  ¡÷ ¸ü¤J ItemIdTable
-  ¡÷ ªì©l¤Æ LineParser
-  ¡÷ ªì©l¤Æ ItemChangeBlockProcessor
-  ¡÷ «Ø¥ß GameLogProcessor
-  ¡÷ ±Ò°Ê SafeFileTailWatcher
+  â†’ è¼‰å…¥ ItemIdTable
+  â†’ åˆå§‹åŒ– LineParser
+  â†’ åˆå§‹åŒ– ItemChangeBlockProcessor
+  â†’ å»ºç«‹ GameLogProcessor
+  â†’ å•Ÿå‹• SafeFileTailWatcher
 ```
 
-### ¹B¦æ¶¥¬q
+### é‹è¡Œéšæ®µ
 ```
-ÀÉ®×ÅÜ¤Æ
-  ¡÷ SafeFileTailWatcher °»´ú
-  ¡÷ Ä²µo OnNewLine ¨Æ¥ó
-  ¡÷ GameLogProcessor.ProcessLine()
-    ¢u¡÷ §PÂ_¤é»xÃş«¬
-    ¢u¡÷ ©I¥s¹ïÀ³ªº³B²z¾¹
-    ¢|¡÷ ¿é¥Xµ²ªG
+æª”æ¡ˆè®ŠåŒ–
+  â†’ SafeFileTailWatcher åµæ¸¬
+  â†’ è§¸ç™¼ OnNewLine äº‹ä»¶
+  â†’ GameLogProcessor.ProcessLine()
+    â”œâ†’ åˆ¤æ–·æ—¥èªŒé¡å‹
+    â”œâ†’ å‘¼å«å°æ‡‰çš„è™•ç†å™¨
+    â””â†’ è¼¸å‡ºçµæœ
 ```
 
-## ?? ±`¥Î¾Ş§@
+## ?? å¸¸ç”¨æ“ä½œ
 
-### ·s¼Wª««~©w¸q
-1. ¶}±Ò `ItemIdTable.json`
-2. ²K¥[ª««~¡G
+### æ–°å¢ç‰©å“å®šç¾©
+1. é–‹å•Ÿ `ItemIdTable.json`
+2. æ·»åŠ ç‰©å“ï¼š
 ```json
 {
   "123456": {
-    "name": "·sª««~¦WºÙ",
-    "type": "ª««~Ãş«¬"
+    "name": "æ–°ç‰©å“åç¨±",
+    "type": "ç‰©å“é¡å‹"
   }
 }
 ```
 
-### ·s¼W¦a¹Ï¤ä´©
-1. ¶}±Ò `MapMapper.cs`
-2. ²K¥[¨ì¹ïÀ³ªº¶°¦X¡G
+### æ–°å¢åœ°åœ–æ”¯æ´
+1. é–‹å•Ÿ `MapMapper.cs`
+2. æ·»åŠ åˆ°å°æ‡‰çš„é›†åˆï¼š
 ```csharp
 private static readonly Dictionary<string, string> _mapNameMapping = new()
 {
-    { "·s¦a¹ÏID", "·s¦a¹Ï¦WºÙ" }
+    { "æ–°åœ°åœ–ID", "æ–°åœ°åœ–åç¨±" }
 };
 
 private static readonly HashSet<string> _netherrealmMapIds =
 [
-    "·s¦a¹ÏID"  // ¦pªG¬O²§¬É¦a¹Ï
+    "æ–°åœ°åœ–ID"  // å¦‚æœæ˜¯ç•°ç•Œåœ°åœ–
 ];
 ```
 
-### ¦Û­q¤é»x¸ô®|
-1. ¶}±Ò `Configuration/AppConfiguration.cs`
-2. ­×§ï `CandidateLogPaths`¡G
+### è‡ªè¨‚æ—¥èªŒè·¯å¾‘
+1. é–‹å•Ÿ `Configuration/AppConfiguration.cs`
+2. ä¿®æ”¹ `CandidateLogPaths`ï¼š
 ```csharp
 public static readonly string[] CandidateLogPaths =
 [
-    @"§Aªº¦Û­q¸ô®|\UE_game.log"
+    @"ä½ çš„è‡ªè¨‚è·¯å¾‘\UE_game.log"
 ];
 ```
 
-### ½Õ¾ãºÊÅ¥°Ñ¼Æ
-¦b `AppConfiguration.cs` ¤¤­×§ï¡G
+### èª¿æ•´ç›£è½åƒæ•¸
+åœ¨ `AppConfiguration.cs` ä¸­ä¿®æ”¹ï¼š
 ```csharp
-public const int FileWatcherDebounceMs = 500;  // ¨¾§İ°Ê®É¶¡
-public const int FilePollingIntervalSeconds = 2;  // ½ü¸ß¶¡¹j
+public const int FileWatcherDebounceMs = 500;  // é˜²æŠ–å‹•æ™‚é–“
+public const int FilePollingIntervalSeconds = 2;  // è¼ªè©¢é–“éš”
 ```
 
-## ?? °»¿ù§Ş¥©
+## ?? åµéŒ¯æŠ€å·§
 
-### ÀË¬d¤é»x¸ÑªR
-¦b `LineParser.cs` ªº¦U¤èªk¤¤²K¥[¤¤Â_ÂI¡G
+### æª¢æŸ¥æ—¥èªŒè§£æ
+åœ¨ `LineParser.cs` çš„å„æ–¹æ³•ä¸­æ·»åŠ ä¸­æ–·é»ï¼š
 - `IsInitBagItemData()`
 - `GetItemData()`
 - `GetMapPathData()`
 
-### °lÂÜ­I¥]ÅÜ¤Æ
-¦b `BagInventoryManager.cs` ¤¤¡G
-- `UpdateBagItem()` - ¬d¬İª««~§ó·sÅŞ¿è
-- `ItemChangeResult` - ÀË¬dªğ¦^­È
+### è¿½è¹¤èƒŒåŒ…è®ŠåŒ–
+åœ¨ `BagInventoryManager.cs` ä¸­ï¼š
+- `UpdateBagItem()` - æŸ¥çœ‹ç‰©å“æ›´æ–°é‚è¼¯
+- `ItemChangeResult` - æª¢æŸ¥è¿”å›å€¼
 
-### °lÂÜ¦a¹Ï°O¿ı
-¦b `MapPickRecordManager.cs` ¤¤¡G
-- `RecordPickedItem()` - ¬d¬İ°O¿ıÅŞ¿è
-- `MapPickResult` - ÀË¬dªğ¦^­È
+### è¿½è¹¤åœ°åœ–è¨˜éŒ„
+åœ¨ `MapPickRecordManager.cs` ä¸­ï¼š
+- `RecordPickedItem()` - æŸ¥çœ‹è¨˜éŒ„é‚è¼¯
+- `MapPickResult` - æª¢æŸ¥è¿”å›å€¼
 
-### ÀË¬d¨Æ¥óÄ²µo
-¦b `ItemChangeBlockProcessor.cs` ¤¤¡G
-- `HandleLine()` - ¬d¬İ°Ï¶ô³B²z
-- `OnBagModInsideBlock` - ½T»{¨Æ¥óÄ²µo
+### æª¢æŸ¥äº‹ä»¶è§¸ç™¼
+åœ¨ `ItemChangeBlockProcessor.cs` ä¸­ï¼š
+- `HandleLine()` - æŸ¥çœ‹å€å¡Šè™•ç†
+- `OnBagModInsideBlock` - ç¢ºèªäº‹ä»¶è§¸ç™¼
 
-## ?? µ{¦¡½X½d¨Ò
+## ?? ç¨‹å¼ç¢¼ç¯„ä¾‹
 
-### Åª¨ú­I¥]¸ê®Æ
+### è®€å–èƒŒåŒ…è³‡æ–™
 ```csharp
 var bagData = _bagInventoryManager.BagData;
 foreach (var item in bagData)
@@ -169,12 +169,12 @@ foreach (var item in bagData)
 }
 ```
 
-### Àò¨ú¦a¹Ï°O¿ı
+### ç²å–åœ°åœ–è¨˜éŒ„
 ```csharp
 var records = _mapPickRecordManager.MapRecords;
 foreach (var record in records)
 {
-    Console.WriteLine($"¦a¹Ï: {record.Name}, ®É¶¡: {record.UseTime}");
+    Console.WriteLine($"åœ°åœ–: {record.Name}, æ™‚é–“: {record.UseTime}");
     foreach (var item in record.PickRecord)
     {
         Console.WriteLine($"  {item.Value.Name}: {item.Value.Total}");
@@ -182,30 +182,30 @@ foreach (var record in records)
 }
 ```
 
-### ­q¾\¨Æ¥ó
+### è¨‚é–±äº‹ä»¶
 ```csharp
-// ­q¾\°Ï¶ô¶}©l¨Æ¥ó
+// è¨‚é–±å€å¡Šé–‹å§‹äº‹ä»¶
 _itemChangeProcessor.OnBlockStarted += (ev) =>
 {
-    Console.WriteLine($"°Ï¶ô¶}©l: {ev.ProtoName}");
+    Console.WriteLine($"å€å¡Šé–‹å§‹: {ev.ProtoName}");
 };
 
-// ­q¾\­I¥]­×§ï¨Æ¥ó
+// è¨‚é–±èƒŒåŒ…ä¿®æ”¹äº‹ä»¶
 _itemChangeProcessor.OnBagModInsideBlock += (ev) =>
 {
-    Console.WriteLine($"ª««~­×§ï: {ev.ConfigBaseId}, ¼Æ¶q: {ev.Num}");
+    Console.WriteLine($"ç‰©å“ä¿®æ”¹: {ev.ConfigBaseId}, æ•¸é‡: {ev.Num}");
 };
 ```
 
-## ?? ´ú¸Õ«ØÄ³
+## ?? æ¸¬è©¦å»ºè­°
 
-### ³æ¤¸´ú¸Õ½d¨Ò
+### å–®å…ƒæ¸¬è©¦ç¯„ä¾‹
 ```csharp
 [Fact]
 public void BagInventoryManager_UpdateBagItem_ShouldCalculateCorrectly()
 {
     // Arrange
-    var itemTable = new Dictionary<int, string> { { 1001, "´ú¸Õª««~" } };
+    var itemTable = new Dictionary<int, string> { { 1001, "æ¸¬è©¦ç‰©å“" } };
     var manager = new BagInventoryManager(itemTable);
     
     // Act
@@ -219,56 +219,56 @@ public void BagInventoryManager_UpdateBagItem_ShouldCalculateCorrectly()
 }
 ```
 
-### ¾ã¦X´ú¸Õ
-1. ·Ç³Æ´ú¸Õ¤é»xÀÉ®×
-2. °õ¦æµ{¦¡«ü¦V´ú¸ÕÀÉ®×
-3. ÅçÃÒ¿é¥Xµ²ªG
+### æ•´åˆæ¸¬è©¦
+1. æº–å‚™æ¸¬è©¦æ—¥èªŒæª”æ¡ˆ
+2. åŸ·è¡Œç¨‹å¼æŒ‡å‘æ¸¬è©¦æª”æ¡ˆ
+3. é©—è­‰è¼¸å‡ºçµæœ
 
-## ?? ¬ÛÃö¤å¥ó
+## ?? ç›¸é—œæ–‡ä»¶
 
-- **ARCHITECTURE.md** - ¸Ô²Ó¬[ºc»¡©ú
-- **PROJECT_README.md** - §¹¾ã±M®×¤å¥ó
-- **REFACTORING_SUMMARY.md** - ­«ºcÁ`µ²
+- **ARCHITECTURE.md** - è©³ç´°æ¶æ§‹èªªæ˜
+- **PROJECT_README.md** - å®Œæ•´å°ˆæ¡ˆæ–‡ä»¶
+- **REFACTORING_SUMMARY.md** - é‡æ§‹ç¸½çµ
 
-## ?? ³Ì¨Î¹ê½î
+## ?? æœ€ä½³å¯¦è¸
 
-### µ{¦¡½X­·®æ
-- ? ¨Ï¥Î¦³·N¸qªºÅÜ¼Æ¦WºÙ
-- ? ¨C­Ó¤èªk¥u°µ¤@¥ó¨Æ
-- ? ²K¥[ XML ¤å¥óµù¸Ñ
-- ? ³B²z²§±`±¡ªp
+### ç¨‹å¼ç¢¼é¢¨æ ¼
+- ? ä½¿ç”¨æœ‰æ„ç¾©çš„è®Šæ•¸åç¨±
+- ? æ¯å€‹æ–¹æ³•åªåšä¸€ä»¶äº‹
+- ? æ·»åŠ  XML æ–‡ä»¶è¨»è§£
+- ? è™•ç†ç•°å¸¸æƒ…æ³
 
-### ®Ä¯à¦Ò¶q
-- ? ¨Ï¥Î HashSet ¦Ó«D Dictionary¡]·í­È¤£­«­n®É¡^
-- ? ¨Ï¥Î Source Generated Regex
-- ? Á×§K¤£¥²­nªº¦r¦ê¾Ş§@
+### æ•ˆèƒ½è€ƒé‡
+- ? ä½¿ç”¨ HashSet è€Œé Dictionaryï¼ˆç•¶å€¼ä¸é‡è¦æ™‚ï¼‰
+- ? ä½¿ç”¨ Source Generated Regex
+- ? é¿å…ä¸å¿…è¦çš„å­—ä¸²æ“ä½œ
 
-### ºûÅ@©Ê
-- ? «O«ùÃş§OÂ¾³d³æ¤@
-- ? ¨Ï¥Î¨Ì¿àª`¤J
-- ? ¨Æ¥óÅX°Ê¬[ºc
-- ? §¹¾ãªº¿ù»~³B²z
+### ç¶­è­·æ€§
+- ? ä¿æŒé¡åˆ¥è·è²¬å–®ä¸€
+- ? ä½¿ç”¨ä¾è³´æ³¨å…¥
+- ? äº‹ä»¶é©…å‹•æ¶æ§‹
+- ? å®Œæ•´çš„éŒ¯èª¤è™•ç†
 
-## ?? ºÃÃø±Æ¸Ñ
+## ?? ç–‘é›£æ’è§£
 
-### °İÃD¡G§ä¤£¨ì¤é»xÀÉ®×
-**¸Ñ¨M**¡GÀË¬d `AppConfiguration.CandidateLogPaths`
+### å•é¡Œï¼šæ‰¾ä¸åˆ°æ—¥èªŒæª”æ¡ˆ
+**è§£æ±º**ï¼šæª¢æŸ¥ `AppConfiguration.CandidateLogPaths`
 
-### °İÃD¡Gª««~Åã¥Ü¡u¥¼ª¾ª««~¡v
-**¸Ñ¨M**¡GÀË¬d `ItemIdTable.json` ¬O§_¥]§t¸Óª««~ID
+### å•é¡Œï¼šç‰©å“é¡¯ç¤ºã€ŒæœªçŸ¥ç‰©å“ã€
+**è§£æ±º**ï¼šæª¢æŸ¥ `ItemIdTable.json` æ˜¯å¦åŒ…å«è©²ç‰©å“ID
 
-### °İÃD¡G¦a¹Ï¤£³QÃÑ§O
-**¸Ñ¨M**¡G¦b `MapMapper.cs` ¤¤²K¥[¦a¹Ï©w¸q
+### å•é¡Œï¼šåœ°åœ–ä¸è¢«è­˜åˆ¥
+**è§£æ±º**ï¼šåœ¨ `MapMapper.cs` ä¸­æ·»åŠ åœ°åœ–å®šç¾©
 
-### °İÃD¡G¨Æ¥ó¨S¦³Ä²µo
-**¸Ñ¨M**¡GÀË¬d `ItemChangeBlockProcessor` ªº `_targetProtocols`
+### å•é¡Œï¼šäº‹ä»¶æ²’æœ‰è§¸ç™¼
+**è§£æ±º**ï¼šæª¢æŸ¥ `ItemChangeBlockProcessor` çš„ `_targetProtocols`
 
-## ?? Àò¨úÀ°§U
+## ?? ç²å–å¹«åŠ©
 
-- ¬d¬İ [GitHub Issues](https://github.com/AskaLin/TorchLight/issues)
-- ¾\Åª§¹¾ã¤å¥ó
-- ÀË¬dµ{¦¡½Xµù¸Ñ
+- æŸ¥çœ‹ [GitHub Issues](https://github.com/AskaLin/TorchLight/issues)
+- é–±è®€å®Œæ•´æ–‡ä»¶
+- æª¢æŸ¥ç¨‹å¼ç¢¼è¨»è§£
 
 ---
 
-**´£¥Ü**: ³o¥÷«ü«n²[»\¤F³Ì±`¥Îªº¾Ş§@©M·§©À¡A§ó¸Ô²Óªº¸ê°T½Ğ°Ñ¾\¦U­Ó¤å¥ó¡I
+**æç¤º**: é€™ä»½æŒ‡å—æ¶µè“‹äº†æœ€å¸¸ç”¨çš„æ“ä½œå’Œæ¦‚å¿µï¼Œæ›´è©³ç´°çš„è³‡è¨Šè«‹åƒé–±å„å€‹æ–‡ä»¶ï¼

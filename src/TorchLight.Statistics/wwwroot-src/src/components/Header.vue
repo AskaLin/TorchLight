@@ -1,33 +1,33 @@
-<template>
+ï»¿<template>
   <header class="header">
     <div class="header-content">
       <div class="logo">
-        <h1>?? ¤õ¬²¤§¥úµL­­ - ¬B¨ú²Î­p</h1>
+        <h1>?? ç«ç‚¬ä¹‹å…‰ç„¡é™ - æ‹¾å–çµ±è¨ˆ</h1>
       </div>
  
       <nav class="nav">
-        <router-link to="/" class="nav-link">­º­¶</router-link>
-        <router-link to="/maps" class="nav-link">¦a¹Ï°O¿ı</router-link>
-      <router-link to="/statistics" class="nav-link">²Î­p</router-link>
+        <router-link to="/" class="nav-link">é¦–é </router-link>
+        <router-link to="/maps" class="nav-link">åœ°åœ–è¨˜éŒ„</router-link>
+      <router-link to="/statistics" class="nav-link">çµ±è¨ˆ</router-link>
       </nav>
 
       <div class="status">
         <div v-if="currentMapInfo.isInMap" class="status-indicator online">
           <span class="dot"></span>
-     ¶i¦æ¤¤: {{ currentMapInfo.mapName }}
+     é€²è¡Œä¸­: {{ currentMapInfo.mapName }}
    </div>
  <div v-else class="status-indicator offline">
           <span class="dot"></span>
-       «İ¾÷¤¤
+       å¾…æ©Ÿä¸­
         </div>
       </div>
   
       <div class="actions">
-      <button @click="minimizeWindow" class="btn-icon" title="³Ì¤p¤Æ">
+      <button @click="minimizeWindow" class="btn-icon" title="æœ€å°åŒ–">
       <span>-</span>
  </button>
-<button @click="closeWindow" class="btn-icon btn-close" title="Ãö³¬">
-          <span>¡Ñ</span>
+<button @click="closeWindow" class="btn-icon btn-close" title="é—œé–‰">
+          <span>Ã—</span>
         </button>
       </div>
     </div>
@@ -47,7 +47,7 @@ const minimizeWindow = () => {
 }
 
 const closeWindow = () => {
-  if (confirm('½T©w­nÃö³¬À³¥Îµ{¦¡¶Ü¡H')) {
+  if (confirm('ç¢ºå®šè¦é—œé–‰æ‡‰ç”¨ç¨‹å¼å—ï¼Ÿ')) {
     apiCall('CloseApplication').catch(console.error)
   }
 }

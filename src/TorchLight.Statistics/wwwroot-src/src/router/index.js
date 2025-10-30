@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from 'vue-router'
+﻿import { createRouter, createWebHashHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import MapList from '../views/MapList.vue'
 import MapDetail from '../views/MapDetail.vue'
