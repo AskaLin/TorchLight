@@ -1,4 +1,4 @@
-﻿namespace TorchLight.Statistics.Models;
+﻿namespace TorchLight.Statistics.Enums;
 
 /// <summary>
 /// 物品類型枚舉
@@ -18,7 +18,7 @@ public enum ItemType
     /// <summary>
     /// 神格石板
     /// </summary>
-    DivinityTablet,
+    DivinitySlate,
 
     /// <summary>
     /// 通貨

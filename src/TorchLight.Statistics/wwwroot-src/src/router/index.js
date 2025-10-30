@@ -3,7 +3,7 @@ import Home from '../views/Home.vue'
 import MapList from '../views/MapList.vue'
 import MapDetail from '../views/MapDetail.vue'
 import Statistics from '../views/Statistics.vue'
-import MapSettings from '../views/MapSettings.vue'
+import Settings from '../views/Settings.vue'
 
 const routes = [
   {
@@ -29,8 +29,8 @@ const routes = [
   },
   {
     path: '/settings',
-    name: 'MapSettings',
-    component: MapSettings
+    name: 'Settings',
+    component: Settings
   }
 ]
 

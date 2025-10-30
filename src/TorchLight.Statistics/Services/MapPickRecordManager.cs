@@ -1,4 +1,6 @@
 ﻿using Serilog;
+using TorchLight.Statistics.Enums;
+using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
@@ -32,32 +34,32 @@ public class MapPickRecordManager
     /// </summary>
     public void RecordMapMaterial(int configBaseId, ItemType itemType)
     {
-      if (!_itemTable.TryGetValue(configBaseId, out var item))
-     return;
+        if (!_itemTable.TryGetValue(configBaseId, out var item))
+            return;
 
- switch (itemType)
-   {
-case ItemType.MapTicket:
-      case ItemType.BossTicket:
- case ItemType.GameplayTicket:
-      _pendingMapTicket = item.Name;
-   Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
-      break;
-
-    case ItemType.Compass:
-     if (_pendingCompasses.Count < 4)
+        switch (itemType)
         {
-_pendingCompasses.Add(item.Name);
-         Log.Debug("[開圖材料] 羅盤 #{Index}: {CompassName}", _pendingCompasses.Count, item.Name);
-         }
-   break;
+            case ItemType.MapTicket:
+            case ItemType.BossTicket:
+            case ItemType.GameplayTicket:
+                _pendingMapTicket = item.Name;
+                Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
+                break;
+
+            case ItemType.Compass:
+                if (_pendingCompasses.Count < 4)
+                {
+                    _pendingCompasses.Add(item.Name);
+                    Log.Debug("[開圖材料] 羅盤 #{Index}: {CompassName}", _pendingCompasses.Count, item.Name);
+                }
+                break;
 
             case ItemType.Probe:
-     _pendingProbe = item.Name;
-        Log.Debug("[開圖材料] 探針: {ProbeName}", item.Name);
-            break;
+                _pendingProbe = item.Name;
+                Log.Debug("[開圖材料] 探針: {ProbeName}", item.Name);
+                break;
         }
- }
+    }
 
     /// <summary>
     /// 開始記錄新地圖
@@ -66,7 +68,7 @@ _pendingCompasses.Add(item.Name);
     {
         _currentMapRecord = new MapRecordModel
         {
-            Id = mapId,
+            Id = MapInfoMapper.ExtractMapId(mapId),
             Name = mapName,
             StartTime = startTime,
             MapTicket = _pendingMapTicket,
@@ -81,25 +83,25 @@ _pendingCompasses.Add(item.Name);
 
         _currentMapPickData = [];
         IsInNetherrealmMap = true;
-   CurrentMapName = mapName;
+        CurrentMapName = mapName;
 
         Log.Information("{Time} 進入異界地圖: {MapName}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName);
-        
-        if (!string.IsNullOrEmpty(_pendingMapTicket))
-   {
-          Log.Information("  使用門票: {Ticket}", _pendingMapTicket);
-    }
-   if (_pendingCompasses.Count > 0)
- {
-   Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _pendingCompasses));
- }
-        if (!string.IsNullOrEmpty(_pendingProbe))
- {
- Log.Information("  使用探針: {Probe}", _pendingProbe);
-   }
 
-   // 清空暫存資料
-   ClearPendingMaterials();
+        if (!string.IsNullOrEmpty(_pendingMapTicket))
+        {
+            Log.Information("  使用門票: {Ticket}", _pendingMapTicket);
+        }
+        if (_pendingCompasses.Count > 0)
+        {
+            Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _pendingCompasses));
+        }
+        if (!string.IsNullOrEmpty(_pendingProbe))
+        {
+            Log.Information("  使用探針: {Probe}", _pendingProbe);
+        }
+
+        // 清空暫存資料
+        ClearPendingMaterials();
     }
 
     /// <summary>
@@ -107,20 +109,19 @@ _pendingCompasses.Add(item.Name);
     /// </summary>
     public void EndMapRecord(string mapName, DateTime endTime)
     {
-    _currentMapRecord.EndTime = endTime;
+        _currentMapRecord.EndTime = endTime;
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
-        Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", 
-   endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
+        Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
 
-    // 顯示當前地圖的拾取記錄
+        // 顯示當前地圖的拾取記錄
         PrintCurrentMapRecord(_currentMapRecord);
 
         // 重置
-     _currentMapRecord = new();
-     _currentMapPickData = [];
- IsInNetherrealmMap = false;
+        _currentMapRecord = new();
+        _currentMapPickData = [];
+        IsInNetherrealmMap = false;
     }
 
     /// <summary>
@@ -138,6 +139,13 @@ _pendingCompasses.Add(item.Name);
     {
         if (!IsInNetherrealmMap)
         {
+            return null;
+        }
+
+        // 檢查物品是否啟用統計
+        if (!ItemInfoMapper.IsItemEnabled(configBaseId))
+        {
+            Log.Debug("[拾取統計] 物品 {ItemId} 已停用，跳過記錄", configBaseId);
             return null;
         }
 
@@ -199,28 +207,28 @@ _pendingCompasses.Add(item.Name);
     public MapRecordModel? GetCurrentMapRecord()
     {
         if (!IsInNetherrealmMap || _currentMapRecord == null)
-   return null;
+            return null;
 
         // 創建一個包含當前拾取記錄的副本
-    var recordCopy = new MapRecordModel
-  {
-          RecordId = _currentMapRecord.RecordId,
+        var recordCopy = new MapRecordModel
+        {
+            RecordId = _currentMapRecord.RecordId,
             Id = _currentMapRecord.Id,
-        Name = _currentMapRecord.Name,
+            Name = _currentMapRecord.Name,
             MapTicket = _currentMapRecord.MapTicket,
-   Probe = _currentMapRecord.Probe,
+            Probe = _currentMapRecord.Probe,
             StartTime = _currentMapRecord.StartTime,
-       EndTime = DateTime.Now, // 當前時間作為臨時結束時間
-     PickRecord = _currentMapPickData
-   };
+            EndTime = DateTime.Now, // 當前時間作為臨時結束時間
+            PickRecord = _currentMapPickData
+        };
 
         // 複製羅盤資料
-   for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 4; i++)
         {
-         recordCopy.Compass[i] = _currentMapRecord.Compass[i];
-  }
+            recordCopy.Compass[i] = _currentMapRecord.Compass[i];
+        }
 
- return recordCopy;
+        return recordCopy;
     }
 
     /// <summary>
@@ -249,23 +257,23 @@ _pendingCompasses.Add(item.Name);
 
     /// <summary>
     /// 顯示當前地圖的拾取記錄
- /// </summary>
+    /// </summary>
     private void PrintCurrentMapRecord(MapRecordModel record)
     {
         if (record.PickRecord == null || record.PickRecord.Count == 0)
         {
-Log.Information("本次地圖未拾取任何物品");
+            Log.Information("本次地圖未拾取任何物品");
             return;
-    }
+        }
 
         Log.Information("═══ 本次地圖拾取統計 ═══");
         Log.Information("地圖: {MapName} (用時: {Duration})", record.Name, record.UseTime);
-        
+
         foreach (var item in record.PickRecord.OrderByDescending(x => x.Value.Total))
- {
-       Log.Information("  {ItemName}: {Total} 個", item.Value.Name, item.Value.Total);
+        {
+            Log.Information("  {ItemName}: {Total} 個", item.Value.Name, item.Value.Total);
         }
-        
+
         Log.Information("═══════════════════════");
     }
 
@@ -275,11 +283,11 @@ Log.Information("本次地圖未拾取任何物品");
     public void PrintAllRecords()
     {
         Log.Debug("所有地圖記錄統計 (共 {Count} 筆):", _mapRecords.Count);
-   foreach (var record in _mapRecords)
-     {
-            Log.Debug("  [{RecordId}] {MapName} (用時: {Duration})", 
+        foreach (var record in _mapRecords)
+        {
+            Log.Debug("  [{RecordId}] {MapName} (用時: {Duration})",
    record.RecordId, record.Name, record.UseTime);
- }
+        }
     }
 
     private string GetItemName(int configBaseId)

@@ -34,9 +34,6 @@
     <None Update="ItemIdTable.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="mapInfo.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="UE_game.log">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

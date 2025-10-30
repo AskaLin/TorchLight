@@ -1,4 +1,6 @@
-﻿namespace TorchLight.Statistics.Models;
+﻿using TorchLight.Statistics.Enums;
+
+namespace TorchLight.Statistics.Models;
 
 public class ItemModel
 {

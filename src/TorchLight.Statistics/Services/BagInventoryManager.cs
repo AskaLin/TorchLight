@@ -114,8 +114,8 @@ public class BagInventoryManager
     {
         Log.Debug("背包初始化明細:");
         foreach (var bagItem in _bagData)
-        {            
-            Log.Debug("  {ItemName}({ItemId}): {Total} 個", 
+        {
+            Log.Debug("  {ItemName}({ItemId}): {Total} 個",
       bagItem.Value.Name, bagItem.Value.BaseId, bagItem.Value.Total);
         }
     }

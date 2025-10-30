@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Threading;
 using Timer = System.Threading.Timer;
 
 namespace TorchLight.Statistics;

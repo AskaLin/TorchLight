@@ -136,4 +136,16 @@ public class WebViewHub
             message
         });
     }
+
+    /// <summary>
+    /// 通知前端：拾取統計設定已更新
+    /// </summary>
+    public Task NotifyPickupStatisticsConfigUpdatedAsync(bool success, string message)
+    {
+        return SendMessageAsync("pickupStatisticsConfigUpdated", new
+        {
+            success,
+            message
+        });
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.Models;
+using Serilog;
 
 namespace TorchLight.Statistics;
 
@@ -128,7 +129,7 @@ public partial class LineParser
         var match = LineRegex.MapLine().Match(line);
         if (!match.Success)
         {
-            Console.WriteLine($"[警告] 未能解析地圖切換資料: {line}");
+            Log.Warning($"未能解析地圖切換資料: {line}");
             return (DateTime.MinValue, string.Empty, string.Empty, false);
         }
 

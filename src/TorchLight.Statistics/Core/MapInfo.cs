@@ -1,25 +1,6 @@
-﻿namespace TorchLight.Statistics.Core;
+﻿using TorchLight.Statistics.Enums;
 
-/// <summary>
-/// 地圖類型枚舉
-/// </summary>
-public enum MapType
-{
-    /// <summary>
-    /// 未知地圖
-    /// </summary>
-    Unknown,
-
-    /// <summary>
-    /// 藏身處
-    /// </summary>
-    Hideout,
-
-    /// <summary>
-    /// 異界地圖（可統計拾取）
-    /// </summary>
-    Netherrealm
-}
+namespace TorchLight.Statistics.Core;
 
 /// <summary>
 /// 地圖資訊

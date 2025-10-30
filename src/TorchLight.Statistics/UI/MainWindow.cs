@@ -2,6 +2,7 @@
 using Microsoft.Web.WebView2.WinForms;
 using Serilog;
 using System.Text.Json;
+using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Services;
 
 namespace TorchLight.Statistics.UI;
@@ -42,7 +43,10 @@ public class MainWindow : Form
         _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
 
         // 註冊地圖設定更新事件
-        MapMapper.OnConfigUpdated += HandleMapConfigUpdated;
+        MapInfoMapper.OnConfigUpdated += HandleMapConfigUpdated;
+
+        // 註冊物品設定更新事件
+        ItemInfoMapper.OnConfigUpdated += HandlePickupStatisticsConfigUpdated;
 
         // 初始化 WebView2
         InitializeAsync();
@@ -187,15 +191,27 @@ public class MainWindow : Form
     {
         if (_isInitialized)
         {
-            await _webViewHub.NotifyMapConfigUpdatedAsync(success, message);
-            Log.Information("已通知前端：地圖設定更新 - {Success}: {Message}", success, message);
+   await _webViewHub.NotifyMapConfigUpdatedAsync(success, message);
+      Log.Information("地圖設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
+        }
+    }
+
+    /// <summary>
+    /// 處理拾取統計設定更新事件
+  /// </summary>
+  private async void HandlePickupStatisticsConfigUpdated(bool success, string message)
+    {
+        if (_isInitialized)
+  {
+      await _webViewHub.NotifyPickupStatisticsConfigUpdatedAsync(success, message);
+            Log.Information("拾取統計設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
         }
     }
 
     /// <summary>
     /// 通知前端背包同步狀態
     /// </summary>
-    public async Task NotifyBagSyncAsync()
+ public async Task NotifyBagSyncAsync()
     {
         if (_isInitialized)
         {

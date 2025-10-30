@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using Serilog;
-using TorchLight.Statistics;
 using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.UI;
 using TorchLight.Statistics.Services;
+using TorchLight.Statistics.Mapper;
 
 namespace TorchLight.Statistics
 {
@@ -31,9 +31,12 @@ namespace TorchLight.Statistics
                 Log.Information("正在初始化...");
                 
                 // 初始化地圖映射器
-                MapMapper.Initialize();
+                MapInfoMapper.Initialize();
+
+                // 初始化物品映射器
+                ItemInfoMapper.Initialize();
             
-                var itemTable = ItemIdTable.GetItemTable();
+                var itemTable = ItemInfoMapper.GetItemTable();
                 Log.Information("已載入 {ItemCount} 個物品定義", itemTable.Count);
 
                 var lineParser = new LineParser(itemTable);
@@ -63,16 +66,16 @@ namespace TorchLight.Statistics
                     startFromEnd: AppConfiguration.StartFromFileEnd);
 
                 tail.OnNewLine += logProcessor.ProcessLine;
-                tail.Start();
+                // tail.Start();
 
                 // 測試用, 讀取現有日誌內容 進行處理
-                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                //using StreamReader sr = new(fs, Encoding.UTF8);
-                //string line;
-                //while ((line = sr.ReadLine()) != null)
-                //{
-                //    logProcessor.ProcessLine(line);
-                //}
+                using FileStream fs = new("E:\\SideProjects\\UE_game-疊界4.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using StreamReader sr = new(fs, Encoding.UTF8);
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    logProcessor.ProcessLine(line);
+                }
 
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");
