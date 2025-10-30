@@ -1,10 +1,10 @@
-using Serilog;
+ï»¿using Serilog;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
 
 /// <summary>
-/// ºŞ²zª±®a­I¥]®w¦s
+/// ç®¡ç†ç©å®¶èƒŒåŒ…åº«å­˜
 /// </summary>
 public class BagInventoryManager
 {
@@ -19,7 +19,7 @@ public class BagInventoryManager
     public IReadOnlyDictionary<int, PickedItemDataModel> BagData => _bagData;
 
     /// <summary>
-    /// ªì©l¤Æ­I¥]ª««~
+    /// åˆå§‹åŒ–èƒŒåŒ…ç‰©å“
     /// </summary>
     public void InitializeBagItem(ItemModel item)
     {
@@ -42,7 +42,7 @@ public class BagInventoryManager
     }
 
     /// <summary>
-    /// §ó·s­I¥]ª««~¼Æ¶q
+    /// æ›´æ–°èƒŒåŒ…ç‰©å“æ•¸é‡
     /// </summary>
     public ItemChangeResult UpdateBagItem(BagModEvent ev)
     {
@@ -56,7 +56,7 @@ public class BagInventoryManager
 
         if (!_bagData.TryGetValue(ev.ConfigBaseId, out var bagItem))
         {
-            // ·sª««~
+            // æ–°ç‰©å“
             var newItem = new PickedItemDataModel
             {
                 BaseId = ev.ConfigBaseId,
@@ -76,7 +76,7 @@ public class BagInventoryManager
 
         if (bagItem.Slots.TryGetValue(ev.SlotId, out int previousSlotCount))
         {
-            // §ó·s²{¦³Äæ¦ì
+            // æ›´æ–°ç¾æœ‰æ¬„ä½
             int quantityChange = ev.Num - previousSlotCount;
             bagItem.Slots[ev.SlotId] = ev.Num;
             bagItem.Total += quantityChange;
@@ -87,7 +87,7 @@ public class BagInventoryManager
         }
         else
         {
-            // ·sÄæ¦ì
+            // æ–°æ¬„ä½
             bagItem.Slots[ev.SlotId] = ev.Num;
             bagItem.Total += ev.Num;
 
@@ -100,7 +100,7 @@ public class BagInventoryManager
     }
 
     /// <summary>
-    /// ­«¸m­I¥]¸ê®Æ¡]µn¤J®É¨Ï¥Î¡^
+    /// é‡ç½®èƒŒåŒ…è³‡æ–™ï¼ˆç™»å…¥æ™‚ä½¿ç”¨ï¼‰
     /// </summary>
     public void Reset()
     {
@@ -108,26 +108,26 @@ public class BagInventoryManager
     }
 
     /// <summary>
-    /// Åã¥Ü­I¥]ªì©l¤Æ§¹¦¨ªº¸ê°T
+    /// é¡¯ç¤ºèƒŒåŒ…åˆå§‹åŒ–å®Œæˆçš„è³‡è¨Š
     /// </summary>
     public void PrintInitializedBag()
     {
-        Log.Debug("­I¥]ªì©l¤Æ©ú²Ó:");
+        Log.Debug("èƒŒåŒ…åˆå§‹åŒ–æ˜ç´°:");
         foreach (var bagItem in _bagData)
         {            
-            Log.Debug("  {ItemName}({ItemId}): {Total} ­Ó", 
+            Log.Debug("  {ItemName}({ItemId}): {Total} å€‹", 
       bagItem.Value.Name, bagItem.Value.BaseId, bagItem.Value.Total);
         }
     }
 
     private string GetItemName(int configBaseId)
     {
-        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"¥¼ª¾ªºª««~({configBaseId})";
+        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"æœªçŸ¥çš„ç‰©å“({configBaseId})";
     }
 }
 
 /// <summary>
-/// ª««~ÅÜ§óµ²ªG
+/// ç‰©å“è®Šæ›´çµæœ
 /// </summary>
 public class ItemChangeResult
 {

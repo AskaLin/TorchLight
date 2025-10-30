@@ -1,57 +1,57 @@
-using Serilog;
+ï»¿using Serilog;
 using TorchLight.Statistics.Services;
 
 namespace TorchLight.Statistics;
 
 /// <summary>
-/// ±±¨î¥x¤é»x¿é¥X¾¹
+/// æ§åˆ¶å°æ—¥èªŒè¼¸å‡ºå™¨
 /// </summary>
 public class ConsoleLogger
 {
     /// <summary>
-    /// °O¿ı­I¥]ª««~­×§ï¨Æ¥ó
+    /// è¨˜éŒ„èƒŒåŒ…ç‰©å“ä¿®æ”¹äº‹ä»¶
     /// </summary>
     public void LogBagModification(BagModEvent ev, ItemChangeResult result)
     {
-        // Debug: ¸Ô²Ó¸ê°T
-        Log.Debug("[{Protocol}] {Action} - ª««~: {ItemName}({ItemId}), Slot: {SlotId}, ¼Æ¶q: {Count}",
+        // Debug: è©³ç´°è³‡è¨Š
+        Log.Debug("[{Protocol}] {Action} - ç‰©å“: {ItemName}({ItemId}), Slot: {SlotId}, æ•¸é‡: {Count}",
             ev.ProtoName, ev.Action, result.ItemName, result.ConfigBaseId, ev.SlotId, result.NewSlotCount);
 
-        Log.Debug("  ÅÜ¤Æ¸Ô±¡: «e={PrevTotal}, ÅÜ¤Æ={Change}, «á={NewTotal}",
+        Log.Debug("  è®ŠåŒ–è©³æƒ…: å‰={PrevTotal}, è®ŠåŒ–={Change}, å¾Œ={NewTotal}",
             result.PreviousTotalCount, result.QuantityChange, result.NewTotalCount);
 
-        // Info: Â²³æµ²ªG
+        // Info: ç°¡å–®çµæœ
         if (result.IsNewItem)
         {
-            Log.Information("[­I¥]] ·s¼W {ItemName} x{Count}", result.ItemName, result.QuantityChange);
+            Log.Information("[èƒŒåŒ…] æ–°å¢ {ItemName} x{Count}", result.ItemName, result.QuantityChange);
             return;
         }
 
-        string action = result.QuantityChange > 0 ? "¼W¥[" : "´î¤Ö";
-        Log.Information("[­I¥]] {ItemName} {Action} {Change} (Á`­p: {Total})",
+        string action = result.QuantityChange > 0 ? "å¢åŠ " : "æ¸›å°‘";
+        Log.Information("[èƒŒåŒ…] {ItemName} {Action} {Change} (ç¸½è¨ˆ: {Total})",
             result.ItemName, action, Math.Abs(result.QuantityChange), result.NewTotalCount);
     }
 
     /// <summary>
-    /// °O¿ı¦a¹Ï¬B¨úª««~
+    /// è¨˜éŒ„åœ°åœ–æ‹¾å–ç‰©å“
     /// </summary>
     public void LogMapPickItem(string mapName, MapPickResult result)
     {
-        // Debug: ¸Ô²Ó¸ê°T
-        Log.Debug("[¦a¹Ï¬B¨ú] ¦a¹Ï: {MapName}, ª««~: {ItemName}, Slot: {SlotId}",
+        // Debug: è©³ç´°è³‡è¨Š
+        Log.Debug("[åœ°åœ–æ‹¾å–] åœ°åœ–: {MapName}, ç‰©å“: {ItemName}, Slot: {SlotId}",
             mapName, result.ItemName, result.SlotId);
-        Log.Debug("  ¬B¨ú¸Ô±¡: «e={PrevSlot}, ¼W¥[={Change}, «á={NewSlot}, Á`­p={Total}",
+        Log.Debug("  æ‹¾å–è©³æƒ…: å‰={PrevSlot}, å¢åŠ ={Change}, å¾Œ={NewSlot}, ç¸½è¨ˆ={Total}",
             result.PreviousSlotCount, result.QuantityChange, result.NewSlotCount, result.NewTotalCount);
 
-        // Info: Â²³æµ²ªG
+        // Info: ç°¡å–®çµæœ
         if (result.IsFirstTimeInMap)
         {
-            Log.Information("[{MapName}] ¬B¨ú {ItemName} x{Count}",
+            Log.Information("[{MapName}] æ‹¾å– {ItemName} x{Count}",
                 mapName, result.ItemName, result.NewTotalCount);
         }
         else
         {
-            Log.Information("[{MapName}] {ItemName} +{Change} (Á`­p: {Total})",
+            Log.Information("[{MapName}] {ItemName} +{Change} (ç¸½è¨ˆ: {Total})",
                 mapName, result.ItemName, result.QuantityChange, result.NewTotalCount);
         }
     }

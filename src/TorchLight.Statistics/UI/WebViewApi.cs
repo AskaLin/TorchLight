@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+ï»¿using System.Runtime.InteropServices;
 using System.Text.Json;
 using Serilog;
 using TorchLight.Statistics.Models;
@@ -7,7 +7,7 @@ using TorchLight.Statistics.Services;
 namespace TorchLight.Statistics.UI;
 
 /// <summary>
-/// WebView2 API ¾ô±µ¼h - ´£¨Ñµ¹ JavaScript ©I¥sªº C# ¤èªk
+/// WebView2 API æ©‹æ¥å±¤ - æä¾›çµ¦ JavaScript å‘¼å«çš„ C# æ–¹æ³•
 /// </summary>
 [ClassInterface(ClassInterfaceType.AutoDual)]
 [ComVisible(true)]
@@ -25,7 +25,7 @@ private readonly MainWindow _mainWindow;
     }
 
     /// <summary>
-    /// Àò¨ú©Ò¦³¦a¹Ï°O¿ı
+    /// ç²å–æ‰€æœ‰åœ°åœ–è¨˜éŒ„
     /// </summary>
     public string GetMapRecords()
     {
@@ -56,13 +56,13 @@ r.Name,
         }
       catch (Exception ex)
         {
-          Log.Error(ex, "Àò¨ú¦a¹Ï°O¿ı¥¢±Ñ");
+          Log.Error(ex, "ç²å–åœ°åœ–è¨˜éŒ„å¤±æ•—");
        return JsonSerializer.Serialize(new { error = ex.Message });
    }
     }
 
     /// <summary>
-    /// Àò¨ú«ü©w¦a¹Ïªº¸Ô²Ó¸ê°T
+    /// ç²å–æŒ‡å®šåœ°åœ–çš„è©³ç´°è³‡è¨Š
     /// </summary>
     public string GetMapRecordDetail(string recordIdStr)
     {
@@ -70,7 +70,7 @@ r.Name,
      {
         if (!Guid.TryParse(recordIdStr, out var recordId))
             {
-       return JsonSerializer.Serialize(new { error = "µL®Äªº°O¿ıID" });
+       return JsonSerializer.Serialize(new { error = "ç„¡æ•ˆçš„è¨˜éŒ„ID" });
  }
 
             var record = _mapPickRecordManager.MapRecords
@@ -78,7 +78,7 @@ r.Name,
 
    if (record == null)
      {
-  return JsonSerializer.Serialize(new { error = "§ä¤£¨ì«ü©wªº°O¿ı" });
+  return JsonSerializer.Serialize(new { error = "æ‰¾ä¸åˆ°æŒ‡å®šçš„è¨˜éŒ„" });
             }
 
    var detail = new
@@ -109,13 +109,13 @@ r.Name,
       }
         catch (Exception ex)
    {
-     Log.Error(ex, "Àò¨ú¦a¹Ï°O¿ı¸Ô±¡¥¢±Ñ");
+     Log.Error(ex, "ç²å–åœ°åœ–è¨˜éŒ„è©³æƒ…å¤±æ•—");
     return JsonSerializer.Serialize(new { error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Àò¨ú·í«e¦a¹Ï¸ê°T
+    /// ç²å–ç•¶å‰åœ°åœ–è³‡è¨Š
     /// </summary>
     public string GetCurrentMapInfo()
     {
@@ -134,13 +134,13 @@ r.Name,
     }
     catch (Exception ex)
    {
-          Log.Error(ex, "Àò¨ú·í«e¦a¹Ï¸ê°T¥¢±Ñ");
+          Log.Error(ex, "ç²å–ç•¶å‰åœ°åœ–è³‡è¨Šå¤±æ•—");
  return JsonSerializer.Serialize(new { error = ex.Message });
  }
     }
 
     /// <summary>
-    /// Àò¨ú²Î­p¸ê®Æ
+    /// ç²å–çµ±è¨ˆè³‡æ–™
     /// </summary>
     public string GetStatistics()
     {
@@ -178,31 +178,31 @@ TotalMaps = records.Count,
  }
    catch (Exception ex)
         {
-  Log.Error(ex, "Àò¨ú²Î­p¸ê®Æ¥¢±Ñ");
+  Log.Error(ex, "ç²å–çµ±è¨ˆè³‡æ–™å¤±æ•—");
    return JsonSerializer.Serialize(new { error = ex.Message });
    }
  }
 
     /// <summary>
-    /// ²M°£©Ò¦³°O¿ı
+    /// æ¸…é™¤æ‰€æœ‰è¨˜éŒ„
     /// </summary>
     public string ClearAllRecords()
     {
         try
       {
  _mapPickRecordManager.Reset();
-          Log.Information("¤w²M°£©Ò¦³¦a¹Ï°O¿ı");
-     return JsonSerializer.Serialize(new { success = true, message = "¤w²M°£©Ò¦³°O¿ı" });
+          Log.Information("å·²æ¸…é™¤æ‰€æœ‰åœ°åœ–è¨˜éŒ„");
+     return JsonSerializer.Serialize(new { success = true, message = "å·²æ¸…é™¤æ‰€æœ‰è¨˜éŒ„" });
         }
         catch (Exception ex)
  {
-     Log.Error(ex, "²M°£°O¿ı¥¢±Ñ");
+     Log.Error(ex, "æ¸…é™¤è¨˜éŒ„å¤±æ•—");
  return JsonSerializer.Serialize(new { success = false, error = ex.Message });
         }
     }
 
     /// <summary>
-    /// ¶×¥X°O¿ı¬° JSON
+    /// åŒ¯å‡ºè¨˜éŒ„ç‚º JSON
   /// </summary>
     public string ExportRecordsJson()
     {
@@ -217,13 +217,13 @@ TotalMaps = records.Count,
         }
         catch (Exception ex)
         {
-Log.Error(ex, "¶×¥X°O¿ı¥¢±Ñ");
+Log.Error(ex, "åŒ¯å‡ºè¨˜éŒ„å¤±æ•—");
 return JsonSerializer.Serialize(new { error = ex.Message });
     }
     }
 
 /// <summary>
-    /// ³Ì¤p¤Æµøµ¡
+    /// æœ€å°åŒ–è¦–çª—
     /// </summary>
     public void MinimizeWindow()
   {
@@ -231,7 +231,7 @@ return JsonSerializer.Serialize(new { error = ex.Message });
     }
 
     /// <summary>
-  /// Ãö³¬À³¥Îµ{¦¡
+  /// é—œé–‰æ‡‰ç”¨ç¨‹å¼
     /// </summary>
     public void CloseApplication()
     {

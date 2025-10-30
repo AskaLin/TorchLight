@@ -1,10 +1,10 @@
-using Serilog;
+ן»¿using Serilog;
 using TorchLight.Statistics.Services;
 
 namespace TorchLight.Statistics;
 
 /// <summary>
-/// ¥D¿ן³ז÷Þ²z¾¹
+/// ה¸»י¸ו–®ח®¡ח†ו™¨
 /// </summary>
 public class MenuManager
 {
@@ -20,23 +20,23 @@ public class MenuManager
     public bool IsRunning => _isRunning;
 
     /// <summary>
-    /// ֵד¥Ü¥D¿ן³ז
+    /// י¡¯ח₪÷ה¸»י¸ו–®
     /// </summary>
 public void ShowMainMenu()
     {
-        Console.WriteLine("\nשÝשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששß");
-  Console.WriteLine("שר     ¥D¿ן³ז Main Menu שר");
-   Console.WriteLine("שאשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששג");
-    Console.WriteLine("שר 1. ¦C¥X¦a¹ֿ¬B¨ת°O¿‎                    שר");
-        Console.WriteLine("שר 2. ₪ֱ´«₪י»x¿י¥X [{0}]       שר", _consoleLogEnabled ? "¶}±ׂ" : "ֳצ³¬");
-  Console.WriteLine("שר 3. ²M°£µe­±   שר");
-   Console.WriteLine("שר 0. ×נ¦^÷Êֵ¥ / µ²§פµ{¦¡  שר");
-        Console.WriteLine("שדשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששו");
-     Console.Write("\n½׀¿ן¾Ü¥\¯א (0-3): ");
+        Console.WriteLine("\nג•”ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•—");
+  Console.WriteLine("ג•‘     ה¸»י¸ו–® Main Menu ג•‘");
+   Console.WriteLine("ג• ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•£");
+    Console.WriteLine("ג•‘ 1. וˆ—ו‡÷ו°ו–ז‹¾ו–ט¨˜י„                    ג•‘");
+        Console.WriteLine("ג•‘ 2. וˆ‡ז›ז—¥ט×ט¼¸ו‡÷ [{0}]       ג•‘", _consoleLogEnabled ? "י–‹ו•" : "י—י–‰");
+  Console.WriteLine("ג•‘ 3. ז¸…י™₪ח•«י¢   ג•‘");
+   Console.WriteLine("ג•‘ 0. ט¿”ו›ח›£ט½ / חµזח¨‹ו¼  ג•‘");
+        Console.WriteLine("ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•");
+     Console.Write("\nט«‹י¸ז“‡וטƒ½ (0-3): ");
     }
 
     /// <summary>
-    /// ³B²z¿ן³ז¿י₪J
+    /// ט™•ח†י¸ו–®ט¼¸ו…¥
     /// </summary>
     public void HandleInput(string input)
     {
@@ -55,13 +55,13 @@ public void ShowMainMenu()
      _isRunning = false;
      break;
   default:
-      Console.WriteLine("µL®ִ×÷¿ן¶µ¡A½׀­«·s¿י₪J");
+      Console.WriteLine("ח„¡ז•ˆח„י¸י …ן¼ט«‹י‡ז–°ט¼¸ו…¥");
                 break;
         }
     }
 
     /// <summary>
-    /// ¦C¥X©ׂ¦³¦a¹ֿ°O¿‎
+    /// וˆ—ו‡÷ז‰€ז‰ו°ו–ט¨˜י„
     /// </summary>
     private void ShowMapRecordList()
     {
@@ -69,25 +69,25 @@ public void ShowMainMenu()
     
         if (records.Count == 0)
       {
-            Console.WriteLine("\n¥״«e¨S¦³¦a¹ֿ°O¿‎");
-            Console.WriteLine("«צ Enter ×נ¦^¥D¿ן³ז...");
+            Console.WriteLine("\nח›®ו‰ז²’ז‰ו°ו–ט¨˜י„");
+            Console.WriteLine("ז‰ Enter ט¿”ו›ה¸»י¸ו–®...");
          Console.ReadLine();
             return;
         }
 
-        Console.WriteLine("\nשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש");
-        Console.WriteLine("         ¦a¹ֿ¬B¨ת°O¿‎¦C×ם");
-        Console.WriteLine("שששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש");
+        Console.WriteLine("\nג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•");
+        Console.WriteLine("         ו°ו–ז‹¾ו–ט¨˜י„וˆ—ט¡¨");
+        Console.WriteLine("ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•");
 
         for (int i = 0; i < records.Count; i++)
         {
        var record = records[i];
-            var ticketInfo = string.IsNullOrEmpty(record.MapTicket) ? "µL×ש²¼" : record.MapTicket;
+            var ticketInfo = string.IsNullOrEmpty(record.MapTicket) ? "ח„¡י–€ח¥¨" : record.MapTicket;
    Console.WriteLine($"{i + 1}. [{record.StartTime:yyyy/MM/dd HH:mm:ss}] - {ticketInfo} - {record.Name}");
         }
 
-   Console.WriteLine("שששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש");
-        Console.Write("\n¿י₪J½s¸¹¬d¬Ý¸װ²׃₪÷®e (0 ×נ¦^): ");
+   Console.WriteLine("ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•");
+        Console.Write("\nט¼¸ו…¥ח·¨ט™ז¥ח‹ט©³ח´°ו…§ו®¹ (0 ט¿”ו›): ");
     
         if (int.TryParse(Console.ReadLine(), out int selection))
         {
@@ -101,37 +101,37 @@ public void ShowMainMenu()
           }
        else
             {
- Console.WriteLine("µL®ִ×÷½s¸¹");
+ Console.WriteLine("ח„¡ז•ˆח„ח·¨ט™");
        }
         }
         
-        Console.WriteLine("\n«צ Enter ×נ¦^¥D¿ן³ז...");
+        Console.WriteLine("\nז‰ Enter ט¿”ו›ה¸»י¸ו–®...");
         Console.ReadLine();
     }
 
     /// <summary>
-    /// ֵד¥Ü¦a¹ֿ°O¿‎¸װ²׃₪÷®e
+    /// י¡¯ח₪÷ו°ו–ט¨˜י„ט©³ח´°ו…§ו®¹
     /// </summary>
     private void ShowMapRecordDetail(Models.MapRecordModel record)
     {
-     Console.WriteLine("\nשÝשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששß");
-        Console.WriteLine("שר           ¦a¹ֿ°O¿‎¸װ²׃¸ך°T         שר");
-      Console.WriteLine("שדשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששו");
-        Console.WriteLine($"\n°O¿‎ID: {record.RecordId}");
-        Console.WriteLine($"¦a¹ֿ¦W÷Ù: {record.Name}");
-        Console.WriteLine($"¦a¹ֿID: {record.Id}");
-        Console.WriteLine($"¶}©l®ֹ¶¡: {record.StartTime:yyyy/MM/dd HH:mm:ss}");
-        Console.WriteLine($"µ²§פ®ֹ¶¡: {record.EndTime:yyyy/MM/dd HH:mm:ss}");
-        Console.WriteLine($"¨ֿ¥־®ֹ¶¡: {record.UseTime}");
+     Console.WriteLine("\nג•”ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•—");
+        Console.WriteLine("ג•‘           ו°ו–ט¨˜י„ט©³ח´°ט³‡ט¨         ג•‘");
+      Console.WriteLine("ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•");
+        Console.WriteLine($"\nט¨˜י„ID: {record.RecordId}");
+        Console.WriteLine($"ו°ו–וח¨±: {record.Name}");
+        Console.WriteLine($"ו°ו–ID: {record.Id}");
+        Console.WriteLine($"י–‹ו§‹ז™‚י–“: {record.StartTime:yyyy/MM/dd HH:mm:ss}");
+        Console.WriteLine($"חµזז™‚י–“: {record.EndTime:yyyy/MM/dd HH:mm:ss}");
+        Console.WriteLine($"ה½¿ח”¨ז™‚י–“: {record.UseTime}");
         
         if (!string.IsNullOrEmpty(record.MapTicket))
         {
-            Console.WriteLine($"\n¨ֿ¥־×ש²¼: {record.MapTicket}");
+            Console.WriteLine($"\nה½¿ח”¨י–€ח¥¨: {record.MapTicket}");
       }
     
         if (record.Compass.Any(c => !string.IsNullOrEmpty(c)))
      {
-            Console.WriteLine("\n¨ֿ¥־ֳ¹½L:");
+            Console.WriteLine("\nה½¿ח”¨ח¾…ח›₪:");
          for (int i = 0; i < record.Compass.Length; i++)
       {
    if (!string.IsNullOrEmpty(record.Compass[i]))
@@ -143,30 +143,30 @@ public void ShowMainMenu()
       
         if (!string.IsNullOrEmpty(record.Probe))
         {
-       Console.WriteLine($"\n¨ֿ¥־±´°w: {record.Probe}");
+       Console.WriteLine($"\nה½¿ח”¨ז¢י‡: {record.Probe}");
         }
 
       if (record.PickRecord != null && record.PickRecord.Count > 0)
         {
-            Console.WriteLine("\n¬B¨ת×««~²־­p:");
-            Console.WriteLine("¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w");
+            Console.WriteLine("\nז‹¾ו–ח‰©ו“חµ±ט¨ˆ:");
+            Console.WriteLine("ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€");
       
   foreach (var item in record.PickRecord.OrderByDescending(x => x.Value.Total))
         {
         Console.WriteLine($"  {item.Value.Name,-30} x {item.Value.Total,5}");
             }
             
-  Console.WriteLine("¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w¢w");
-    Console.WriteLine($"¦@ {record.PickRecord.Count} ÷״×««~");
+  Console.WriteLine("ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€");
+    Console.WriteLine($"ו…± {record.PickRecord.Count} ח¨®ח‰©ו“");
         }
         else
     {
-    Console.WriteLine("\n¥»¦¸¦a¹ֿ¥¼¬B¨ת¥פ¦ף×««~");
+    Console.WriteLine("\nז¬ז¬¡ו°ו–ז×ז‹¾ו–ה»»ה½•ח‰©ו“");
      }
     }
 
     /// <summary>
-    /// ₪ֱ´«±±¨מ¥x₪י»x¿י¥X
+    /// וˆ‡ז›ז§וˆ¶ו°ז—¥ט×ט¼¸ו‡÷
     /// </summary>
     private void ToggleConsoleLog()
     {
@@ -174,40 +174,40 @@ public void ShowMainMenu()
         
         if (_consoleLogEnabled)
   {
-            // ­«·s±ׂ¥־ Console sink
+            // י‡ז–°ו•ח”¨ Console sink
        Log.Logger = new LoggerConfiguration()
       .MinimumLevel.Debug()
        .WriteTo.Console()
     .WriteTo.File("logs/torchlight-.txt", rollingInterval: Serilog.RollingInterval.Day)
       .CreateLogger();
-        Console.WriteLine("\n₪י»x¿י¥X₪w¶}±ׂ");
+        Console.WriteLine("\nז—¥ט×ט¼¸ו‡÷ו·²י–‹ו•");
         }
   else
         {
-          // ¥u«O¯d File sink
+          // ו×ה¿ח•™ File sink
     Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File("logs/torchlight-.txt", rollingInterval: Serilog.RollingInterval.Day)
           .CreateLogger();
-        Console.WriteLine("\n₪י»x¿י¥X₪wֳצ³¬¡]¶ָ¼g₪Jְֹ®׳¡^");
+        Console.WriteLine("\nז—¥ט×ט¼¸ו‡÷ו·²י—י–‰ן¼ˆוƒ…ו¯«ו…¥ז×”ז¡ˆן¼‰");
         }
         
-     Console.WriteLine("«צ Enter ×נ¦^¥D¿ן³ז...");
+     Console.WriteLine("ז‰ Enter ט¿”ו›ה¸»י¸ו–®...");
         Console.ReadLine();
     }
 
     /// <summary>
-    /// ²M°£µe­±¨ֳֵד¥Ü¿ן³ז
+    /// ז¸…י™₪ח•«י¢ה¸¦י¡¯ח₪÷י¸ו–®
     /// </summary>
     private void ClearScreen()
     {
         Console.Clear();
-     Console.WriteLine("שÝשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששß");
-        Console.WriteLine("שר  ₪ץ¬²₪§¥תµL­­ - ¬B¨ת×««~²־­p₪u¨ד       שר");
-        Console.WriteLine("שר  Torchlight Infinite Item Tracker      שר");
-      Console.WriteLine("שדשששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששו");
-        Console.WriteLine("\nµe­±₪w²M°£");
-     Console.WriteLine("«צ Enter ×נ¦^¥D¿ן³ז...");
+     Console.WriteLine("ג•”ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•—");
+        Console.WriteLine("ג•‘  ח«ח‚¬ה¹‹ו…‰ח„¡י™ - ז‹¾ו–ח‰©ו“חµ±ט¨ˆו·¥ו…·       ג•‘");
+        Console.WriteLine("ג•‘  Torchlight Infinite Item Tracker      ג•‘");
+      Console.WriteLine("ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•ג•");
+        Console.WriteLine("\nח•«י¢ו·²ז¸…י™₪");
+     Console.WriteLine("ז‰ Enter ט¿”ו›ה¸»י¸ו–®...");
    Console.ReadLine();
     }
 }

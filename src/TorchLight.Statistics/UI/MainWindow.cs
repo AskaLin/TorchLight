@@ -1,4 +1,4 @@
-using Microsoft.Web.WebView2.Core;
+ï»¿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using Serilog;
 using System.Text.Json;
@@ -7,27 +7,29 @@ using TorchLight.Statistics.Services;
 namespace TorchLight.Statistics.UI;
 
 /// <summary>
-/// WebView2 ¥Dµøµ¡
+/// WebView2 ä¸»è¦–çª—
 /// </summary>
 public class MainWindow : Form
 {
     private readonly WebView2 _webView;
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly GameLogProcessor _gameLogProcessor;
+    private readonly WebViewHub _webViewHub;
     private bool _isInitialized = false;
 
     public MainWindow(MapPickRecordManager mapPickRecordManager, GameLogProcessor gameLogProcessor)
     {
         _mapPickRecordManager = mapPickRecordManager ?? throw new ArgumentNullException(nameof(mapPickRecordManager));
         _gameLogProcessor = gameLogProcessor ?? throw new ArgumentNullException(nameof(gameLogProcessor));
+        _webViewHub = new WebViewHub();
 
-        // ³]©wµøµ¡
-        Text = "¤õ¬²¤§¥úµL­­ - ¬B¨úª««~²Î­p¤u¨ã";
+        // è¨­å®šè¦–çª—
+        Text = "ç«ç‚¬ä¹‹å…‰ç„¡é™ - æ‹¾å–ç‰©å“çµ±è¨ˆå·¥å…·";
         Width = 1200;
         Height = 800;
         StartPosition = FormStartPosition.CenterScreen;
 
-        // ³Ğ«Ø WebView2
+        // å‰µå»º WebView2
         _webView = new WebView2
         {
             Dock = DockStyle.Fill
@@ -35,7 +37,11 @@ public class MainWindow : Form
 
         Controls.Add(_webView);
 
-        // ªì©l¤Æ WebView2
+        // è¨»å†ŠéŠæˆ²æ—¥èªŒäº‹ä»¶
+        _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
+        _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
+
+        // åˆå§‹åŒ– WebView2
         InitializeAsync();
     }
 
@@ -43,7 +49,7 @@ public class MainWindow : Form
     {
         try
         {
-            // ³]©w WebView2 Àô¹Ò
+            // è¨­å®š WebView2 ç’°å¢ƒ
             var userDataFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "TorchLight.Statistics");
@@ -54,10 +60,13 @@ public class MainWindow : Form
 
             await _webView.EnsureCoreWebView2Async(env);
 
-            // µù¥U JavaScript »P C# ªº¾ô±µ
+            // åˆå§‹åŒ– WebViewHub (å‚³å…¥ Control ä»¥ä¾¿åˆ‡æ›åˆ° UI åŸ·è¡Œç·’)
+            _webViewHub.Initialize(_webView.CoreWebView2, this);
+
+            // è¨»å†Š JavaScript èˆ‡ C# çš„æ©‹æ¥
             RegisterJavaScriptBridge();
 
-            // ¸ü¤J«eºİ­¶­±
+            // è¼‰å…¥å‰ç«¯é é¢
             var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html");
 
             if (File.Exists(wwwrootPath))
@@ -66,29 +75,29 @@ public class MainWindow : Form
             }
             else
             {
-                // ¶}µo¼Ò¦¡¡G¨Ï¥Î Vite ¶}µo¦øªA¾¹
+                // é–‹ç™¼æ¨¡å¼ï¼šä½¿ç”¨ Vite é–‹ç™¼ä¼ºæœå™¨
                 _webView.CoreWebView2.Navigate("http://localhost:5173");
             }
 
             _isInitialized = true;
-            Log.Information("WebView2 ªì©l¤Æ§¹¦¨");
+            Log.Information("WebView2 åˆå§‹åŒ–å®Œæˆ");
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "WebView2 ªì©l¤Æ¥¢±Ñ");
-            MessageBox.Show($"WebView2 ªì©l¤Æ¥¢±Ñ¡G{ex.Message}", "¿ù»~", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Log.Error(ex, "WebView2 åˆå§‹åŒ–å¤±æ•—");
+            MessageBox.Show($"WebView2 åˆå§‹åŒ–å¤±æ•—ï¼š{ex.Message}", "éŒ¯èª¤", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
     /// <summary>
-    /// µù¥U JavaScript »P C# ªº¾ô±µ
+    /// è¨»å†Š JavaScript èˆ‡ C# çš„æ©‹æ¥
     /// </summary>
     private void RegisterJavaScriptBridge()
     {
-        // ±q JavaScript ©I¥s C# ¤èªk
+        // å¾ JavaScript å‘¼å« C# æ–¹æ³•
         _webView.CoreWebView2.AddHostObjectToScript("csharpApi", new WebViewApi(_mapPickRecordManager, _gameLogProcessor, this));
 
-        // ±Ò¥Î¶}µoªÌ¤u¨ã¡]¶È¶}µo¼Ò¦¡¡^
+        // å•Ÿç”¨é–‹ç™¼è€…å·¥å…·ï¼ˆåƒ…é–‹ç™¼æ¨¡å¼ï¼‰
 #if DEBUG
         _webView.CoreWebView2.Settings.AreDevToolsEnabled = true;
 #else
@@ -100,7 +109,7 @@ public class MainWindow : Form
     }
 
     /// <summary>
-    /// ±q C# ©I¥s JavaScript ¤èªk
+    /// å¾ C# å‘¼å« JavaScript æ–¹æ³•
     /// </summary>
     public async Task CallJavaScriptAsync(string functionName, params object[] args)
     {
@@ -118,12 +127,12 @@ public class MainWindow : Form
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "©I¥s JavaScript ¤èªk¥¢±Ñ¡G{FunctionName}", functionName);
+            Log.Error(ex, "å‘¼å« JavaScript æ–¹æ³•å¤±æ•—ï¼š{FunctionName}", functionName);
         }
     }
 
     /// <summary>
-    /// ³qª¾«eºİ¡G·s¦a¹Ï°O¿ı
+    /// é€šçŸ¥å‰ç«¯ï¼šæ–°åœ°åœ–è¨˜éŒ„
     /// </summary>
     public async Task NotifyNewMapRecord()
     {
@@ -134,13 +143,48 @@ public class MainWindow : Form
     }
 
     /// <summary>
-    /// ³qª¾«eºİ¡Gª««~¬B¨ú
+    /// é€šçŸ¥å‰ç«¯ï¼šç‰©å“æ‹¾å–
     /// </summary>
     public async Task NotifyItemPicked(string itemName, int quantity)
     {
         if (_isInitialized)
         {
             await CallJavaScriptAsync("window.onItemPicked", itemName, quantity);
+        }
+    }
+
+    /// <summary>
+    /// è™•ç† "å·²é–‹å•Ÿæ—¥èªŒ" äº‹ä»¶
+    /// </summary>
+    private async void HandleLogOpenedDetected()
+    {
+        if (_isInitialized)
+        {
+            await _webViewHub.NotifyLogMonitoringStatusAsync("ç›£æ§æ—¥èªŒä¸­");
+            Log.Information("å·²é€šçŸ¥å‰ç«¯ï¼šç›£æ§æ—¥èªŒä¸­");
+        }
+    }
+
+    /// <summary>
+    /// è™•ç†èƒŒåŒ…åŒæ­¥å®Œæˆäº‹ä»¶
+    /// </summary>
+    private async void HandleBagSyncCompleted()
+    {
+        if (_isInitialized)
+        {
+            await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
+            Log.Information("å·²é€šçŸ¥å‰ç«¯ï¼šèƒŒåŒ…åŒæ­¥å®Œæˆ");
+        }
+    }
+
+    /// <summary>
+    /// é€šçŸ¥å‰ç«¯èƒŒåŒ…åŒæ­¥ç‹€æ…‹
+    /// </summary>
+    public async Task NotifyBagSyncAsync()
+    {
+        if (_isInitialized)
+        {
+            await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
         }
     }
 }

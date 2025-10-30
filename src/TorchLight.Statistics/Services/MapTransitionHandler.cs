@@ -1,7 +1,7 @@
-namespace TorchLight.Statistics.Services;
+ï»¿namespace TorchLight.Statistics.Services;
 
 /// <summary>
-/// ³B²z¦a¹Ï¤Á´«ÅŞ¿è
+/// è™•ç†åœ°åœ–åˆ‡æ›é‚è¼¯
 /// </summary>
 public class MapTransitionHandler
 {
@@ -13,23 +13,23 @@ public class MapTransitionHandler
     }
 
     /// <summary>
-    /// ³B²z¦a¹Ï¤Á´«¨Æ¥ó
+    /// è™•ç†åœ°åœ–åˆ‡æ›äº‹ä»¶
     /// </summary>
     public void HandleMapTransition(DateTime time, string fromPath, string toPath)
     {
         var fromMapName = MapMapper.GetMapNameByFullPath(fromPath);
         var toMapName = MapMapper.GetMapNameByFullPath(toPath);
 
-        Console.WriteLine($"{time:yyyy/MM/dd HH:mm:ss}\t±q¦a¹Ï {fromMapName} ¶i¤J¦a¹Ï {toMapName}");
+        Console.WriteLine($"{time:yyyy/MM/dd HH:mm:ss}\tå¾åœ°åœ– {fromMapName} é€²å…¥åœ°åœ– {toMapName}");
 
         _mapPickRecordManager.UpdateCurrentMapName(toMapName);
 
-        // ±qÂÃ¨­³B¶i¤J²§¬É¦a¹Ï
+        // å¾è—èº«è™•é€²å…¥ç•°ç•Œåœ°åœ–
         if (MapMapper.IsHideoutMap(fromPath))// && MapMapper.IsNetherrealmMap(toPath))
         {
             _mapPickRecordManager.StartMapRecord(toPath, toMapName, time);
         }
-        // ±q²§¬É¦a¹Ïªğ¦^ÂÃ¨­³B
+        // å¾ç•°ç•Œåœ°åœ–è¿”å›è—èº«è™•
         else if (MapMapper.IsHideoutMap(toPath))// && MapMapper.IsNetherrealmMap(fromPath))
         {
             _mapPickRecordManager.EndMapRecord(fromMapName, time);

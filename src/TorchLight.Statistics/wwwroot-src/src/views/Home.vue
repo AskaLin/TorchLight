@@ -1,33 +1,41 @@
 ﻿<template>
   <div class="home">
     <div class="welcome-card">
-<h2>歡迎使用拾取物品統計工具</h2>
+      <h2>歡迎使用拾取物品統計工具</h2>
       <p>此工具會自動監控遊戲日誌，統計您在異界地圖中拾取的物品</p>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon">???</div>
-        <div class="stat-content">
-    <div class="stat-label">總地圖數</div>
+<div class="stat-icon">🗺️</div>
+ <div class="stat-content">
+   <div class="stat-label">總地圖數</div>
           <div class="stat-value">{{ mapStore.totalMaps }}</div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon">??</div>
+    <div class="stat-card">
+        <div class="stat-icon">📦</div>
         <div class="stat-content">
-        <div class="stat-label">總物品種類</div>
-          <div class="stat-value">{{ mapStore.totalItems }}</div>
+  <div class="stat-label">總物品種類</div>
+      <div class="stat-value">{{ mapStore.totalItems }}</div>
         </div>
-</div>
+      </div>
 
       <div class="stat-card">
-        <div class="stat-icon">?</div>
-      <div class="stat-content">
-          <div class="stat-label">狀態</div>
-    <div class="stat-value status">{{ statusText }}</div>
+        <div class="stat-icon">🔍</div>
+<div class="stat-content">
+          <div class="stat-label">監控狀態</div>
+          <div class="stat-value status" :class="statusClass">{{ mapStore.monitoringStatus }}</div>
+        </div>
       </div>
+
+      <div class="stat-card">
+ <div class="stat-icon">🕒</div>
+        <div class="stat-content">
+          <div class="stat-label">背包上次同步</div>
+          <div class="stat-value time">{{ formattedSyncTime }}</div>
+        </div>
       </div>
     </div>
 
@@ -64,10 +72,21 @@ import { useMapStore } from '../stores/mapStore'
 
 const mapStore = useMapStore()
 
-const statusText = computed(() => {
-  return mapStore.currentMapInfo.isInMap 
-    ? `進行中: ${mapStore.currentMapInfo.mapName}` 
-    : '待機中'
+const statusClass = computed(() => {
+  if (mapStore.monitoringStatus === '監控日誌中') return 'active'
+  if (mapStore.currentMapInfo.isInMap) return 'in-map'
+  return 'idle'
+})
+
+const formattedSyncTime = computed(() => {
+  if (!mapStore.lastBagSyncTime) return '未同步'
+  
+  const time = new Date(mapStore.lastBagSyncTime)
+  return time.toLocaleTimeString('zh-TW', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
 })
 
 const exportRecords = async () => {
@@ -84,7 +103,7 @@ const clearRecords = async () => {
     return
   }
   
-const success = await mapStore.clearAllRecords()
+  const success = await mapStore.clearAllRecords()
   if (success) {
     alert('已清除所有記錄')
   } else {
@@ -165,6 +184,25 @@ const success = await mapStore.clearAllRecords()
 
 .stat-value.status {
   font-size: 1.2rem;
+}
+
+.stat-value.status.active {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.stat-value.status.in-map {
+  color: #ff9800;
+  font-weight: bold;
+}
+
+.stat-value.status.idle {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.stat-value.time {
+  font-size: 1.2rem;
+  color: #2196f3;
 }
 
 .quick-actions {
