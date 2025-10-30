@@ -2,6 +2,7 @@
 using Serilog;
 using TorchLight.Statistics;
 using TorchLight.Statistics.Configuration;
+using TorchLight.Statistics.UI;
 
 // 初始化 Serilog
 Log.Logger = new LoggerConfiguration()
@@ -27,9 +28,6 @@ try
     var itemChangeProcessor = new ItemChangeBlockProcessor();
     var logProcessor = new GameLogProcessor(itemTable, lineParser, itemChangeProcessor);
     Log.Information("核心組件初始化完成");
-
-    // 建立選單管理器
-    var menuManager = new MenuManager(logProcessor.MapPickRecordManager);
 
     // 設定日誌檔案路徑
     var filePath = GetLogFilePath();
@@ -59,38 +57,14 @@ try
     Log.Information("監聽已啟動，等待遊戲事件...");
     Log.Information("提示：進入異界地圖後會自動開始統計拾取物品");
     Log.Information("════════════════════════════════════════");
-    Log.Information("按 'M' 或 'm' 開啟選單，按 Enter 結束程式");
 
-    // 主迴圈：監聽鍵盤輸入
-    while (true)
-    {
-        if (Console.KeyAvailable)
-        {
-            var key = Console.ReadKey(intercept: true);
+    // 啟動 WebView2 UI
+    Application.SetHighDpiMode(HighDpiMode.SystemAware);
+    Application.EnableVisualStyles();
+    Application.SetCompatibleTextRenderingDefault(false);
 
-            if (key.Key == ConsoleKey.M)
-            {
-                // 進入選單模式
-                while (menuManager.IsRunning)
-                {
-                    menuManager.ShowMainMenu();
-                    var input = Console.ReadLine();
-                    menuManager.HandleInput(input);
-                }
-
-                // 離開選單，顯示提示
-                Console.WriteLine("\n返回監聽模式...");
-                Log.Information("按 'M' 或 'm' 開啟選單，按 Enter 結束程式");
-            }
-            else if (key.Key == ConsoleKey.Enter)
-            {
-                // 結束程式
-                break;
-            }
-        }
-
-        Thread.Sleep(100); // 避免佔用過多 CPU
-    }
+    var mainWindow = new MainWindow(logProcessor.MapPickRecordManager, logProcessor);
+    Application.Run(mainWindow);
 
     tail.Stop();
     Log.Information("程式已結束。感謝使用！");
@@ -98,8 +72,7 @@ try
 catch (Exception ex)
 {
     Log.Fatal(ex, "程式發生嚴重錯誤");
-    Log.Information("按下 Enter 結束程式...");
-    Console.ReadLine();
+    MessageBox.Show($"程式發生嚴重錯誤：{ex.Message}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
 }
 finally
 {
