@@ -27,11 +27,7 @@
     <None Include="$(SolutionRoot)\README.md">
       <Link>README.md</Link>
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Include="$(SolutionRoot)\CHANGELOG.md">
-      <Link>CHANGELOG.md</Link>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
+    </None>    
   </ItemGroup>
 
   <ItemGroup>
