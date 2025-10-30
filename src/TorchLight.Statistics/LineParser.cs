@@ -164,7 +164,7 @@ public partial class LineParser
             Name = itemName
         };
     }
-
+    
     #endregion
 
     #region 輔助方法
@@ -172,7 +172,7 @@ public partial class LineParser
     /// <summary>
     /// 將 Unreal 日誌時間格式轉換為 DateTime
     /// </summary>
-    private static DateTime ParseUnrealDateTime(string timeStr)
+    public static DateTime ParseUnrealDateTime(string timeStr)
     {
         var dt = DateTime.ParseExact(timeStr, AppConfiguration.UnrealLogTimeFormat, null);
         return dt.AddHours(AppConfiguration.TimeZoneOffsetHours);

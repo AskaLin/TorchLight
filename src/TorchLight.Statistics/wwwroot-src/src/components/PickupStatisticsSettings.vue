@@ -3,13 +3,13 @@
     <div class="settings-header">
       <h2>拾取統計設定管理</h2>
       <button @click="showAddDialog = true" class="btn-add">
-        <span>➕ 新增統計項目</span>
+    <span>➕ 新增統計項目</span>
       </button>
     </div>
 
     <!-- 通知訊息 -->
     <div v-if="notification.show" :class="['notification', notification.type]">
-      {{ notification.message }}
+   {{ notification.message }}
     </div>
 
     <!-- 載入中 -->
@@ -18,111 +18,145 @@
     <!-- 統計設定列表 -->
     <div v-else class="statistics-container">
       <!-- 動態渲染 PageId 類型區塊 -->
-      <div
+  <div
         v-for="pageType in pageIdTypes"
         :key="pageType.value"
-        class="statistics-section"
-    >
-    <!-- 標題與折疊按鈕 -->
+      class="statistics-section"
+      >
+        <!-- 大分類標題與折疊按鈕 -->
         <div class="section-header" @click="toggleCollapse(pageType.value)">
           <h3>
             <span class="collapse-icon">{{ isCollapsed(pageType.value) ? '▶' : '▼' }}</span>
-            {{ pageType.name }}
-            <span class="count-badge">({{ getItemsByPageId(pageType.value).length }})</span>
-  </h3>
+   {{ pageType.name }}
+        <span class="count-badge">({{ getTotalItemsByPageId(pageType.value) }})</span>
+          </h3>
         </div>
 
-        <!-- 統計項目網格（可折疊） -->
-        <div v-show="!isCollapsed(pageType.value)" class="statistics-grid">
+   <!-- 小分類（ItemType）區塊 -->
+        <div v-show="!isCollapsed(pageType.value)" class="subcategories">
   <div
-            v-for="item in getItemsByPageId(pageType.value)"
-            :key="item.itemId"
-            :class="['statistics-card', { disabled: !item.enabled }]"
-            @click="toggleItemEnabled(item)"
+   v-for="(items, itemType) in getItemTypesByPageId(pageType.value)"
+          :key="`${pageType.value}-${itemType}`"
+class="subcategory-section"
           >
-            <div class="card-header">
-            <div class="item-name">{{ item.itemName }}</div>
-     <div class="item-status-icon">
-          {{ item.enabled ? '✓' : '✗' }}
-  </div>
-    </div>
-   <div class="card-footer">
-     <span class="item-id">ID: {{ item.itemId }}</span>
-              <div class="card-actions" @click.stop>
-                <button @click="editItem(item)" class="btn-icon" title="編輯">
-   ✏️
-       </button>
-     <button @click="deleteItem(item)" class="btn-icon" title="刪除">
-         🗑️
-   </button>
-   </div>
+    <!-- 小分類標題 -->
+            <div class="subcategory-header" @click="toggleSubcategoryCollapse(pageType.value, itemType)">
+              <h4>
+      <span class="collapse-icon">{{ isSubcategoryCollapsed(pageType.value, itemType) ? '▶' : '▼' }}</span>
+          {{ getItemTypeName(itemType) }}
+          <span class="count-badge">({{ items.length }})</span>
+              </h4>
             </div>
-          </div>
-        </div>
 
-   <!-- 空狀態提示 -->
-        <div v-if="!isCollapsed(pageType.value) && getItemsByPageId(pageType.value).length === 0" class="empty-message">
-     尚未設定{{ pageType.name.replace(/^.+?\s/, '') }}統計項目
-        </div>
-   </div>
-    </div>
-
- <!-- 新增/編輯對話框 -->
-    <div v-if="showAddDialog" class="modal-overlay" @click.self="closeDialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>{{ isEditing ? '編輯統計項目' : '新增統計項目' }}</h3>
-        <button @click="closeDialog" class="btn-close">✕</button>
-        </div>
-
-        <div class="modal-body">
-      <div class="form-group">
-          <label>物品 ID *</label>
-            <input
-            v-model.number="editingItem.itemId"
-     type="number"
-              placeholder="例如: 1001"
- :disabled="isEditing"
-       class="form-input"
-            />
+            <!-- 統計項目網格（可折疊） -->
+     <div v-show="!isSubcategoryCollapsed(pageType.value, itemType)" class="statistics-grid">
+     <div
+             v-for="item in items"
+         :key="item.itemId"
+                :class="['statistics-card', { disabled: !item.enabled }]"
+           @click="toggleItemEnabled(item)"
+  >
+        <div class="card-header">
+    <div class="item-name">{{ item.itemName }}</div>
+    <div class="item-status-icon">
+ {{ item.enabled ? '✓' : '✗' }}
   </div>
-
-          <div class="form-group">
-   <label>物品名稱 *</label>
-       <input
-            v-model="editingItem.itemName"
-    type="text"
-      placeholder="例如: 神威輝石"
-        class="form-input"
-    />
+         </div>
+ <div class="card-footer">
+            <span class="item-id">ID: {{ item.itemId }}</span>
+   <div class="card-actions" @click.stop>
+    <button @click="editItem(item)" class="btn-icon" title="編輯">
+     ✏️
+  </button>
+        <button @click="deleteItem(item)" class="btn-icon" title="刪除">
+      🗑️
+               </button>
+    </div>
+             </div>
+         </div>
+    </div>
 </div>
 
+          <!-- 空狀態提示 -->
+   <div v-if="getTotalItemsByPageId(pageType.value) === 0" class="empty-message">
+    尚未設定{{ pageType.name.replace(/^.+?\s/, '') }}統計項目
+   </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增/編輯對話框 -->
+    <div v-if="showAddDialog" class="modal-overlay" @click.self="closeDialog">
+      <div class="modal-content">
+     <div class="modal-header">
+          <h3>{{ isEditing ? '編輯統計項目' : '新增統計項目' }}</h3>
+    <button @click="closeDialog" class="btn-close">✕</button>
+  </div>
+
+        <div class="modal-body">
           <div class="form-group">
-       <label>頁面類型 *</label>
-            <select v-model.number="editingItem.pageId" class="form-select">
-          <option
+     <label>物品 ID *</label>
+         <input
+       v-model.number="editingItem.itemId"
+        type="number"
+              placeholder="例如: 1001"
+      :disabled="isEditing"
+       class="form-input"
+ />
+ </div>
+
+ <div class="form-group">
+            <label>物品名稱 *</label>
+     <input
+     v-model="editingItem.itemName"
+      type="text"
+    placeholder="例如: 神威輝石"
+            class="form-input"
+   />
+      </div>
+
+          <div class="form-group">
+     <label>頁面類型 *</label>
+     <select v-model.number="editingItem.pageId" @change="onPageIdChange" class="form-select">
+    <option
      v-for="type in pageIdTypes"
-      :key="type.value"
-   :value="type.value"
-        >
-   {{ type.name }}
-  </option>
-        </select>
-            <div v-if="pageIdTypes.length === 0" class="form-hint">
-  載入頁面類型中...
-            </div>
+        :key="type.value"
+          :value="type.value"
+       >
+         {{ type.name }}
+   </option>
+      </select>
+   <div v-if="pageIdTypes.length === 0" class="form-hint">
+      載入頁面類型中...
+    </div>
           </div>
 
           <div class="form-group">
-       <label class="checkbox-label">
+<label>物品類型 *</label>
+     <select v-model="editingItem.itemType" class="form-select">
+      <option
+ v-for="type in filteredItemTypes"
+     :key="type.value"
+        :value="type.value"
+    >
+       {{ type.name }}
+   </option>
+  </select>
+      <div v-if="filteredItemTypes.length === 0" class="form-hint">
+           請先選擇頁面類型
+  </div>
+       </div>
+
+    <div class="form-group">
+     <label class="checkbox-label">
   <input
-   v-model="editingItem.enabled"
-type="checkbox"
-      class="form-checkbox"
-              />
-            <span>啟用統計</span>
-       </label>
-          </div>
+       v-model="editingItem.enabled"
+    type="checkbox"
+             class="form-checkbox"
+   />
+<span>啟用統計</span>
+      </label>
+      </div>
         </div>
 
         <div class="modal-footer">
@@ -130,7 +164,7 @@ type="checkbox"
           <button @click="saveItem" class="btn-save">儲存</button>
         </div>
       </div>
-    </div>
+  </div>
   </div>
 </template>
 
@@ -141,46 +175,104 @@ import { apiCall } from '../utils/api'
 const loading = ref(false)
 const statisticsConfigs = ref({})
 const pageIdTypes = ref([])
+const itemTypes = ref([])
+const pageIdItemTypeMapping = ref({}) // 新增：PageId 和 ItemType 對應關係
 const showAddDialog = ref(false)
 const isEditing = ref(false)
 const notification = ref({ show: false, type: 'success', message: '' })
 
 const collapsedSections = ref({})
+const collapsedSubcategories = ref({})
 
 const editingItem = ref({
   itemId: 0,
   itemName: '',
   pageId: 100,
+  itemType: '',
   enabled: true
 })
 
-// 切換折疊狀態
+// 切換大分類折疊狀態
 const toggleCollapse = (pageId) => {
   collapsedSections.value[pageId] = !collapsedSections.value[pageId]
 }
 
-// 檢查是否已折疊（預設為 true，即收起）
+// 檢查大分類是否已折疊（預設為 true，即折疊）
 const isCollapsed = (pageId) => {
+  // 如果未設定，預設為 true（折疊）
   return collapsedSections.value[pageId] !== false
 }
 
-// 根據 PageId 獲取項目
-const getItemsByPageId = (pageId) => {
-  return statisticsConfigs.value[pageId] || []
+// 切換小分類折疊狀態
+const toggleSubcategoryCollapse = (pageId, itemType) => {
+  const key = `${pageId}-${itemType}`
+  collapsedSubcategories.value[key] = !collapsedSubcategories.value[key]
+}
+
+// 檢查小分類是否已折疊（預設為 true，即折疊）
+const isSubcategoryCollapsed = (pageId, itemType) => {
+  const key = `${pageId}-${itemType}`
+  // 如果未設定，預設為 true（折疊）
+  return collapsedSubcategories.value[key] !== false
+}
+
+// 根據 PageId 獲取所有 ItemType 分組
+const getItemTypesByPageId = (pageId) => {
+  return statisticsConfigs.value[pageId] || {}
+}
+
+// 獲取 PageId 下的總項目數
+const getTotalItemsByPageId = (pageId) => {
+  const itemTypeGroups = statisticsConfigs.value[pageId]
+  if (!itemTypeGroups) return 0
+  
+  return Object.values(itemTypeGroups).reduce((total, items) => total + items.length, 0)
+}
+
+// 獲取 ItemType 的顯示名稱
+const getItemTypeName = (itemType) => {
+  const type = itemTypes.value.find(t => t.value === itemType)
+  return type ? type.name : itemType
+}
+
+// 根據選擇的 PageId 過濾可用的 ItemType
+const filteredItemTypes = computed(() => {
+  const pageId = editingItem.value.pageId
+  if (!pageId || !pageIdItemTypeMapping.value[pageId]) {
+  return itemTypes.value
+  }
+  
+  const allowedTypes = pageIdItemTypeMapping.value[pageId]
+  return itemTypes.value.filter(t => allowedTypes.includes(t.value))
+})
+
+// 監聽 PageId 變化，自動調整 ItemType
+const onPageIdChange = () => {
+  const currentItemType = editingItem.value.itemType
+  const allowedTypes = pageIdItemTypeMapping.value[editingItem.value.pageId] || []
+  
+  // 如果當前選擇的 ItemType 不在允許的列表中，重置為第一個可用選項
+  if (currentItemType && !allowedTypes.includes(currentItemType)) {
+    if (filteredItemTypes.value.length > 0) {
+      editingItem.value.itemType = filteredItemTypes.value[0].value
+} else {
+   editingItem.value.itemType = ''
+    }
+  }
 }
 
 // 切換項目啟用狀態
 const toggleItemEnabled = async (item) => {
   const newEnabled = !item.enabled
   
-  try {
+try {
     const result = await apiCall(
       'SavePickupStatisticsItem',
       item.itemId,
       item.itemName,
       item.pageId,
       newEnabled,
-    0
+      item.itemType
     )
 
     if (result.success) {
@@ -200,7 +292,7 @@ const loadPageIdTypes = async () => {
     const data = await apiCall('GetPageIdTypes')
     pageIdTypes.value = data
 
-    if (pageIdTypes.value.length > 0 && editingItem.value.pageId === 0) {
+  if (pageIdTypes.value.length > 0 && editingItem.value.pageId === 0) {
       editingItem.value.pageId = pageIdTypes.value[0].value
     }
   } catch (err) {
@@ -209,11 +301,37 @@ const loadPageIdTypes = async () => {
   }
 }
 
+// 載入物品類型
+const loadItemTypes = async () => {
+  try {
+  const data = await apiCall('GetItemTypes')
+  itemTypes.value = data
+
+    if (itemTypes.value.length > 0 && !editingItem.value.itemType) {
+      editingItem.value.itemType = itemTypes.value[0].value
+  }
+  } catch (err) {
+    console.error('載入物品類型失敗:', err)
+    showNotification('error', '載入物品類型失敗: ' + err.message)
+  }
+}
+
+// 載入 PageId 和 ItemType 對應關係
+const loadPageIdItemTypeMapping = async () => {
+  try {
+    const data = await apiCall('GetPageIdItemTypeMapping')
+    pageIdItemTypeMapping.value = data
+  } catch (err) {
+    console.error('載入對應關係失敗:', err)
+    showNotification('error', '載入對應關係失敗: ' + err.message)
+  }
+}
+
 // 載入統計設定
 const loadStatisticsConfigs = async () => {
   loading.value = true
   try {
-    const data = await apiCall('GetPickupStatisticsConfigs')
+  const data = await apiCall('GetPickupStatisticsConfigs')
     statisticsConfigs.value = data
   } catch (err) {
     showNotification('error', '載入統計設定失敗: ' + err.message)
@@ -231,7 +349,7 @@ const editItem = (item) => {
 
 // 儲存項目
 const saveItem = async () => {
-  if (!editingItem.value.itemId || !editingItem.value.itemName) {
+  if (!editingItem.value.itemId || !editingItem.value.itemName || !editingItem.value.itemType) {
     showNotification('error', '請填寫所有必填欄位')
     return
   }
@@ -240,15 +358,15 @@ const saveItem = async () => {
     const result = await apiCall(
       'SavePickupStatisticsItem',
       editingItem.value.itemId,
-      editingItem.value.itemName,
+  editingItem.value.itemName,
       editingItem.value.pageId,
       editingItem.value.enabled,
-      0
+      editingItem.value.itemType
     )
 
     if (result.success) {
       showNotification('success', result.message)
-      closeDialog()
+    closeDialog()
       await loadStatisticsConfigs()
     } else {
       showNotification('error', result.message)
@@ -272,7 +390,7 @@ const deleteItem = async (item) => {
       await loadStatisticsConfigs()
     } else {
       showNotification('error', result.message)
- }
+    }
   } catch (err) {
     showNotification('error', '刪除失敗: ' + err.message)
   }
@@ -283,9 +401,10 @@ const closeDialog = () => {
   showAddDialog.value = false
   isEditing.value = false
   editingItem.value = {
-  itemId: 0,
+    itemId: 0,
     itemName: '',
-    pageId: pageIdTypes.value.length > 0 ? pageIdTypes.value[0].value : 100,
+  pageId: pageIdTypes.value.length > 0 ? pageIdTypes.value[0].value : 100,
+    itemType: itemTypes.value.length > 0 ? itemTypes.value[0].value : '',
     enabled: true
   }
 }
@@ -294,21 +413,21 @@ const closeDialog = () => {
 const showNotification = (type, message) => {
   notification.value = { show: true, type, message }
   setTimeout(() => {
-  notification.value.show = false
+    notification.value.show = false
   }, 3000)
 }
 
 // 監聽後端的設定更新通知
 if (typeof window !== 'undefined') {
   window.addEventListener('message', (event) => {
-    try {
-      const message = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+ try {
+ const message = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
 
-   if (message && message.type === 'pickupStatisticsConfigUpdated') {
-        const { success, message: msg } = message.data
+ if (message && message.type === 'pickupStatisticsConfigUpdated') {
+    const { success, message: msg } = message.data
       showNotification(success ? 'success' : 'error', msg)
-    if (success) {
-          loadStatisticsConfigs()
+        if (success) {
+      loadStatisticsConfigs()
         }
       }
     } catch (err) {
@@ -319,6 +438,8 @@ if (typeof window !== 'undefined') {
 
 onMounted(async () => {
   await loadPageIdTypes()
+  await loadItemTypes()
+  await loadPageIdItemTypeMapping() // 新增：載入對應關係
   await loadStatisticsConfigs()
 })
 </script>
@@ -400,30 +521,72 @@ onMounted(async () => {
   margin-bottom: 30px;
 }
 
-/* 區塊標題 */
+/* 大分類標題 */
 .section-header {
   display: flex;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  padding: 12px 15px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 8px;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
   margin-bottom: 15px;
   transition: all 0.3s;
+  border-left: 4px solid rgba(102, 126, 234, 0.5);
 }
 
 .section-header:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.08);
+  border-left-color: #667eea;
 }
 
 .section-header h3 {
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   color: white;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+/* 小分類區塊容器 */
+.subcategories {
+  padding-left: 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* 小分類標題 */
+.subcategory-section {
+  margin-bottom: 20px;
+}
+
+.subcategory-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: all 0.3s;
+  border-left: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.subcategory-header:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-left-color: rgba(102, 126, 234, 0.8);
+}
+
+.subcategory-header h4 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .collapse-icon {
@@ -436,7 +599,7 @@ onMounted(async () => {
 
 .count-badge {
   font-size: 0.85rem;
-color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.5);
   font-weight: normal;
 }
 
@@ -445,6 +608,7 @@ color: rgba(255, 255, 255, 0.5);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 15px;
+  padding-left: 20px;
   animation: slideDown 0.3s ease-out;
 }
 
@@ -464,7 +628,7 @@ color: rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   border: 2px solid rgba(255, 255, 255, 0.1);
-border-radius: 12px;
+  border-radius: 12px;
   padding: 20px;
   cursor: pointer;
   transition: all 0.3s;
@@ -476,7 +640,7 @@ border-radius: 12px;
 .statistics-card:hover {
   border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-5px);
-box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .statistics-card.disabled {
@@ -569,6 +733,7 @@ box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   color: rgba(255, 255, 255, 0.5);
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
+  margin-left: 20px;
 }
 
 /* 對話框 */
@@ -727,7 +892,7 @@ box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 
 .btn-save:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* 響應式設計 */
@@ -740,6 +905,11 @@ box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 @media (max-width: 768px) {
   .statistics-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    padding-left: 10px;
+  }
+
+  .subcategories {
+  padding-left: 10px;
   }
 }
 

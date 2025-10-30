@@ -1,11 +1,10 @@
-﻿using System.Runtime.InteropServices;
+﻿using Serilog;
+using System.Runtime.InteropServices;
 using System.Text.Json;
-using Serilog;
+using TorchLight.Statistics.Enums;
+using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
-using TorchLight.Statistics.Core;
-using TorchLight.Statistics.Mapper;
-using TorchLight.Statistics.Enums;
 
 namespace TorchLight.Statistics.UI;
 
@@ -14,18 +13,17 @@ namespace TorchLight.Statistics.UI;
 /// </summary>
 [ClassInterface(ClassInterfaceType.AutoDual)]
 [ComVisible(true)]
-public class WebViewApi
+public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProcessor gameLogProcessor, MainWindow mainWindow)
 {
-    private readonly MapPickRecordManager _mapPickRecordManager;
-    private readonly GameLogProcessor _gameLogProcessor;
-    private readonly MainWindow _mainWindow;
+    private readonly MapPickRecordManager _mapPickRecordManager = mapPickRecordManager;
+    private readonly GameLogProcessor _gameLogProcessor = gameLogProcessor;
+    private readonly MainWindow _mainWindow = mainWindow;
 
-    public WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProcessor gameLogProcessor, MainWindow mainWindow)
+    private readonly JsonSerializerOptions _ops = new()
     {
-        _mapPickRecordManager = mapPickRecordManager;
-        _gameLogProcessor = gameLogProcessor;
-        _mainWindow = mainWindow;
-    }
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
 
     /// <summary>
     /// 獲取所有地圖記錄
@@ -35,27 +33,22 @@ public class WebViewApi
         try
         {
             var records = _mapPickRecordManager.MapRecords
-          .Select(r => new
-          {
-              r.RecordId,
-              r.Id,
-              Name = MapInfoMapper.GetMapName(r.Id), // 即時從 MapMapper 取得最新名稱
-              r.MapTicket,
-              Compass = r.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
-              r.Probe,
-              r.StartTime,
-              r.EndTime,
-              r.UseTime,
-              ItemCount = r.PickRecord?.Count ?? 0,
-              TotalQuantity = r.PickRecord?.Sum(p => p.Value.Total) ?? 0
-          })
-         .ToList();
+                .Select(r => new
+                {
+                    r.RecordId,
+                    r.Id,
+                    Name = MapInfoMapper.GetMapName(r.Id), // 即時從 MapMapper 取得最新名稱
+                    r.MapTicket,
+                    Compass = r.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
+                    r.Probe,
+                    r.StartTime,
+                    r.EndTime,
+                    r.UseTime,
+                    ItemCount = r.PickRecord?.Count ?? 0,
+                    TotalQuantity = r.PickRecord?.Sum(p => p.Value.Total) ?? 0
+                }).ToList();
 
-            return JsonSerializer.Serialize(records, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(records, _ops);
         }
         catch (Exception ex)
         {
@@ -76,8 +69,7 @@ public class WebViewApi
                 return JsonSerializer.Serialize(new { error = "無效的記錄ID" });
             }
 
-            var record = _mapPickRecordManager.MapRecords
- .FirstOrDefault(r => r.RecordId == recordId);
+            var record = _mapPickRecordManager.MapRecords.FirstOrDefault(r => r.RecordId == recordId);
 
             if (record == null)
             {
@@ -100,15 +92,11 @@ public class WebViewApi
                     p.Value.BaseId,
                     p.Value.Name,
                     p.Value.Total,
-                    Slots = p.Value.Slots
+                    p.Value.Slots
                 }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
             };
 
-            return JsonSerializer.Serialize(detail, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(detail, _ops);
         }
         catch (Exception ex)
         {
@@ -132,12 +120,16 @@ public class WebViewApi
                 return JsonSerializer.Serialize(new
                 {
                     IsInMap = false,
-                    MapType = "Hideout",
-                    MapName = _mapPickRecordManager.CurrentMapName
-                }, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                    MapType = MapType.Hideout.ToString(),  // ✅ 轉換為字串
+                    MapName = _mapPickRecordManager.CurrentMapName,
+                    RecordId = (Guid?)null,
+                    MapTicket = "",
+                    Compass = Array.Empty<string>(),
+                    Probe = "",
+                    StartTime = (DateTime?)null,
+                    Items = Array.Empty<object>(),
+
+                }, _ops);
             }
             else if (currentRecord != null)
             {
@@ -145,24 +137,22 @@ public class WebViewApi
                 return JsonSerializer.Serialize(new
                 {
                     IsInMap = true,
-                    MapType = "Netherrealm",
+                    MapType = MapType.Netherrealm.ToString(),  // ✅ 轉換為字串
+                    currentRecord.Token,
                     MapName = MapInfoMapper.GetMapName(currentRecord.Id), // 即時取得最新名稱
-                    RecordId = currentRecord.RecordId,
-                    MapTicket = currentRecord.MapTicket,
+                    currentRecord.RecordId,
+                    currentRecord.MapTicket,
                     Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
-                    Probe = currentRecord.Probe,
-                    StartTime = currentRecord.StartTime,
+                    currentRecord.Probe,
+                    currentRecord.StartTime,
                     Items = currentRecord.PickRecord?.Select(p => new
                     {
                         p.Value.BaseId,
                         p.Value.Name,
                         p.Value.Total,
-                        Slots = p.Value.Slots
+                        p.Value.Slots
                     }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
-                }, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                }, _ops);
             }
             else
             {
@@ -170,12 +160,16 @@ public class WebViewApi
                 return JsonSerializer.Serialize(new
                 {
                     IsInMap = true,
-                    MapType = "Netherrealm",
-                    MapName = _mapPickRecordManager.CurrentMapName
-                }, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                    MapType = MapType.Netherrealm.ToString(),  // ✅ 轉換為字串
+                    _mapPickRecordManager.Token,
+                    MapName = _mapPickRecordManager.CurrentMapName,
+                    RecordId = (Guid?)null,
+                    MapTicket = "",
+                    Compass = Array.Empty<string>(),
+                    Probe = "",
+                    StartTime = (DateTime?)null,
+                    Items = Array.Empty<object>()
+                }, _ops);
             }
         }
         catch (Exception ex)
@@ -199,28 +193,19 @@ public class WebViewApi
                 TotalMaps = records.Count,
                 TotalItems = records.Sum(r => r.PickRecord?.Count ?? 0),
                 TotalQuantity = records.Sum(r => r.PickRecord?.Sum(p => p.Value.Total) ?? 0),
-                TotalPlayTime = TimeSpan.FromSeconds(
-                   records.Sum(r => (r.EndTime - r.StartTime).TotalSeconds)
-              ).ToString(@"hh\:mm\:ss"),
-                MostPickedItems = records
-                   .SelectMany(r => r.PickRecord?.Values ?? Enumerable.Empty<PickedItemDataModel>())
-              .GroupBy(p => p.BaseId)
-             .Select(g => new
-             {
-                 BaseId = g.Key,
-                 Name = g.First().Name,
-                 TotalQuantity = g.Sum(p => p.Total)
-             })
-          .OrderByDescending(i => i.TotalQuantity)
-            .Take(10)
-            .ToArray()
+                TotalPlayTime = TimeSpan.FromSeconds(records.Sum(r => (r.EndTime - r.StartTime).TotalSeconds)).ToString(@"hh\:mm\:ss"),
+                MostPickedItems = records.SelectMany(r => r.PickRecord?.Values ?? Enumerable.Empty<PickedItemDataModel>())
+                                         .GroupBy(p => p.BaseId)
+                                         .Select(g => new
+                                         {
+                                             BaseId = g.Key,
+                                             g.First().Name,
+                                             TotalQuantity = g.Sum(p => p.Total)
+                                         }).OrderByDescending(i => i.TotalQuantity)
+                                         .Take(10).ToArray()
             };
 
-            return JsonSerializer.Serialize(stats, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(stats, _ops);
         }
         catch (Exception ex)
         {
@@ -255,11 +240,7 @@ public class WebViewApi
         try
         {
             var records = _mapPickRecordManager.MapRecords;
-            return JsonSerializer.Serialize(records, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(records, _ops);
         }
         catch (Exception ex)
         {
@@ -292,12 +273,7 @@ public class WebViewApi
         try
         {
             var configsByType = MapInfoMapper.GetAllMapConfigsByType();
-
-            return JsonSerializer.Serialize(configsByType, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(configsByType, _ops);
         }
         catch (Exception ex)
         {
@@ -323,6 +299,7 @@ public class WebViewApi
                 "Hideout" => MapType.Hideout,
                 "Netherrealm" => MapType.Netherrealm,
                 "SecretRealm" => MapType.SecretRealm,
+                "Boss" => MapType.Boss,
                 _ => MapType.Unknown
             };
 
@@ -371,32 +348,27 @@ public class WebViewApi
         try
         {
             var mapTypes = Enum.GetValues<MapType>()
-           .Where(t => t != MapType.Unknown) // 排除 Unknown
-                     .Select(t => new
-                     {
-                         Value = t.ToString(),
-                         Name = t switch
-                         {
-                             MapType.Hideout => "🏠 藏身處",
-                             MapType.Netherrealm => "🌌 異界地圖",
-                             MapType.SecretRealm => "🔮 秘境",
-                             _ => t.ToString()
-                         },
-                         Description = t switch
-                         {
-                             MapType.Hideout => "玩家的安全區域",
-                             MapType.Netherrealm => "可統計拾取的地圖",
-                             MapType.SecretRealm => "特殊秘境地圖",
-                             _ => ""
-                         }
-                     })
-                .ToArray();
+                .Where(t => t != MapType.Unknown) // 排除 Unknown
+                .Select(t => new
+                {
+                    Value = t.ToString(),
+                    Name = t switch
+                    {
+                        MapType.Hideout => "🏠 藏身處",
+                        MapType.Netherrealm => "🌌 異界地圖",
+                        MapType.SecretRealm => "🔮 秘境",
+                        _ => t.ToString()
+                    },
+                    Description = t switch
+                    {
+                        MapType.Hideout => "玩家的安全區域",
+                        MapType.Netherrealm => "可統計拾取的地圖",
+                        MapType.SecretRealm => "特殊秘境地圖",
+                        _ => ""
+                    }
+                }).ToArray();
 
-            return JsonSerializer.Serialize(mapTypes, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(mapTypes, _ops);
         }
         catch (Exception ex)
         {
@@ -432,18 +404,131 @@ public class WebViewApi
                            PageIdType.Other => "其他類物品",
                            _ => ""
                        }
-                   })
-                   .ToArray();
+                   }).ToArray();
 
-            return JsonSerializer.Serialize(pageIdTypes, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            return JsonSerializer.Serialize(pageIdTypes, _ops);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "獲取 PageId 類型失敗");
+            return JsonSerializer.Serialize(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 獲取所有物品類型（ItemType）
+    /// </summary>
+    public string GetItemTypes()
+    {
+        try
+        {
+            var itemTypes = Enum.GetValues<ItemType>().Where(t => t != ItemType.Unknown)
+                .Select(t => new
+                {
+                    Value = t.ToString(),
+                    Name = t switch
+                    {
+                        ItemType.Currency => "💰 通貨",
+                        ItemType.EquipmentMaterial => "⚙️ 裝備材料",
+                        ItemType.MemoryMaterial => "🧩 追憶材料",
+                        ItemType.CubeMaterial => "🎲 魔方材料",
+                        ItemType.TowerMaterial => "🗼 高塔材料",
+                        ItemType.DreamMaterial => "💭 夢語材料",
+                        ItemType.CorrosionMaterial => "☠️ 侵蝕材料",
+                        ItemType.OverlayMaterial => "🔷 疊界材料",
+                        ItemType.SpecialItem => "✨ 特殊道具",
+                        ItemType.DivinityContract => "📜 神格契約",
+                        ItemType.GameplayTicket => "🎫 玩法門票",
+                        ItemType.MapTicket => "🗺️ 地圖門票",
+                        ItemType.BossTicket => "👑 BOSS門票",
+                        ItemType.MemoryFirefly => "🔥 記憶螢光",
+                        ItemType.DivinitySlate => "📖 神格石板",
+                        ItemType.SkillItem => "⚡ 技能道具",
+                        ItemType.Compass => "🧭 羅盤",
+                        ItemType.Probe => "🛰️ 探針",
+                        ItemType.DivineCrest => "🛡️ 神威紋章",
+                        _ => t.ToString()
+                    },
+                    Description = t switch
+                    {
+                        ItemType.Currency => "基礎通貨類",
+                        ItemType.EquipmentMaterial => "用於強化裝備的材料",
+                        ItemType.MemoryMaterial => "追憶系統相關材料",
+                        ItemType.CubeMaterial => "魔方系統相關材料",
+                        ItemType.TowerMaterial => "高塔玩法相關材料",
+                        ItemType.DreamMaterial => "夢語系統相關材料",
+                        ItemType.CorrosionMaterial => "侵蝕系統相關材料",
+                        ItemType.OverlayMaterial => "疊界系統相關材料",
+                        ItemType.SpecialItem => "特殊功能道具",
+                        ItemType.DivinityContract => "神格契約類物品",
+                        ItemType.GameplayTicket => "各類玩法門票",
+                        ItemType.MapTicket => "進入地圖的門票",
+                        ItemType.BossTicket => "挑戰 BOSS 的門票",
+                        ItemType.MemoryFirefly => "記憶螢光類物品",
+                        ItemType.DivinitySlate => "神格石板類物品",
+                        ItemType.SkillItem => "技能相關物品",
+                        ItemType.Compass => "羅盤類物品",
+                        ItemType.Probe => "探針類物品",
+                        ItemType.DivineCrest => "神威紋章類物品",
+                        _ => ""
+                    }
+                }).ToArray();
+
+            return JsonSerializer.Serialize(itemTypes, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取物品類型失敗");
+            return JsonSerializer.Serialize(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 獲取 PageId 和 ItemType 的對應關係
+    /// </summary>
+    public string GetPageIdItemTypeMapping()
+    {
+        try
+        {
+            // 定義 PageIdType 和 ItemType 的對應關係
+            var mapping = new Dictionary<int, List<string>>
+            {
+                // Equipment (100) - 裝備類
+                [(int)PageIdType.Equipment] = [nameof(ItemType.DivinitySlate)],
+                // Skill (101) - 技能類
+                [(int)PageIdType.Skill] = [nameof(ItemType.SkillItem)],
+                // Currency (102) - 通貨類
+                [(int)PageIdType.Currency] =
+                [
+                    nameof(ItemType.Currency),
+                    nameof(ItemType.EquipmentMaterial),
+                    nameof(ItemType.MemoryMaterial),
+                    nameof(ItemType.CubeMaterial),
+                    nameof(ItemType.TowerMaterial),
+                    nameof(ItemType.DreamMaterial),
+                    nameof(ItemType.CorrosionMaterial),
+                    nameof(ItemType.OverlayMaterial),
+                    nameof(ItemType.SpecialItem),
+                    nameof(ItemType.DivinityContract)
+                ],
+                // Other (103) - 其他類
+                [(int)PageIdType.Other] =
+                [
+                    nameof(ItemType.GameplayTicket),
+                    nameof(ItemType.MapTicket),
+                    nameof(ItemType.BossTicket),
+                    nameof(ItemType.MemoryFirefly),
+                    nameof(ItemType.Compass),
+                    nameof(ItemType.Probe),
+                    nameof(ItemType.DivineCrest)
+                ]
+            };
+
+            return JsonSerializer.Serialize(mapping, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取 PageId 和 ItemType 對應關係失敗");
             return JsonSerializer.Serialize(new { error = ex.Message });
         }
     }
@@ -456,33 +541,36 @@ public class WebViewApi
         try
         {
             var allItems = ItemInfoMapper.GetAllItemConfigs();
- 
-      // 按 PageIdType 分組（包含所有項目，不論是否啟用）
-      var configsByPageId = new Dictionary<int, List<object>>();
-      
+
+            // 按 PageIdType 和 ItemType 雙層分組
+            var configsByPageId = new Dictionary<int, Dictionary<string, List<object>>>();
+
             foreach (var item in allItems)
-  {
-      var pageId = (int)item.PageIdType;
-         
-  if (!configsByPageId.ContainsKey(pageId))
-     {
-      configsByPageId[pageId] = new List<object>();
-        }
-         
-           configsByPageId[pageId].Add(new
-         {
-       ItemId = item.Id,
-    ItemName = item.Name,
-         PageId = pageId,
-          Enabled = item.Enable
-        });
-      }
-     
-        return JsonSerializer.Serialize(configsByPageId, new JsonSerializerOptions
-         {
-  PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-           WriteIndented = true
-    });
+            {
+                var pageId = (int)item.PageIdType;
+                var itemType = item.Type.ToString();
+
+                if (!configsByPageId.ContainsKey(pageId))
+                {
+                    configsByPageId[pageId] = new Dictionary<string, List<object>>();
+                }
+
+                if (!configsByPageId[pageId].ContainsKey(itemType))
+                {
+                    configsByPageId[pageId][itemType] = [];
+                }
+
+                configsByPageId[pageId][itemType].Add(new
+                {
+                    ItemId = item.Id,
+                    ItemName = item.Name,
+                    PageId = pageId,
+                    ItemType = itemType,
+                    Enabled = item.Enable
+                });
+            }
+
+            return JsonSerializer.Serialize(configsByPageId, _ops);
         }
         catch (Exception ex)
         {
@@ -491,87 +579,93 @@ public class WebViewApi
         }
     }
 
- /// <summary>
+    /// <summary>
     /// 保存拾取統計項目（更新到 ItemInfo.json）
     /// </summary>
-    public string SavePickupStatisticsItem(int itemId, string itemName, int pageId, bool enabled, int order)
+    public string SavePickupStatisticsItem(int itemId, string itemName, int pageId, bool enabled, string itemType)
     {
         try
         {
-  // 從 ItemInfoMapper 獲取現有配置
-       var allItems = ItemInfoMapper.GetAllItemConfigs();
+            // 從 ItemInfoMapper 獲取現有配置
+            var allItems = ItemInfoMapper.GetAllItemConfigs();
             var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
-        
-if (existingItem != null)
+
+            if (existingItem != null)
             {
                 // 更新現有項目
-     existingItem.Name = itemName;
-            existingItem.PageIdType = (PageIdType)pageId;
-             existingItem.Enable = enabled;
-           
-              // 儲存回 ItemInfo.json
-        var success = ItemInfoMapper.SaveToJson();
-      
-         return JsonSerializer.Serialize(new
-   {
-              success,
-  message = success ? "拾取統計項目已儲存" : "儲存失敗"
-       });
-   }
-      else
-     {
-    return JsonSerializer.Serialize(new
-         {
-   success = false,
-                message = "找不到指定的物品ID"
-       });
-       }
+                existingItem.Name = itemName;
+                existingItem.PageIdType = (PageIdType)pageId;
+                existingItem.Enable = enabled;
+
+                // 更新物品類型
+                if (!string.IsNullOrWhiteSpace(itemType) && Enum.TryParse<ItemType>(itemType, out var parsedItemType))
+                {
+                    existingItem.Type = parsedItemType;
+                }
+
+                // 儲存回 ItemInfo.json
+                var success = ItemInfoMapper.SaveToJson();
+
+                return JsonSerializer.Serialize(new
+                {
+                    success,
+                    message = success ? "拾取統計項目已儲存" : "儲存失敗"
+                }, _ops);
+            }
+            else
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    success = false,
+                    message = "找不到指定的物品ID"
+                }, _ops);
+            }
         }
         catch (Exception ex)
-     {
-          Log.Error(ex, "保存拾取統計項目失敗");
-   return JsonSerializer.Serialize(new { success = false, message = ex.Message });
+        {
+            Log.Error(ex, "保存拾取統計項目失敗");
+            return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
         }
     }
 
- /// <summary>
+    /// <summary>
     /// 刪除拾取統計項目（將 Enable 設為 false）
     /// </summary>
     public string DeletePickupStatisticsItem(int pageId, int itemId)
     {
-      try
+        try
         {
             // 從 ItemInfoMapper 獲取現有配置
-    var allItems = ItemInfoMapper.GetAllItemConfigs();
+            var allItems = ItemInfoMapper.GetAllItemConfigs();
             var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
-    
+
             if (existingItem != null)
-      {
-     // 將 Enable 設為 false
- existingItem.Enable = false;
-     
-        // 儲存回 ItemInfo.json
-          var success = ItemInfoMapper.SaveToJson();
-       
+            {
+                // 將 Enable 設為 false
+                existingItem.Enable = false;
+
+                // 儲存回 ItemInfo.json
+                var success = ItemInfoMapper.SaveToJson();
+
                 return JsonSerializer.Serialize(new
- {
-            success,
-             message = success ? "拾取統計項目已停用" : "停用失敗"
-  });
-         }
-     else
-   {
-      return JsonSerializer.Serialize(new
-    {
-                  success = false,
-          message = "找不到指定的物品ID"
-                });
+                {
+                    success,
+                    message = success ? "拾取統計項目已停用" : "停用失敗"
+                }, _ops);
+            }
+            else
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    success = false,
+                    message = "找不到指定的物品ID"
+                }, _ops);
             }
         }
-      catch (Exception ex)
+        catch (Exception ex)
         {
- Log.Error(ex, "刪除拾取統計項目失敗");
-       return JsonSerializer.Serialize(new { success = false, message = ex.Message });
+            Log.Error(ex, "刪除拾取統計項目失敗");
+            return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
         }
     }
 }

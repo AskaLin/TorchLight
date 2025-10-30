@@ -1,7 +1,10 @@
 ﻿using Serilog;
+using System.Text.RegularExpressions;
 using TorchLight.Statistics.Enums;
+using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace TorchLight.Statistics;
 
@@ -61,6 +64,7 @@ public class GameLogProcessor
         _mapTransitionHandler.SetWebViewHub(webViewHub);
     }
 
+    private bool SPV3OPENStart = false;
     /// <summary>
     /// 處理遊戲日誌
     /// </summary>
@@ -71,6 +75,34 @@ public class GameLogProcessor
 
         try
         {
+            // 開始開新圖, 結算舊圖
+            if (line.Contains("----Socket RecvMessage STT----Spv3Open----"))
+            {
+                Log.Debug("開始開新圖, 結算舊圖");
+                var match = Regex.Match(line, @"\[(\d{4}\.\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{2}:\d{3})\]");
+                if (match.Success)
+                {
+                    SPV3OPENStart = true;
+                    _mapPickRecordManager.EndMapRecord(LineParser.ParseUnrealDateTime(match.Groups[1].Value));
+                }
+
+                return;
+            }
+
+            if (line.Contains("TokenKey"))
+            {
+                var match = Regex.Match(line, @"\[(\d+)\]");
+
+                if (match.Success)
+                {
+                    string token = match.Groups[1].Value;
+                    _mapPickRecordManager.SetMapToken(token);                    
+                    SPV3OPENStart = false;
+                }
+            }
+
+
+
             // 0. 檢查 "已開啟日誌" 訊息
             if (_lineParser.IsLogOpenedMessage(line))
             {
@@ -154,23 +186,28 @@ public class GameLogProcessor
     {
         try
         {
-            // 處理 Spv3Open 事件（開圖材料）
-            if (ev.ProtoName == "Spv3Open" && _itemTable.TryGetValue(ev.ConfigBaseId, out var item))
-            {
-                // 記錄羅盤、探針和門票作為開圖材料
-                if (item.Type == ItemType.Compass || item.Type == ItemType.Probe ||
-                    item.Type == ItemType.MapTicket || item.Type == ItemType.BossTicket ||
-                    item.Type == ItemType.GameplayTicket)
-                {
-                    _mapPickRecordManager.RecordMapMaterial(ev.ConfigBaseId, item.Type);
-                }
-            }
-
             // 更新背包庫存
             var bagResult = _bagInventoryManager.UpdateBagItem(ev);
 
             // 記錄日誌
             _logger.LogBagModification(ev, bagResult);
+
+            // 處理 Spv3Open 事件（開圖材料）
+            if (ev.ProtoName == "Spv3Open" && _itemTable.TryGetValue(ev.ConfigBaseId, out var item))
+            {
+                if (item.Type == ItemType.Currency)
+                {
+                    Log.Debug("[開圖材料] 使用迴響數量 {res}", Math.Abs(bagResult.QuantityChange));
+                }
+
+                // 記錄羅盤、探針和門票作為開圖材料
+                if (item.Type == ItemType.Compass || item.Type == ItemType.Probe ||
+                    item.Type == ItemType.MapTicket || item.Type == ItemType.BossTicket ||
+                    item.Type == ItemType.GameplayTicket || item.Type == ItemType.Currency)
+                {
+                    _mapPickRecordManager.RecordMapMaterial(ev.ConfigBaseId, item.Type);
+                }
+            }
 
             // 如果是增加物品（拾取），且在異界地圖中，則記錄拾取
             if (bagResult.QuantityChange > 0 && ev.ProtoName == "PickItems")
@@ -217,22 +254,28 @@ public class GameLogProcessor
                 {
                     IsInMap = false,
                     MapType = "Hideout",
-                    MapName = _mapPickRecordManager.CurrentMapName
+                    MapName = _mapPickRecordManager.CurrentMapName,
+                    RecordId = (Guid?)null,
+                    MapTicket = "",
+                    Compass = Array.Empty<string>(),
+                    Probe = "",
+                    StartTime = (DateTime?)null,
+                    Items = Array.Empty<object>()
                 };
             }
             else if (currentRecord != null)
             {
-                // 異界地圖
+                // 異界地圖 - 即時從 MapInfoMapper 獲取最新名稱
                 return new
                 {
                     IsInMap = true,
                     MapType = "Netherrealm",
-                    MapName = currentRecord.Name,
+                    MapName = MapInfoMapper.GetMapName(currentRecord.Id),  // ✅ 即時獲取最新名稱
                     RecordId = currentRecord.RecordId,
                     MapTicket = currentRecord.MapTicket,
                     Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
                     Probe = currentRecord.Probe,
-                    currentRecord.StartTime,
+                    StartTime = currentRecord.StartTime,
                     Items = currentRecord.PickRecord?.Select(p => new
                     {
                         p.Value.BaseId,
@@ -249,7 +292,13 @@ public class GameLogProcessor
                 {
                     IsInMap = true,
                     MapType = "Netherrealm",
-                    MapName = _mapPickRecordManager.CurrentMapName
+                    MapName = _mapPickRecordManager.CurrentMapName,
+                    RecordId = (Guid?)null,
+                    MapTicket = "",
+                    Compass = Array.Empty<string>(),
+                    Probe = "",
+                    StartTime = (DateTime?)null,
+                    Items = Array.Empty<object>()
                 };
             }
         }

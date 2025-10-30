@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using TorchLight.Statistics.Enums;
 
 namespace TorchLight.Statistics.Models;
 
@@ -23,27 +24,28 @@ public class MapConfigItem
     /// 地圖類型（Hideout、Netherrealm、SecretRealm）
     /// </summary>
     [JsonPropertyName("type")]
-    public string Type { get; set; } = string.Empty;
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public MapType Type { get; set; }
 
-    // 向後兼容的屬性
-    [JsonIgnore]
-    public string MapId
-    {
-        get => Id;
-        set => Id = value;
-    }
+    //// 向後兼容的屬性
+    //[JsonIgnore]
+    //public string MapId
+    //{
+    //    get => Id;
+    //    set => Id = value;
+    //}
 
-    [JsonIgnore]
-    public string MapName
-    {
-        get => Name;
-        set => Name = value;
-    }
+    //[JsonIgnore]
+    //public string MapName
+    //{
+    //    get => Name;
+    //    set => Name = value;
+    //}
 
-    [JsonIgnore]
-    public string MapType
-    {
-        get => Type;
-        set => Type = value;
-    }
+    //[JsonIgnore]
+    //public string MapType
+    //{
+    //    get => Type;
+    //    set => Type = value;
+    //}
 }

@@ -13,6 +13,10 @@
         public string Id { get; set; }
 
         /// <summary>
+        /// 地圖Token
+        /// </summary>
+        public string Token { get; set; }
+        /// <summary>
         /// 地圖名稱
         /// </summary>
         public string Name { get; set; }

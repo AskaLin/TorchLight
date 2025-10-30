@@ -26,23 +26,28 @@ public class MapInfoMapper
     /// </summary>
     private static readonly List<MapConfigItem> DefaultMapConfigs =
     [
-        new() { Id = "XZ_YuJinZhiXiBiNanSuo200", Name = "餘燼之息", Type = "Hideout" },
-        new() { Id = "GeBuLinCunLuo01", Name = "隔壁林村落01", Type = "Netherrealm" },
-        new() { Id = "YJ_TaiYangWangTing200", Name = "長明宮城", Type = "Netherrealm" },
-        new() { Id = "SQ_JingJiHuiTu100", Name = "荊棘穢土", Type = "Netherrealm" },
-        new() { Id = "KD_AiRenDiErCeng01", Name = "悲鳴礦區", Type = "Netherrealm" },
-        new() { Id = "DD_DiDuTingYuan000", Name = "聖教庭院", Type = "Netherrealm" },
-        new() { Id = "DD_DiDuTingYuan200", Name = "暗夜王庭", Type = "Netherrealm" },
-        new() { Id = "JH_ShengDeLanXiuDaoYuan000", Name = "懺悔學院", Type = "Netherrealm" },
-        new() { Id = "KD_RongHuoHeXin000", Name = "熔鐵工廠", Type = "Netherrealm" },
-        new() { Id = "YL_KuangReYuLin100", Name = "微光沼澤", Type = "Netherrealm" },
-        new() { Id = "SD_ShouGuSiDi000", Name = "龍眠峽谷", Type = "Netherrealm" },
-        new() { Id = "BZ_NaGouZhiXi100", Name = "汙穢王座", Type = "SecretRealm" },
-        new() { Id = "KD_AiRenDiSanCeng", Name = "群山之心", Type = "Netherrealm" },
-        new() { Id = "SQ_BianChuiZhiDi200", Name = "蠻荒原野", Type = "Netherrealm" },
-        new() { Id = "SD_ShouGuLinDi000", Name = "曲折谷地", Type = "Netherrealm" },
-        new() { Id = "YJ_LuoRiQiongDi200", Name = "落日穹底", Type = "Netherrealm" },
-        new() { Id = "KD_YuanSuKuangDong000", Name = "元素礦洞", Type = "Netherrealm" }
+        new() { Id = "XZ_YuJinZhiXiBiNanSuo200", Name = "餘燼之息", Type = MapType.Hideout },
+        new() { Id = "GeBuLinCunLuo01", Name = "隔壁林村落01", Type = MapType.Netherrealm },
+        new() { Id = "YJ_TaiYangWangTing200", Name = "長明宮城", Type = MapType.Netherrealm },
+        new() { Id = "SQ_JingJiHuiTu100", Name = "荊棘穢土", Type = MapType.Netherrealm },
+        new() { Id = "KD_AiRenDiErCeng01", Name = "悲鳴礦區", Type = MapType.Netherrealm },
+        new() { Id = "DD_DiDuTingYuan000", Name = "聖教庭院", Type = MapType.Netherrealm },
+        new() { Id = "DD_DiDuTingYuan200", Name = "暗夜王庭", Type = MapType.Netherrealm },
+        new() { Id = "JH_ShengDeLanXiuDaoYuan000", Name = "懺悔學院", Type = MapType.Netherrealm },
+        new() { Id = "KD_RongHuoHeXin000", Name = "熔鐵工廠", Type = MapType.Netherrealm },
+        new() { Id = "YL_KuangReYuLin100", Name = "微光沼澤", Type = MapType.Netherrealm },
+        new() { Id = "SD_ShouGuSiDi000", Name = "龍眠峽谷", Type = MapType.Netherrealm },
+        new() { Id = "BZ_NaGouZhiXi100", Name = "汙穢王座", Type = MapType.SecretRealm },
+        new() { Id = "KD_AiRenDiSanCeng", Name = "群山之心", Type = MapType.Netherrealm },
+        new() { Id = "SQ_BianChuiZhiDi200", Name = "蠻荒原野", Type = MapType.Netherrealm },
+        new() { Id = "SD_ShouGuLinDi000", Name = "曲折谷地", Type = MapType.Netherrealm },
+        new() { Id = "YJ_LuoRiQiongDi200", Name = "落日穹底", Type = MapType.Netherrealm },
+        new() { Id = "KD_YuanSuKuangDong000", Name = "元素礦洞", Type = MapType.Netherrealm },
+
+        new() { Id = "YanYuZhiGu", Name = "炎獄之谷", Type = MapType.Boss },
+        new() { Id = "YL_BeiFengLinDi201", Name = "悲風林地", Type = MapType.Netherrealm },
+        new() { Id = "SD_GeBuLinShanZhai", Name = "暗影前哨", Type = MapType.Netherrealm },
+        new() { Id = "KD_AiRenKuangDong01", Name = "荒棄礦場", Type = MapType.Netherrealm }
     ];
 
     /// <summary>
@@ -145,7 +150,7 @@ public class MapInfoMapper
     /// </summary>
     private static void LoadDefaultConfig()
     {
-        _mapConfigs = new List<MapConfigItem>(DefaultMapConfigs);
+        _mapConfigs = [.. DefaultMapConfigs];
     }
 
     /// <summary>
@@ -219,43 +224,22 @@ public class MapInfoMapper
             var config = _mapConfigs.FirstOrDefault(m => m.Id == mapId);
             return config?.Name ?? mapId;
         }
-    }
+    } 
 
     /// <summary>
-    /// 判斷是否為藏身處地圖
+    /// 取得地圖類型
     /// </summary>
-    public static bool IsHideoutMap(string mapIdOrPath)
+    /// <param name="mapIdOrPath"></param>
+    /// <param name="mapType"></param>
+    /// <returns></returns>
+    public static bool MapTypeCheck(string mapIdOrPath, MapType mapType)
     {
         lock (_lock)
         {
             var mapId = mapIdOrPath.Contains('/') ? ExtractMapId(mapIdOrPath) : mapIdOrPath;
-            return _mapConfigs.Any(m => m.Id == mapId && m.Type == "Hideout");
+            return _mapConfigs.Any(m => m.Id == mapId && m.Type == mapType);
         }
-    }
-
-    /// <summary>
-    /// 判斷是否為異界地圖
-    /// </summary>
-    public static bool IsNetherrealmMap(string mapIdOrPath)
-    {
-        lock (_lock)
-        {
-            var mapId = mapIdOrPath.Contains('/') ? ExtractMapId(mapIdOrPath) : mapIdOrPath;
-            return _mapConfigs.Any(m => m.Id == mapId && m.Type == "Netherrealm");
-        }
-    }
-
-    /// <summary>
-    /// 判斷是否為秘境地圖
-    /// </summary>
-    public static bool IsSecretRealmMap(string mapIdOrPath)
-    {
-        lock (_lock)
-        {
-            var mapId = mapIdOrPath.Contains('/') ? ExtractMapId(mapIdOrPath) : mapIdOrPath;
-            return _mapConfigs.Any(m => m.Id == mapId && m.Type == "SecretRealm");
-        }
-    }
+    }   
 
     /// <summary>
     /// 判斷地圖類型
@@ -263,14 +247,7 @@ public class MapInfoMapper
     private static MapType DetermineMapType(string mapId)
     {
         var config = _mapConfigs.FirstOrDefault(m => m.Id == mapId);
-
-        return config?.Type switch
-        {
-            "Hideout" => MapType.Hideout,
-            "Netherrealm" => MapType.Netherrealm,
-            "SecretRealm" => MapType.SecretRealm,
-            _ => MapType.Unknown
-        };
+        return config?.Type ?? MapType.Unknown;
     }
 
     /// <summary>
@@ -302,7 +279,7 @@ public class MapInfoMapper
                 if (existingConfig != null)
                 {
                     existingConfig.Name = mapName;
-                    existingConfig.Type = mapType.ToString();
+                    existingConfig.Type = mapType;
                 }
                 else
                 {
@@ -310,7 +287,7 @@ public class MapInfoMapper
                     {
                         Id = mapId,
                         Name = mapName,
-                        Type = mapType.ToString()
+                        Type = mapType
                     });
                 }
 
@@ -358,29 +335,15 @@ public class MapInfoMapper
     /// <summary>
     /// 獲取所有地圖設定（按地圖類型分類）
     /// </summary>
-    public static Dictionary<string, List<MapConfigItem>> GetAllMapConfigsByType()
+    public static Dictionary<MapType, List<MapConfigItem>> GetAllMapConfigsByType()
     {
         lock (_lock)
         {
-            return new Dictionary<string, List<MapConfigItem>>
-    {
-       { "Hideout", GetMapConfigsByType("Hideout") },
-            { "Netherrealm", GetMapConfigsByType("Netherrealm") },
- { "SecretRealm", GetMapConfigsByType("SecretRealm") }
-      };
+            return _mapConfigs
+                .GroupBy(m => m.Type)
+                .ToDictionary(g => g.Key, g => g.OrderBy(m => m.Name).ToList());
         }
-    }
-
-    /// <summary>
-    /// 根據地圖類型獲取設定列表
-    /// </summary>
-    private static List<MapConfigItem> GetMapConfigsByType(string mapType)
-    {
-        return _mapConfigs
-     .Where(m => m.Type == mapType)
-              .OrderBy(m => m.Name)
-  .ToList();
-    }
+    }    
 
     /// <summary>
     /// 停止檔案監控

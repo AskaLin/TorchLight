@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using TorchLight.Statistics.Enums;
 using TorchLight.Statistics.Mapper;
 
 namespace TorchLight.Statistics.Services;
@@ -37,7 +38,7 @@ public class MapTransitionHandler
         _mapPickRecordManager.UpdateCurrentMapName(toMapName);
 
         // 從藏身處進入異界地圖
-        if (MapInfoMapper.IsHideoutMap(fromPath))
+        if (MapInfoMapper.MapTypeCheck(fromPath, MapType.Hideout))
         {
             _mapPickRecordManager.StartMapRecord(toPath, toMapName, time);
 
@@ -51,9 +52,9 @@ public class MapTransitionHandler
             }
         }
         // 從異界地圖返回藏身處
-        else if (MapInfoMapper.IsHideoutMap(toPath))
+        else if (MapInfoMapper.MapTypeCheck(toPath, MapType.Hideout))
         {
-            _mapPickRecordManager.EndMapRecord(fromMapName, time);
+            // _mapPickRecordManager.EndMapRecord(fromMapName, time);
 
             // 通知前端：地圖結算完成，新記錄已產生
             if (_webViewHub != null)
@@ -81,17 +82,23 @@ public class MapTransitionHandler
             {
                 IsInMap = false,
                 MapType = "Hideout",
-                MapName = _mapPickRecordManager.CurrentMapName
+                MapName = _mapPickRecordManager.CurrentMapName,
+                RecordId = (Guid?)null,
+                MapTicket = "",
+                Compass = Array.Empty<string>(),
+                Probe = "",
+                StartTime = (DateTime?)null,
+                Items = Array.Empty<object>()
             };
         }
         else if (currentRecord != null)
         {
-            // 異界地圖
+            // 異界地圖 - 即時從 MapInfoMapper 獲取最新名稱
             return new
             {
                 IsInMap = true,
                 MapType = "Netherrealm",
-                MapName = currentRecord.Name,
+                MapName = MapInfoMapper.GetMapName(currentRecord.Id),  // ✅ 即時獲取最新名稱
                 RecordId = currentRecord.RecordId,
                 MapTicket = currentRecord.MapTicket,
                 Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
@@ -113,7 +120,13 @@ public class MapTransitionHandler
             {
                 IsInMap = true,
                 MapType = "Netherrealm",
-                MapName = _mapPickRecordManager.CurrentMapName
+                MapName = _mapPickRecordManager.CurrentMapName,
+                RecordId = (Guid?)null,
+                MapTicket = "",
+                Compass = Array.Empty<string>(),
+                Probe = "",
+                StartTime = (DateTime?)null,
+                Items = Array.Empty<object>()
             };
         }
     }

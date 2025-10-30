@@ -205,7 +205,7 @@ namespace TorchLight.Statistics.Mapper
             new() {Id = 12041, Name = "羅盤之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
             new() {Id = 12050, Name = "信標之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
             new() {Id = 100001, Name = "罪孽之劫掠羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-            new() {Id = 100200, Name = "初火靈砂", Type= ItemType.Currency, PageIdType= PageIdType.Currency, Enable = false },
+            new() {Id = 100200, Name = "初火靈砂", Type= ItemType.Currency, PageIdType= PageIdType.Currency },
             new() {Id = 100300, Name = "初火源質", Type= ItemType.Currency, PageIdType= PageIdType.Currency },
             new() {Id = 140004, Name = "淺白夢語-武器", Type= ItemType.DreamMaterial, PageIdType= PageIdType.Currency },
             new() {Id = 140005, Name = "淺白夢語-防具", Type= ItemType.DreamMaterial, PageIdType= PageIdType.Currency },

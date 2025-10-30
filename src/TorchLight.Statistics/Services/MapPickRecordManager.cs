@@ -19,6 +19,8 @@ public class MapPickRecordManager
     private string _pendingMapTicket = string.Empty;
     private readonly List<string> _pendingCompasses = [];
     private string _pendingProbe = string.Empty;
+    private int _pendingResonance = 0;
+    
 
     public MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     {
@@ -27,8 +29,13 @@ public class MapPickRecordManager
 
     public bool IsInNetherrealmMap { get; private set; }
     public string CurrentMapName { get; private set; } = string.Empty;
+    public string Token { get; private set; } = string.Empty;
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
 
+    public void SetMapToken(string token)
+    {
+        Token = token;
+    }
     /// <summary>
     /// 記錄開圖材料（從 Spv3Open 事件）
     /// </summary>
@@ -58,6 +65,10 @@ public class MapPickRecordManager
                 _pendingProbe = item.Name;
                 Log.Debug("[開圖材料] 探針: {ProbeName}", item.Name);
                 break;
+            case ItemType.Currency:
+                _pendingResonance = item.Num;
+                Log.Debug("[開圖材料] 迴響: {count}", item.Num);
+                break;
         }
     }
 
@@ -72,7 +83,8 @@ public class MapPickRecordManager
             Name = mapName,
             StartTime = startTime,
             MapTicket = _pendingMapTicket,
-            Probe = _pendingProbe
+            Probe = _pendingProbe,
+            Token = Token            
         };
 
         // 複製羅盤資料到陣列
@@ -85,7 +97,7 @@ public class MapPickRecordManager
         IsInNetherrealmMap = true;
         CurrentMapName = mapName;
 
-        Log.Information("{Time} 進入異界地圖: {MapName}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName);
+        Log.Information("{Time} 進入異界地圖: {MapName} {tk}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), CurrentMapName, _currentMapRecord.Token);
 
         if (!string.IsNullOrEmpty(_pendingMapTicket))
         {
@@ -107,13 +119,13 @@ public class MapPickRecordManager
     /// <summary>
     /// 結束當前地圖記錄
     /// </summary>
-    public void EndMapRecord(string mapName, DateTime endTime)
+    public void EndMapRecord(DateTime endTime)
     {
         _currentMapRecord.EndTime = endTime;
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
-        Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
+        Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", endTime.ToString("yyyy/MM/dd HH:mm:ss"), CurrentMapName, _currentMapRecord.UseTime);
 
         // 顯示當前地圖的拾取記錄
         PrintCurrentMapRecord(_currentMapRecord);
@@ -253,6 +265,8 @@ public class MapPickRecordManager
         _pendingMapTicket = string.Empty;
         _pendingCompasses.Clear();
         _pendingProbe = string.Empty;
+        Token = string.Empty;
+        _pendingResonance = 0;
     }
 
     /// <summary>
@@ -285,8 +299,7 @@ public class MapPickRecordManager
         Log.Debug("所有地圖記錄統計 (共 {Count} 筆):", _mapRecords.Count);
         foreach (var record in _mapRecords)
         {
-            Log.Debug("  [{RecordId}] {MapName} (用時: {Duration})",
-   record.RecordId, record.Name, record.UseTime);
+            Log.Debug("  [{RecordId}] {MapName} (用時: {Duration})", record.RecordId, record.Name, record.UseTime);
         }
     }
 
