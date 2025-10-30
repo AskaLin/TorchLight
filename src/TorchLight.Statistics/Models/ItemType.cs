@@ -1,107 +1,107 @@
-namespace TorchLight.Statistics.Models;
+ï»¿namespace TorchLight.Statistics.Models;
 
 /// <summary>
-/// ª««~Ãş«¬ªTÁ|
+/// ç‰©å“é¡å‹æšèˆ‰
 /// </summary>
 public enum ItemType
 {
     /// <summary>
-    /// ¥¼ª¾ª««~
+    /// æœªçŸ¥ç‰©å“
     /// </summary>
     Unknown = 0,
 
     /// <summary>
-    /// °O¾Ğ¿Ã¥ú
+    /// è¨˜æ†¶è¢å…‰
     /// </summary>
     MemoryFirefly,
 
     /// <summary>
-    /// ¯«®æ¥ÛªO
+    /// ç¥æ ¼çŸ³æ¿
     /// </summary>
     DivinityTablet,
 
     /// <summary>
-    /// ³q³f
+    /// é€šè²¨
     /// </summary>
     Currency,
 
     /// <summary>
-    /// ¯S®í¹D¨ã
+    /// ç‰¹æ®Šé“å…·
     /// </summary>
     SpecialItem,
 
     /// <summary>
-    /// ¸Ë³Æ§÷®Æ
+    /// è£å‚™ææ–™
     /// </summary>
     EquipmentMaterial,
 
     /// <summary>
-    /// °l¾Ğ§÷®Æ
+    /// è¿½æ†¶ææ–™
     /// </summary>
     MemoryMaterial,
 
     /// <summary>
-    /// Å]¤è§÷®Æ
+    /// é­”æ–¹ææ–™
     /// </summary>
     CubeMaterial,
 
     /// <summary>
-    /// ª±ªkªù²¼
+    /// ç©æ³•é–€ç¥¨
     /// </summary>
     GameplayTicket,
 
     /// <summary>
-    /// ¯«®æ«´¬ù
+    /// ç¥æ ¼å¥‘ç´„
     /// </summary>
     DivinityContract,
 
     /// <summary>
-    /// °ª¶ğ§÷®Æ
+    /// é«˜å¡”ææ–™
     /// </summary>
     TowerMaterial,
 
     /// <summary>
-    /// §Ş¯à¹D¨ã
+    /// æŠ€èƒ½é“å…·
     /// </summary>
     SkillItem,
 
     /// <summary>
-    /// Ã¹½L
+    /// ç¾…ç›¤
     /// </summary>
     Compass,
 
     /// <summary>
-    /// ±´°w
+    /// æ¢é‡
     /// </summary>
     Probe,
 
     /// <summary>
-    /// ¹Ú»y§÷®Æ
+    /// å¤¢èªææ–™
     /// </summary>
     DreamMaterial,
 
     /// <summary>
-    /// «I»k§÷®Æ
+    /// ä¾µè•ææ–™
     /// </summary>
     CorrosionMaterial,
 
     /// <summary>
-    /// Å|¬É§÷®Æ
+    /// ç–Šç•Œææ–™
     /// </summary>
     OverlayMaterial,
 
     /// <summary>
-    /// ¦a¹Ïªù²¼
+    /// åœ°åœ–é–€ç¥¨
     /// </summary>
     MapTicket,
 
     /// <summary>
-    /// BOSS ªù²¼
+    /// BOSS é–€ç¥¨
     /// </summary>
     BossTicket,
 
     /// <summary>
-    /// ¯««Â¯¾³¹
+    /// ç¥å¨ç´‹ç« 
     /// </summary>
     DivineCrest
 }

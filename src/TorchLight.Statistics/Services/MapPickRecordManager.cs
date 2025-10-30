@@ -1,10 +1,10 @@
-using Serilog;
+ï»¿using Serilog;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
 
 /// <summary>
-/// ºŞ²z²§¬É¦a¹Ïªº¬B¨ú°O¿ı
+/// ç®¡ç†ç•°ç•Œåœ°åœ–çš„æ‹¾å–è¨˜éŒ„
 /// </summary>
 public class MapPickRecordManager
 {
@@ -13,7 +13,7 @@ public class MapPickRecordManager
     private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
     private readonly Dictionary<int, ItemModel> _itemTable;
 
-    // ¼È¦s¶}¹Ï§÷®Æ
+    // æš«å­˜é–‹åœ–ææ–™
     private string _pendingMapTicket = string.Empty;
     private readonly List<string> _pendingCompasses = [];
     private string _pendingProbe = string.Empty;
@@ -28,7 +28,7 @@ public class MapPickRecordManager
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
 
     /// <summary>
-    /// °O¿ı¶}¹Ï§÷®Æ¡]±q Spv3Open ¨Æ¥ó¡^
+    /// è¨˜éŒ„é–‹åœ–ææ–™ï¼ˆå¾ Spv3Open äº‹ä»¶ï¼‰
     /// </summary>
     public void RecordMapMaterial(int configBaseId, ItemType itemType)
     {
@@ -41,26 +41,26 @@ case ItemType.MapTicket:
       case ItemType.BossTicket:
  case ItemType.GameplayTicket:
       _pendingMapTicket = item.Name;
-   Log.Debug("[¶}¹Ï§÷®Æ] ªù²¼: {TicketName}", item.Name);
+   Log.Debug("[é–‹åœ–ææ–™] é–€ç¥¨: {TicketName}", item.Name);
       break;
 
     case ItemType.Compass:
      if (_pendingCompasses.Count < 4)
         {
 _pendingCompasses.Add(item.Name);
-         Log.Debug("[¶}¹Ï§÷®Æ] Ã¹½L #{Index}: {CompassName}", _pendingCompasses.Count, item.Name);
+         Log.Debug("[é–‹åœ–ææ–™] ç¾…ç›¤ #{Index}: {CompassName}", _pendingCompasses.Count, item.Name);
          }
    break;
 
             case ItemType.Probe:
      _pendingProbe = item.Name;
-        Log.Debug("[¶}¹Ï§÷®Æ] ±´°w: {ProbeName}", item.Name);
+        Log.Debug("[é–‹åœ–ææ–™] æ¢é‡: {ProbeName}", item.Name);
             break;
         }
  }
 
     /// <summary>
-    /// ¶}©l°O¿ı·s¦a¹Ï
+    /// é–‹å§‹è¨˜éŒ„æ–°åœ°åœ–
     /// </summary>
     public void StartMapRecord(string mapId, string mapName, DateTime startTime)
     {
@@ -73,7 +73,7 @@ _pendingCompasses.Add(item.Name);
             Probe = _pendingProbe
         };
 
-        // ½Æ»sÃ¹½L¸ê®Æ¨ì°}¦C
+        // è¤‡è£½ç¾…ç›¤è³‡æ–™åˆ°é™£åˆ—
         for (int i = 0; i < _pendingCompasses.Count && i < 4; i++)
         {
             _currentMapRecord.Compass[i] = _pendingCompasses[i];
@@ -83,27 +83,27 @@ _pendingCompasses.Add(item.Name);
         IsInNetherrealmMap = true;
    CurrentMapName = mapName;
 
-        Log.Information("{Time} ¶i¤J²§¬É¦a¹Ï: {MapName}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName);
+        Log.Information("{Time} é€²å…¥ç•°ç•Œåœ°åœ–: {MapName}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName);
         
         if (!string.IsNullOrEmpty(_pendingMapTicket))
    {
-          Log.Information("  ¨Ï¥Îªù²¼: {Ticket}", _pendingMapTicket);
+          Log.Information("  ä½¿ç”¨é–€ç¥¨: {Ticket}", _pendingMapTicket);
     }
    if (_pendingCompasses.Count > 0)
  {
-   Log.Information("  ¨Ï¥ÎÃ¹½L: {Compasses}", string.Join(", ", _pendingCompasses));
+   Log.Information("  ä½¿ç”¨ç¾…ç›¤: {Compasses}", string.Join(", ", _pendingCompasses));
  }
         if (!string.IsNullOrEmpty(_pendingProbe))
  {
- Log.Information("  ¨Ï¥Î±´°w: {Probe}", _pendingProbe);
+ Log.Information("  ä½¿ç”¨æ¢é‡: {Probe}", _pendingProbe);
    }
 
-   // ²MªÅ¼È¦s¸ê®Æ
+   // æ¸…ç©ºæš«å­˜è³‡æ–™
    ClearPendingMaterials();
     }
 
     /// <summary>
-    /// µ²§ô·í«e¦a¹Ï°O¿ı
+    /// çµæŸç•¶å‰åœ°åœ–è¨˜éŒ„
     /// </summary>
     public void EndMapRecord(string mapName, DateTime endTime)
     {
@@ -111,20 +111,20 @@ _pendingCompasses.Add(item.Name);
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
-        Log.Information("{Time} Â÷¶}²§¬É¦a¹Ï: {MapName} (¥Î®É: {Duration})", 
+        Log.Information("{Time} é›¢é–‹ç•°ç•Œåœ°åœ–: {MapName} (ç”¨æ™‚: {Duration})", 
    endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
 
-    // Åã¥Ü·í«e¦a¹Ïªº¬B¨ú°O¿ı
+    // é¡¯ç¤ºç•¶å‰åœ°åœ–çš„æ‹¾å–è¨˜éŒ„
         PrintCurrentMapRecord(_currentMapRecord);
 
-        // ­«¸m
+        // é‡ç½®
      _currentMapRecord = new();
      _currentMapPickData = [];
  IsInNetherrealmMap = false;
     }
 
     /// <summary>
-    /// §ó·s·í«e¦a¹Ï¦WºÙ
+    /// æ›´æ–°ç•¶å‰åœ°åœ–åç¨±
     /// </summary>
     public void UpdateCurrentMapName(string mapName)
     {
@@ -132,7 +132,7 @@ _pendingCompasses.Add(item.Name);
     }
 
     /// <summary>
-    /// °O¿ı¬B¨úª««~
+    /// è¨˜éŒ„æ‹¾å–ç‰©å“
     /// </summary>
     public MapPickResult RecordPickedItem(int configBaseId, int slotId, int quantityChange)
     {
@@ -153,7 +153,7 @@ _pendingCompasses.Add(item.Name);
         {
             if (existingItem.Slots.TryGetValue(slotId, out int previousSlotCount))
             {
-                // §ó·s²{¦³Äæ¦ì
+                // æ›´æ–°ç¾æœ‰æ¬„ä½
                 existingItem.Slots[slotId] = previousSlotCount + quantityChange;
                 existingItem.Total += quantityChange;
 
@@ -164,7 +164,7 @@ _pendingCompasses.Add(item.Name);
             }
             else
             {
-                // ·sÄæ¦ì
+                // æ–°æ¬„ä½
                 existingItem.Slots[slotId] = quantityChange;
                 existingItem.Total += quantityChange;
 
@@ -175,7 +175,7 @@ _pendingCompasses.Add(item.Name);
         }
         else
         {
-            // ·sª««~
+            // æ–°ç‰©å“
             var newItem = new PickedItemDataModel
             {
                 BaseId = configBaseId,
@@ -194,7 +194,37 @@ _pendingCompasses.Add(item.Name);
     }
 
     /// <summary>
-    /// ­«¸m©Ò¦³°O¿ı¡]µn¤J®É¨Ï¥Î¡^
+    /// ç²å–ç•¶å‰åœ°åœ–è¨˜éŒ„ï¼ˆåŒ…å«å®Œæ•´è³‡è¨Šï¼‰
+    /// </summary>
+    public MapRecordModel? GetCurrentMapRecord()
+    {
+        if (!IsInNetherrealmMap || _currentMapRecord == null)
+   return null;
+
+        // å‰µå»ºä¸€å€‹åŒ…å«ç•¶å‰æ‹¾å–è¨˜éŒ„çš„å‰¯æœ¬
+    var recordCopy = new MapRecordModel
+  {
+          RecordId = _currentMapRecord.RecordId,
+            Id = _currentMapRecord.Id,
+        Name = _currentMapRecord.Name,
+            MapTicket = _currentMapRecord.MapTicket,
+   Probe = _currentMapRecord.Probe,
+            StartTime = _currentMapRecord.StartTime,
+       EndTime = DateTime.Now, // ç•¶å‰æ™‚é–“ä½œç‚ºè‡¨æ™‚çµæŸæ™‚é–“
+     PickRecord = _currentMapPickData
+   };
+
+        // è¤‡è£½ç¾…ç›¤è³‡æ–™
+   for (int i = 0; i < 4; i++)
+        {
+         recordCopy.Compass[i] = _currentMapRecord.Compass[i];
+  }
+
+ return recordCopy;
+    }
+
+    /// <summary>
+    /// é‡ç½®æ‰€æœ‰è¨˜éŒ„ï¼ˆç™»å…¥æ™‚ä½¿ç”¨ï¼‰
     /// </summary>
     public void Reset()
     {
@@ -208,7 +238,7 @@ _pendingCompasses.Add(item.Name);
     }
 
     /// <summary>
-    /// ²MªÅ¼È¦sªº¶}¹Ï§÷®Æ
+    /// æ¸…ç©ºæš«å­˜çš„é–‹åœ–ææ–™
     /// </summary>
     private void ClearPendingMaterials()
     {
@@ -218,48 +248,48 @@ _pendingCompasses.Add(item.Name);
     }
 
     /// <summary>
-    /// Åã¥Ü·í«e¦a¹Ïªº¬B¨ú°O¿ı
+    /// é¡¯ç¤ºç•¶å‰åœ°åœ–çš„æ‹¾å–è¨˜éŒ„
  /// </summary>
     private void PrintCurrentMapRecord(MapRecordModel record)
     {
         if (record.PickRecord == null || record.PickRecord.Count == 0)
         {
-Log.Information("¥»¦¸¦a¹Ï¥¼¬B¨ú¥ô¦óª««~");
+Log.Information("æœ¬æ¬¡åœ°åœ–æœªæ‹¾å–ä»»ä½•ç‰©å“");
             return;
     }
 
-        Log.Information("ùùùùùù ¥»¦¸¦a¹Ï¬B¨ú²Î­p ùùùùùù");
-        Log.Information("¦a¹Ï: {MapName} (¥Î®É: {Duration})", record.Name, record.UseTime);
+        Log.Information("â•â•â• æœ¬æ¬¡åœ°åœ–æ‹¾å–çµ±è¨ˆ â•â•â•");
+        Log.Information("åœ°åœ–: {MapName} (ç”¨æ™‚: {Duration})", record.Name, record.UseTime);
         
         foreach (var item in record.PickRecord.OrderByDescending(x => x.Value.Total))
  {
-       Log.Information("  {ItemName}: {Total} ­Ó", item.Value.Name, item.Value.Total);
+       Log.Information("  {ItemName}: {Total} å€‹", item.Value.Name, item.Value.Total);
         }
         
-        Log.Information("ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù");
+        Log.Information("â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•");
     }
 
     /// <summary>
-    /// Åã¥Ü©Ò¦³°O¿ı¡]¥Î©ó Debug¡^
+    /// é¡¯ç¤ºæ‰€æœ‰è¨˜éŒ„ï¼ˆç”¨æ–¼ Debugï¼‰
     /// </summary>
     public void PrintAllRecords()
     {
-        Log.Debug("©Ò¦³¦a¹Ï°O¿ı²Î­p (¦@ {Count} µ§):", _mapRecords.Count);
+        Log.Debug("æ‰€æœ‰åœ°åœ–è¨˜éŒ„çµ±è¨ˆ (å…± {Count} ç­†):", _mapRecords.Count);
    foreach (var record in _mapRecords)
      {
-            Log.Debug("  [{RecordId}] {MapName} (¥Î®É: {Duration})", 
+            Log.Debug("  [{RecordId}] {MapName} (ç”¨æ™‚: {Duration})", 
    record.RecordId, record.Name, record.UseTime);
  }
     }
 
     private string GetItemName(int configBaseId)
     {
-        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"¥¼ª¾ªºª««~({configBaseId})";
+        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"æœªçŸ¥çš„ç‰©å“({configBaseId})";
     }
 }
 
 /// <summary>
-/// ¦a¹Ï¬B¨úµ²ªG
+/// åœ°åœ–æ‹¾å–çµæœ
 /// </summary>
 public class MapPickResult
 {

@@ -33,6 +33,11 @@ public partial class LineParser
     public bool IsLoginStart(string line) => line.Contains("LuaLoading@ LoadUILogic STT!");
 
     /// <summary>
+    /// 是否為已開啟日誌的訊息
+    /// </summary>
+    public bool IsLogOpenedMessage(string line) => line.Contains("MsgMgr@:Show MsgValue = 已開啟日誌");
+
+    /// <summary>
     /// 是否為初始化完成的日誌（已廢棄，改用 CheckBagInitializationState）
     /// </summary>
     [Obsolete("請使用 CheckBagInitializationState 來判斷初始化狀態")]

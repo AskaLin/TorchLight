@@ -1,28 +1,28 @@
-namespace TorchLight.Statistics.Core;
+ï»¿namespace TorchLight.Statistics.Core;
 
 /// <summary>
-/// ¦a¹ÏÃş«¬ªTÁ|
+/// åœ°åœ–é¡å‹æšèˆ‰
 /// </summary>
 public enum MapType
 {
     /// <summary>
-    /// ¥¼ª¾¦a¹Ï
+    /// æœªçŸ¥åœ°åœ–
     /// </summary>
     Unknown,
 
     /// <summary>
-    /// ÂÃ¨­³B
+    /// è—èº«è™•
     /// </summary>
     Hideout,
 
     /// <summary>
-    /// ²§¬É¦a¹Ï¡]¥i²Î­p¬B¨ú¡^
+    /// ç•°ç•Œåœ°åœ–ï¼ˆå¯çµ±è¨ˆæ‹¾å–ï¼‰
     /// </summary>
     Netherrealm
 }
 
 /// <summary>
-/// ¦a¹Ï¸ê°T
+/// åœ°åœ–è³‡è¨Š
 /// </summary>
 public class MapInfo
 {

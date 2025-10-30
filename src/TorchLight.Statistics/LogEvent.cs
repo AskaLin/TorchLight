@@ -75,17 +75,17 @@ public sealed class ItemChangeBlockProcessor
     /// <summary>
     /// 當偵測到區塊開始時觸發
     /// </summary>
-    public event Action<BlockStarted>? OnBlockStarted;
+    public event Action<BlockStarted> OnBlockStarted;
 
     /// <summary>
     /// 當區塊內發生背包修改時立即觸發（即時模式）
     /// </summary>
-    public event Action<BagModEvent>? OnBagModInsideBlock;
+    public event Action<BagModEvent> OnBagModInsideBlock;
 
     /// <summary>
     /// 當區塊結束時觸發，並提供該區塊內所有的背包修改事件（彙整模式）
     /// </summary>
-    public event Action<BlockEnded, IReadOnlyList<BagModEvent>>? OnBlockEndedWithBatch;
+    public event Action<BlockEnded, IReadOnlyList<BagModEvent>> OnBlockEndedWithBatch;
 
     #endregion
 
@@ -124,7 +124,7 @@ public sealed class ItemChangeBlockProcessor
 
     #region 解析方法
 
-    private bool TryParseBlockStart(string line, out BlockStarted? blockStarted)
+    private bool TryParseBlockStart(string line, out BlockStarted blockStarted)
     {
         blockStarted = null;
         var match = LineRegex.StartLine().Match(line);
@@ -141,7 +141,7 @@ public sealed class ItemChangeBlockProcessor
         return true;
     }
 
-    private bool TryParseBlockEnd(string line, out BlockEnded? blockEnded)
+    private static bool TryParseBlockEnd(string line, out BlockEnded blockEnded)
     {
         blockEnded = null;
         var match = LineRegex.EndLine().Match(line);
@@ -155,7 +155,7 @@ public sealed class ItemChangeBlockProcessor
         return true;
     }
 
-    private bool TryParseBagModification(string line, out BagModEvent? bagEvent)
+    private bool TryParseBagModification(string line, out BagModEvent bagEvent)
     {
         bagEvent = null;
         var match = LineRegex.BagItemLine().Match(line);
@@ -182,7 +182,7 @@ public sealed class ItemChangeBlockProcessor
         return true;
     }
 
-    private bool TryParseBagDeletion(string line, out BagModEvent? deleteEvent)
+    private bool TryParseBagDeletion(string line, out BagModEvent deleteEvent)
     {
         deleteEvent = null;
         var match = LineRegex.BagItemDeleteLine().Match(line);

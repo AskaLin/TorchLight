@@ -1,11 +1,12 @@
-using Serilog;
+ï»¿using Serilog;
 using TorchLight.Statistics.Services;
 using TorchLight.Statistics.Models;
+using System.Linq;
 
 namespace TorchLight.Statistics;
 
 /// <summary>
-/// ¹CÀ¸¤é»x³B²z¾¹ - ²ÎÄw©Ò¦³¤é»x³B²zÅŞ¿è
+/// éŠæˆ²æ—¥èªŒè™•ç†å™¨ - æ•´åˆæ‰€æœ‰æ—¥èªŒè™•ç†é‚è¼¯
 /// </summary>
 public class GameLogProcessor
 {
@@ -16,26 +17,49 @@ public class GameLogProcessor
     private readonly MapTransitionHandler _mapTransitionHandler;
     private readonly ConsoleLogger _logger;
     private readonly Dictionary<int, ItemModel> _itemTable;
+    private WebViewHub? _webViewHub;
+
+    /// <summary>
+    /// ç•¶æª¢æ¸¬åˆ° "å·²é–‹å•Ÿæ—¥èªŒ" è¨Šæ¯æ™‚è§¸ç™¼
+    /// </summary>
+#nullable enable
+    public event Action? OnLogOpenedDetected;
+
+    /// <summary>
+    /// ç•¶èƒŒåŒ…åŒæ­¥å®Œæˆæ™‚è§¸ç™¼
+    /// </summary>
+    public event Action? OnBagSyncCompleted;
+#nullable disable
 
     public GameLogProcessor(
-           Dictionary<int, ItemModel> itemTable,
-           LineParser lineParser,
-           ItemChangeBlockProcessor itemChangeProcessor)
+       Dictionary<int, ItemModel> itemTable,
+    LineParser lineParser,
+           ItemChangeBlockProcessor itemChangeProcessor,
+           WebViewHub? webViewHub = null)
     {
         _lineParser = lineParser ?? throw new ArgumentNullException(nameof(lineParser));
         _itemChangeProcessor = itemChangeProcessor ?? throw new ArgumentNullException(nameof(itemChangeProcessor));
         _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
+        _webViewHub = webViewHub;
         _bagInventoryManager = new BagInventoryManager(itemTable);
         _mapPickRecordManager = new MapPickRecordManager(itemTable);
         _mapTransitionHandler = new MapTransitionHandler(_mapPickRecordManager);
         _logger = new ConsoleLogger();
 
-        // µù¥U¨Æ¥ó³B²z
+        // è¨»å†Šäº‹ä»¶è™•ç†
         _itemChangeProcessor.OnBagModInsideBlock += HandleBagModification;
     }
 
     /// <summary>
-    /// ³B²z³æ¦æ¤é»x
+    /// è¨­å®š WebViewHubï¼ˆç”¨æ–¼å¾ŒçºŒé€šçŸ¥å‰ç«¯ï¼‰
+    /// </summary>
+    public void SetWebViewHub(WebViewHub webViewHub)
+    {
+        _webViewHub = webViewHub;
+    }
+
+    /// <summary>
+    /// è™•ç†éŠæˆ²æ—¥èªŒ
     /// </summary>
     public void ProcessLine(string line)
     {
@@ -44,75 +68,93 @@ public class GameLogProcessor
 
         try
         {
-            // 1. ÀË¬d­I¥]ªì©l¤Æª¬ºA
+            // 0. æª¢æŸ¥ "å·²é–‹å•Ÿæ—¥èªŒ" è¨Šæ¯
+            if (_lineParser.IsLogOpenedMessage(line))
+            {
+                Log.Information("æª¢æ¸¬åˆ° 'å·²é–‹å•Ÿæ—¥èªŒ' è¨Šæ¯");
+                OnLogOpenedDetected?.Invoke();
+                return;
+            }
+
+            // 1. æª¢æŸ¥èƒŒåŒ…åˆå§‹åŒ–ç‹€æ…‹
             var (isInitLine, shouldProcess, isComplete, isFirstInit) = _lineParser.CheckBagInitializationState(line);
 
             if (isInitLine && shouldProcess)
             {
-                // ¥u¦b²Ä¤@¦¸¶}©lªì©l¤Æ®É¤~­«¸m­I¥]
+                // åªåœ¨ç¬¬ä¸€æ¬¡é–‹å§‹åˆå§‹åŒ–æ™‚æ‰é‡ç½®èƒŒåŒ…
                 if (isFirstInit)
                 {
-                    Log.Information("°»´ú¨ì­I¥]ªì©l¤Æ¡A­«¸m­I¥]¸ê®Æ");
+                    Log.Information("åµæ¸¬åˆ°èƒŒåŒ…åˆå§‹åŒ–ï¼Œé‡ç½®èƒŒåŒ…è³‡æ–™");
                     _bagInventoryManager.Reset();
                 }
 
-                // ³B²zªì©l¤Æ­I¥]ª««~
+                // è™•ç†åˆå§‹åŒ–èƒŒåŒ…ç‰©å“
                 var itemData = _lineParser.GetItemData(line);
                 _bagInventoryManager.InitializeBagItem(itemData);
-                Log.Debug("ªì©l¤Æ­I¥]ª««~: {ItemName} x{Count}", itemData.Name, itemData.Num);
+                Log.Debug("åˆå§‹åŒ–èƒŒåŒ…ç‰©å“: {ItemName} x{Count}", itemData.Name, itemData.Num);
                 return;
             }
 
             if (isComplete)
             {
-                // ªì©l¤Æ§¹¦¨
-                Log.Information("­I¥]ªì©l¤Æ§¹¦¨¡A¦@ {Count} ºØª««~", _bagInventoryManager.BagData.Count);
+                // åˆå§‹åŒ–å®Œæˆ
+                Log.Information("èƒŒåŒ…åˆå§‹åŒ–å®Œæˆï¼Œå…± {Count} ç¨®ç‰©å“", _bagInventoryManager.BagData.Count);
                 _bagInventoryManager.PrintInitializedBag();
+                OnBagSyncCompleted?.Invoke();
                 return;
             }
 
-            // 2. µn¤J¶}©l - ­«¸m©Ò¦³¸ê®Æ
+            // 2. ç™»å…¥é–‹å§‹ - é‡ç½®æ‰€æœ‰è³‡æ–™
             if (_lineParser.IsLoginStart(line))
             {
-                Log.Information("°»´ú¨ì­«·sµn¤J¡A­«¸m©Ò¦³¸ê®Æ");
+                Log.Information("åµæ¸¬åˆ°é‡æ–°ç™»å…¥ï¼Œé‡ç½®æ‰€æœ‰è³‡æ–™");
                 _bagInventoryManager.Reset();
                 _mapPickRecordManager.Reset();
                 _lineParser.ResetInitializationState();
                 return;
             }
 
-            // 3. ¦a¹Ï¤Á´«
+            // 3. åœ°åœ–åˆ‡æ›
             if (_lineParser.IsMoveMap(line))
             {
                 var (time, fromPath, toPath, success) = _lineParser.GetMapPathData(line);
                 if (success)
                 {
-                    Log.Debug("¦a¹Ï¤Á´«: {From} -> {To}", fromPath, toPath);
+                    Log.Debug("åœ°åœ–åˆ‡æ›: {From} -> {To}", fromPath, toPath);
                     _mapTransitionHandler.HandleMapTransition(time, fromPath, toPath);
-                }
+                    
+                   // é€šçŸ¥å‰ç«¯åœ°åœ–åˆ‡æ›
+                   if (_webViewHub != null)
+                          {
+            _ = Task.Run(async () =>
+         {
+             await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+                    });
+                 }
+ }
                 return;
             }
 
-            // 4. ³B²zª««~ÅÜ§ó¡]°Ï¶ô³B²z¡^
+            // 4. è™•ç†ç‰©å“è®Šæ›´ï¼ˆå€å¡Šè™•ç†ï¼‰
             _itemChangeProcessor.HandleLine(line);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "³B²z¤é»x¦æ®Éµo¥Í¿ù»~¡A¤é»x¤º®e: {Line}", line);
+            Log.Error(ex, "è™•ç†æ—¥èªŒè¡Œæ™‚ç™¼ç”ŸéŒ¯èª¤ï¼Œæ—¥èªŒå…§å®¹: {Line}", line);
         }
     }
 
     /// <summary>
-    /// ³B²z­I¥]ª««~­×§ï¨Æ¥ó
+    /// è™•ç†èƒŒåŒ…ç‰©å“ä¿®æ”¹äº‹ä»¶
     /// </summary>
     private void HandleBagModification(BagModEvent ev)
     {
         try
         {
-            // ³B²z Spv3Open ¨Æ¥ó¡]¶}¹Ï§÷®Æ¡^
+            // è™•ç† Spv3Open äº‹ä»¶ï¼ˆé–‹åœ–ææ–™ï¼‰
             if (ev.ProtoName == "Spv3Open" && _itemTable.TryGetValue(ev.ConfigBaseId, out var item))
             {
-                // °O¿ıÃ¹½L¡B±´°w©Mªù²¼§@¬°¶}¹Ï§÷®Æ
+                // è¨˜éŒ„ç¾…ç›¤ã€æ¢é‡å’Œé–€ç¥¨ä½œç‚ºé–‹åœ–ææ–™
                 if (item.Type == ItemType.Compass || item.Type == ItemType.Probe || 
                     item.Type == ItemType.MapTicket || item.Type == ItemType.BossTicket || 
                     item.Type == ItemType.GameplayTicket)
@@ -121,35 +163,107 @@ public class GameLogProcessor
                 }
             }
 
-            // §ó·s­I¥]®w¦s
+            // æ›´æ–°èƒŒåŒ…åº«å­˜
             var bagResult = _bagInventoryManager.UpdateBagItem(ev);
 
-            // °O¿ı¤é»x
+            // è¨˜éŒ„æ—¥èªŒ
             _logger.LogBagModification(ev, bagResult);
 
-            // ¦pªG¬O¼W¥[ª««~¡]¬B¨ú¡^¡A¥B¦b²§¬É¦a¹Ï¤¤¡A«h°O¿ı¬B¨ú
+            // å¦‚æœæ˜¯å¢åŠ ç‰©å“ï¼ˆæ‹¾å–ï¼‰ï¼Œä¸”åœ¨ç•°ç•Œåœ°åœ–ä¸­ï¼Œå‰‡è¨˜éŒ„æ‹¾å–
             if (bagResult.QuantityChange > 0 && ev.ProtoName == "PickItems")
             {
                 var mapResult = _mapPickRecordManager.RecordPickedItem(ev.ConfigBaseId, ev.SlotId, bagResult.QuantityChange);
                 if (mapResult != null)
                 {
                     _logger.LogMapPickItem(_mapPickRecordManager.CurrentMapName, mapResult);
-                }
+              
+                    // é€šçŸ¥å‰ç«¯ç‰©å“æ‹¾å–
+          if (_webViewHub != null)
+            {
+     _ = Task.Run(async () =>
+     {
+         await _webViewHub.NotifyItemPickedAsync(mapResult.ItemName, mapResult.QuantityChange);
+              await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+        });
             }
-        }
+       }
+          }
+
+        // èƒŒåŒ…åŒæ­¥å®Œæˆäº‹ä»¶
+  OnBagSyncCompleted?.Invoke();
+}
         catch (Exception ex)
         {
-            Console.WriteLine($"[¿ù»~] ³B²z­I¥]­×§ï®Éµo¥Í¿ù»~: {ex.Message}");
-        }
+            Console.WriteLine($"[éŒ¯èª¤] è™•ç†èƒŒåŒ…ä¿®æ”¹æ™‚ç™¼ç”ŸéŒ¯èª¤: {ex.Message}");
+     }
     }
 
     /// <summary>
-    /// Àò¨ú­I¥]ºŞ²z¾¹¡]¥Î©ó´ú¸Õ©Î¥~³¡¦s¨ú¡^
+    /// ç²å–ç•¶å‰åœ°åœ–è³‡æ–™ï¼ˆç”¨æ–¼é€šçŸ¥å‰ç«¯ï¼‰
+    /// </summary>
+    private object? GetCurrentMapData()
+    {
+        try
+   {
+   var currentRecord = _mapPickRecordManager.GetCurrentMapRecord();
+
+        if (!_mapPickRecordManager.IsInNetherrealmMap)
+        {
+      // é¿é›£æ‰€åœ°åœ–
+                return new
+              {
+        IsInMap = false,
+  MapType = "Hideout",
+        MapName = _mapPickRecordManager.CurrentMapName
+      };
+       }
+else if (currentRecord != null)
+     {
+             // ç•°ç•Œåœ°åœ–
+        return new
+         {
+ IsInMap = true,
+        MapType = "Netherrealm",
+    MapName = currentRecord.Name,
+           RecordId = currentRecord.RecordId,
+          MapTicket = currentRecord.MapTicket,
+        Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
+  Probe = currentRecord.Probe,
+          StartTime = currentRecord.StartTime,
+             Items = currentRecord.PickRecord?.Select(p => new
+     {
+             p.Value.BaseId,
+    p.Value.Name,
+       p.Value.Total,
+   Slots = p.Value.Slots
+}).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
+        };
+         }
+        else
+            {
+          // åœ¨ç•°ç•Œåœ°åœ–ä½†æ²’æœ‰è¨˜éŒ„
+           return new
+                {
+        IsInMap = true,
+       MapType = "Netherrealm",
+         MapName = _mapPickRecordManager.CurrentMapName
+     };
+    }
+ }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "ç²å–ç•¶å‰åœ°åœ–è³‡æ–™å¤±æ•—");
+   return null;
+        }
+  }
+
+    /// <summary>
+    /// ç²å–èƒŒåŒ…ç®¡ç†å™¨ï¼ˆç”¨æ–¼æ¸¬è©¦æˆ–å¤–éƒ¨å­˜å–ï¼‰
     /// </summary>
     public BagInventoryManager BagInventoryManager => _bagInventoryManager;
 
     /// <summary>
-    /// Àò¨ú¦a¹Ï°O¿ıºŞ²z¾¹¡]¥Î©ó´ú¸Õ©Î¥~³¡¦s¨ú¡^
+    /// ç²å–åœ°åœ–è¨˜éŒ„ç®¡ç†å™¨ï¼ˆç”¨æ–¼æ¸¬è©¦æˆ–å¤–éƒ¨å­˜å–ï¼‰
     /// </summary>
     public MapPickRecordManager MapPickRecordManager => _mapPickRecordManager;
 }

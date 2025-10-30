@@ -1,41 +1,41 @@
-namespace TorchLight.Statistics.Configuration;
+ï»¿namespace TorchLight.Statistics.Configuration;
 
 /// <summary>
-/// À³¥Îµ{¦¡°t¸m
+/// æ‡‰ç”¨ç¨‹å¼é…ç½®
 /// </summary>
 public class AppConfiguration
 {
     /// <summary>
-    /// ¹CÀ¸¤é»xÀÉ®×¥i¯àªº¸ô®|
+    /// éŠæˆ²æ—¥èªŒæª”æ¡ˆå¯èƒ½çš„è·¯å¾‘
     /// </summary>
     public static readonly string[] CandidateLogPaths = 
-    [
+    [        
         @"C:\Program Files (x86)\Torchlight Infinite\Game\UE_game\TorchLight\Saved\Logs\UE_game.log", 
         @"D:\Torchlight Infinite Game\UE_game\TorchLight\Saved\Logs\UE_game.log"
     ];
 
     /// <summary>
-    /// ÀÉ®×ºÊÅ¥¨¾§İ°Ê®É¶¡¡]²@¬í¡^
+    /// æª”æ¡ˆç›£è½é˜²æŠ–å‹•æ™‚é–“ï¼ˆæ¯«ç§’ï¼‰
     /// </summary>
     public const int FileWatcherDebounceMs = 500;
 
     /// <summary>
-    /// ÀÉ®×½ü¸ß¶¡¹j¡]¬í¡^
+    /// æª”æ¡ˆè¼ªè©¢é–“éš”ï¼ˆç§’ï¼‰
     /// </summary>
     public const int FilePollingIntervalSeconds = 2;
 
     /// <summary>
-    /// ¬O§_±qÀÉ®×¥½§À¶}©lÅª¨ú
+    /// æ˜¯å¦å¾æª”æ¡ˆæœ«å°¾é–‹å§‹è®€å–
     /// </summary>
     public const bool StartFromFileEnd = true;
 
     /// <summary>
-    /// ¤é»x®É¶¡®æ¦¡
+    /// æ—¥èªŒæ™‚é–“æ ¼å¼
     /// </summary>
     public const string UnrealLogTimeFormat = "yyyy.MM.dd-HH.mm.ss:fff";
 
     /// <summary>
-    /// ®É°Ï°¾²¾¡]¤p®É¡^- ¥Î©óÂà´« UTC ¨ì¥»¦a®É¶¡
+    /// æ™‚å€åç§»ï¼ˆå°æ™‚ï¼‰- ç”¨æ–¼è½‰æ› UTC åˆ°æœ¬åœ°æ™‚é–“
     /// </summary>
     public const int TimeZoneOffsetHours = 8;
 }
