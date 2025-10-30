@@ -8,11 +8,37 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- 找出方案根目錄（相對於 src/project/） -->
+    <SolutionRoot>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\..\..'))</SolutionRoot>
+    <DocsDir>$([System.IO.Path]::Combine('$(SolutionRoot)','docs'))</DocsDir>
+  </PropertyGroup>
+
+  <!-- 顯示 docs 目錄內所有檔案 -->
+  <ItemGroup Condition="Exists('$(DocsDir)')">
+    <None Include="$(DocsDir)\**\*">
+      <Link>docs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- 顯示方案根目錄特定檔案（如 README.md、LICENSE、CHANGELOG.md） -->
   <ItemGroup>
-    <None Update="IdTable.conf">
+    <None Include="$(SolutionRoot)\README.md">
+      <Link>README.md</Link>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Include="$(SolutionRoot)\CHANGELOG.md">
+      <Link>CHANGELOG.md</Link>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ItemIdTable.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="ItemIdTable.json">
+    <None Update="mapInfo.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="UE_game.log">

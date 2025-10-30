@@ -3,6 +3,7 @@ using System.Text.Json;
 using Serilog;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
+using TorchLight.Statistics.Core;
 
 namespace TorchLight.Statistics.UI;
 
@@ -36,17 +37,17 @@ private readonly MainWindow _mainWindow;
   {
     r.RecordId,
           r.Id,
-r.Name,
+          Name = MapMapper.GetMapName(r.Id), // 即時從 MapMapper 取得最新名稱
      r.MapTicket,
         Compass = r.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
           r.Probe,
      r.StartTime,
-          r.EndTime,
+ r.EndTime,
           r.UseTime,
           ItemCount = r.PickRecord?.Count ?? 0,
      TotalQuantity = r.PickRecord?.Sum(p => p.Value.Total) ?? 0
 })
-      .ToList();
+    .ToList();
 
             return JsonSerializer.Serialize(records, new JsonSerializerOptions 
           {
@@ -56,7 +57,7 @@ r.Name,
         }
       catch (Exception ex)
         {
-          Log.Error(ex, "獲取地圖記錄失敗");
+  Log.Error(ex, "獲取地圖記錄失敗");
        return JsonSerializer.Serialize(new { error = ex.Message });
    }
     }
@@ -66,11 +67,11 @@ r.Name,
     /// </summary>
     public string GetMapRecordDetail(string recordIdStr)
     {
-    try
+  try
      {
         if (!Guid.TryParse(recordIdStr, out var recordId))
-            {
-       return JsonSerializer.Serialize(new { error = "無效的記錄ID" });
+    {
+return JsonSerializer.Serialize(new { error = "無效的記錄ID" });
  }
 
             var record = _mapPickRecordManager.MapRecords
@@ -79,17 +80,17 @@ r.Name,
    if (record == null)
      {
   return JsonSerializer.Serialize(new { error = "找不到指定的記錄" });
-            }
+       }
 
    var detail = new
      {
      record.RecordId,
-     record.Id,
-     record.Name,
+record.Id,
+     Name = MapMapper.GetMapName(record.Id), // 即時從 MapMapper 取得最新名稱
             record.MapTicket,
    Compass = record.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
      record.Probe,
-       record.StartTime,
+ record.StartTime,
   record.EndTime,
     record.UseTime,
        Items = record.PickRecord?.Select(p => new
@@ -97,7 +98,7 @@ r.Name,
          p.Value.BaseId,
     p.Value.Name,
        p.Value.Total,
-      Slots = p.Value.Slots
+   Slots = p.Value.Slots
       }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
   };
 
@@ -121,22 +122,65 @@ r.Name,
     {
      try
         {
-         var info = new
-        {
-    IsInMap = _mapPickRecordManager.IsInNetherrealmMap,
-          MapName = _mapPickRecordManager.CurrentMapName
-     };
-
-     return JsonSerializer.Serialize(info, new JsonSerializerOptions 
+ var currentRecord = _mapPickRecordManager.GetCurrentMapRecord();
+   
+      if (!_mapPickRecordManager.IsInNetherrealmMap)
+       {
+  // 避難所地圖 - 只顯示地圖名稱
+    return JsonSerializer.Serialize(new
     {
-     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-         });
-    }
-    catch (Exception ex)
+   IsInMap = false,
+    MapType = "Hideout",
+     MapName = _mapPickRecordManager.CurrentMapName
+       }, new JsonSerializerOptions 
    {
-          Log.Error(ex, "獲取當前地圖資訊失敗");
- return JsonSerializer.Serialize(new { error = ex.Message });
- }
+PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+      });
+     }
+  else if (currentRecord != null)
+  {
+// 異界地圖 - 顯示完整資訊
+  return JsonSerializer.Serialize(new
+      {
+   IsInMap = true,
+     MapType = "Netherrealm",
+   MapName = MapMapper.GetMapName(currentRecord.Id), // 即時取得最新名稱
+         RecordId = currentRecord.RecordId,
+           MapTicket = currentRecord.MapTicket,
+   Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
+       Probe = currentRecord.Probe,
+        StartTime = currentRecord.StartTime,
+     Items = currentRecord.PickRecord?.Select(p => new
+         {
+ p.Value.BaseId,
+       p.Value.Name,
+ p.Value.Total,
+   Slots = p.Value.Slots
+    }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
+      }, new JsonSerializerOptions 
+    {
+           PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+   });
+       }
+     else
+{
+      // 在異界地圖但沒有記錄
+  return JsonSerializer.Serialize(new
+     {
+       IsInMap = true,
+ MapType = "Netherrealm",
+     MapName = _mapPickRecordManager.CurrentMapName
+     }, new JsonSerializerOptions 
+{
+  PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+   });
+  }
+      }
+      catch (Exception ex)
+        {
+    Log.Error(ex, "獲取當前地圖資訊失敗");
+    return JsonSerializer.Serialize(new { error = ex.Message });
+        }
     }
 
     /// <summary>
@@ -236,5 +280,82 @@ return JsonSerializer.Serialize(new { error = ex.Message });
     public void CloseApplication()
     {
      _mainWindow.Invoke(() => _mainWindow.Close());
+    }
+
+    /// <summary>
+    /// 獲取所有地圖設定
+    /// </summary>
+    public string GetMapConfigs()
+    {
+        try
+ {
+          var configs = MapMapper.GetAllMapConfigs();
+  return JsonSerializer.Serialize(configs, new JsonSerializerOptions
+            {
+     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+       WriteIndented = true
+   });
+  }
+        catch (Exception ex)
+     {
+            Log.Error(ex, "獲取地圖設定失敗");
+            return JsonSerializer.Serialize(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 新增或更新地圖設定
+    /// </summary>
+    public string SaveMapConfig(string mapId, string mapName, string mapType)
+    {
+        try
+        {
+   if (string.IsNullOrWhiteSpace(mapId) || string.IsNullOrWhiteSpace(mapName))
+            {
+    return JsonSerializer.Serialize(new { success = false, message = "地圖ID和名稱不能為空" });
+            }
+
+    MapType type = mapType switch
+{
+          "Hideout" => MapType.Hideout,
+          "Netherrealm" => MapType.Netherrealm,
+            _ => MapType.Unknown
+      };
+
+        var success = MapMapper.AddOrUpdateMapMapping(mapId, mapName, type);
+       
+   return JsonSerializer.Serialize(new 
+    { 
+      success, 
+    message = success ? "地圖設定已儲存" : "儲存失敗" 
+        });
+   }
+    catch (Exception ex)
+        {
+      Log.Error(ex, "儲存地圖設定失敗");
+      return JsonSerializer.Serialize(new { success = false, message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 刪除地圖設定
+    /// </summary>
+    public string DeleteMapConfig(string mapId)
+    {
+        try
+      {
+var success = MapMapper.DeleteMapMapping(mapId);
+         
+         return JsonSerializer.Serialize(new 
+      { 
+    success, 
+  message = success ? "地圖設定已刪除" : "刪除失敗" 
+         });
+        }
+        catch (Exception ex)
+ {
+      Log.Error(ex, "刪除地圖設定失敗");
+  return JsonSerializer.Serialize(new { success = false, message = ex.Message });
+        }
     }
 }

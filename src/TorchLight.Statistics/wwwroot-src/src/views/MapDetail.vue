@@ -35,48 +35,33 @@
 <div v-if="detail.mapTicket || detail.compass.length > 0 || detail.probe" class="detail-section">
  <h3>使用材料</h3>
  <div class="materials">
-            <div v-if="detail.mapTicket" class="material-item">
-       <span class="material-icon">??</span>
-     <span>{{ detail.mapTicket }}</span>
-            </div>
-            <div v-for="(compass, index) in detail.compass" :key="index" class="material-item">
-      <span class="material-icon">??</span>
+    <div v-if="detail.mapTicket" class="material-item">
+  <span class="material-icon">🎟️</span>
+              <span>{{ detail.mapTicket }}</span>
+   </div>
+   <div v-for="(compass, index) in detail.compass" :key="index" class="material-item">
+<span class="material-icon">🧭</span>
    <span>{{ compass }}</span>
-      </div>
-  <div v-if="detail.probe" class="material-item">
-         <span class="material-icon">??</span>
-            <span>{{ detail.probe }}</span>
-            </div>
+   </div>
+         <div v-if="detail.probe" class="material-item">
+    <span class="material-icon">📍</span>
+  <span>{{ detail.probe }}</span>
+        </div>
         </div>
  </div>
 
 <div v-if="detail.items && detail.items.length > 0" class="detail-section">
-      <h3>拾取物品 (共 {{ detail.items.length }} 種)</h3>
-  <div class="items-table">
-       <div class="table-header">
-          <div class="col-name">物品名稱</div>
-   <div class="col-quantity">數量</div>
-              <div class="col-slots">欄位分布</div>
-            </div>
-            <div 
-  v-for="item in detail.items" 
-         :key="item.baseId"
-        class="table-row"
-            >
-              <div class="col-name">{{ item.name }}</div>
-   <div class="col-quantity">{{ item.total }}</div>
-            <div class="col-slots">
-     <span 
-    v-for="(count, slotId) in item.slots" 
-    :key="slotId"
-       class="slot-badge"
->
-            欄位{{ slotId }}: {{ count }}
-            </span>
-       </div>
-            </div>
-  </div>
-        </div>
+        <div class="items-grid">
+      <div 
+    v-for="item in detail.items" 
+   :key="item.baseId"
+       class="item-card"
+  >
+            <div class="item-name">{{ item.name }}</div>
+    <div class="item-quantity">x{{ item.total }}</div>
+     </div>
+   </div>
+      </div>
 
     <div v-else class="detail-section">
           <p class="empty-message">本次地圖未拾取任何物品</p>
@@ -222,54 +207,71 @@ font-size: 1.1rem;
   font-size: 1.5rem;
 }
 
-.items-table {
-  background: rgba(255, 255, 255, 0.05);
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.3);
   border-radius: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 75px;
   overflow: hidden;
 }
 
-.table-header, .table-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr 2fr;
-  gap: 15px;
-  padding: 15px;
+.item-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
-.table-header {
-  background: rgba(255, 255, 255, 0.1);
-  font-weight: 600;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.table-row {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.table-row:last-child {
-  border-bottom: none;
-}
-
-.table-row:hover {
-background: rgba(255, 255, 255, 0.05);
-}
-
-.col-quantity {
+.item-name {
+  color: white;
+  font-size: 0.9rem;
   text-align: center;
-  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  width: 100%;
+  padding: 0 4px;
+}
+
+.item-quantity {
   color: #4caf50;
+  font-size: 1.1rem;
+  font-weight: bold;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.col-slots {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+/* 響應式設計 */
+@media (max-width: 1200px) {
+  .items-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.slot-badge {
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  font-size: 0.85rem;
+@media (max-width: 900px) {
+  .items-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .empty-message {

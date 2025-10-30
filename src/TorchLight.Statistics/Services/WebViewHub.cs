@@ -116,4 +116,24 @@ public class WebViewHub
             quantity
         });
     }
+
+    /// <summary>
+    /// 通知前端：當前地圖資訊更新
+    /// </summary>
+    public Task NotifyCurrentMapUpdateAsync(object? mapData)
+    {
+        return SendMessageAsync("currentMapUpdate", mapData);
+    }
+
+    /// <summary>
+    /// 通知前端：地圖設定已更新
+    /// </summary>
+    public Task NotifyMapConfigUpdatedAsync(bool success, string message)
+    {
+        return SendMessageAsync("mapConfigUpdated", new
+        {
+            success,
+            message
+        });
+    }
 }

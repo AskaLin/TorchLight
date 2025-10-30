@@ -6,63 +6,91 @@
 
     <div v-else-if="stats" class="stats-container">
      <div class="stats-overview">
-   <div class="stat-card">
-          <div class="stat-icon">???</div>
-  <div class="stat-content">
+        <router-link to="/maps" class="stat-card clickable">
+          <div class="stat-icon">🗺️</div>
+       <div class="stat-content">
      <div class="stat-value">{{ stats.totalMaps }}</div>
-      <div class="stat-label">總地圖數</div>
+         <div class="stat-label">總地圖數</div>
+      </div>
+        </router-link>
+
+        <div class="stat-card">
+   <div class="stat-icon">📦</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.totalItems }}</div>
+            <div class="stat-label">總物品種類</div>
+          </div>
      </div>
-      </div>
 
-    <div class="stat-card">
-   <div class="stat-icon">??</div>
-      <div class="stat-content">
-      <div class="stat-value">{{ stats.totalItems }}</div>
-  <div class="stat-label">總物品種類</div>
-    </div>
+        <div class="stat-card">
+          <div class="stat-icon">💎</div>
+          <div class="stat-content">
+            <div class="stat-value">{{ stats.totalQuantity }}</div>
+            <div class="stat-label">總拾取數量</div>
+        </div>
         </div>
 
-    <div class="stat-card">
-       <div class="stat-icon">??</div>
-      <div class="stat-content">
- <div class="stat-value">{{ stats.totalQuantity }}</div>
-       <div class="stat-label">總拾取數量</div>
-    </div>
+   <div class="stat-card">
+          <div class="stat-icon">⏱️</div>
+  <div class="stat-content">
+            <div class="stat-value">{{ stats.totalPlayTime }}</div>
+            <div class="stat-label">總遊戲時間</div>
+        </div>
    </div>
-
-    <div class="stat-card">
-<div class="stat-icon">??</div>
-    <div class="stat-content">
-     <div class="stat-value">{{ stats.totalPlayTime }}</div>
-   <div class="stat-label">總遊戲時間</div>
-       </div>
-        </div>
       </div>
 
-   <div v-if="stats.mostPickedItems && stats.mostPickedItems.length > 0" class="most-picked">
+      <div v-if="stats.mostPickedItems && stats.mostPickedItems.length > 0" class="most-picked">
         <h3>最常拾取物品 Top 10</h3>
-     <div class="items-list">
-     <div 
-          v-for="(item, index) in stats.mostPickedItems" 
-            :key="item.baseId"
-  class="item-row"
-  >
-      <div class="rank">{{ index + 1 }}</div>
-       <div class="item-name">{{ item.name }}</div>
+        <div class="items-container">
+          <!-- 左列：1-5 名 -->
+  <div class="items-column">
+<div 
+       v-for="(item, index) in leftColumnItems" 
+       :key="item.baseId"
+       class="item-row"
+     >
+    <div class="rank">{{ index + 1 }}</div>
+              <div class="item-name">{{ item.name }}</div>
    <div class="item-quantity">{{ item.totalQuantity }}</div>
+     </div>
+          </div>
+          
+        <!-- 右列：6-10 名 -->
+       <div class="items-column">
+  <div 
+            v-for="(item, index) in rightColumnItems" 
+            :key="item.baseId"
+              class="item-row"
+    >
+              <div class="rank">{{ index + 6 }}</div>
+              <div class="item-name">{{ item.name }}</div>
+       <div class="item-quantity">{{ item.totalQuantity }}</div>
+  </div>
           </div>
         </div>
-</div>
-  </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { apiCall } from '../utils/api'
 
 const stats = ref(null)
 const loading = ref(true)
+
+// 左列：1-5 名
+const leftColumnItems = computed(() => {
+  if (!stats.value?.mostPickedItems) return []
+  return stats.value.mostPickedItems.slice(0, 5)
+})
+
+// 右列：6-10 名
+const rightColumnItems = computed(() => {
+  if (!stats.value?.mostPickedItems) return []
+  return stats.value.mostPickedItems.slice(5, 10)
+})
 
 onMounted(async () => {
   try {
@@ -108,10 +136,22 @@ gap: 20px;
   align-items: center;
   gap: 20px;
   transition: transform 0.3s;
+  text-decoration: none;
+  color: inherit;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-card.clickable:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .stat-icon {
@@ -147,7 +187,13 @@ gap: 20px;
   font-size: 1.5rem;
 }
 
-.items-list {
+.items-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.items-column {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -155,7 +201,7 @@ gap: 20px;
 
 .item-row {
   display: grid;
-  grid-template-columns: 50px 1fr 150px;
+  grid-template-columns: 50px 1fr 100px;
   align-items: center;
   padding: 15px;
   background: rgba(255, 255, 255, 0.05);
@@ -184,12 +230,20 @@ gap: 20px;
 .item-name {
   color: white;
   font-size: 1.1rem;
+  padding: 0 15px;
 }
 
 .item-quantity {
   text-align: right;
-  color: #4caf50;
+color: #4caf50;
   font-size: 1.5rem;
   font-weight: 600;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .items-container {
+grid-template-columns: 1fr;
+  }
 }
 </style>

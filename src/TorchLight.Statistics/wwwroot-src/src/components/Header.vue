@@ -2,13 +2,14 @@
   <header class="header">
     <div class="header-content">
       <div class="logo">
-        <h1>?? 火炬之光無限 - 拾取統計</h1>
+        <h1>🔥 火炬之光無限 - 拾取統計</h1>
       </div>
  
       <nav class="nav">
         <router-link to="/" class="nav-link">首頁</router-link>
         <router-link to="/maps" class="nav-link">地圖記錄</router-link>
-      <router-link to="/statistics" class="nav-link">統計</router-link>
+        <router-link to="/statistics" class="nav-link">統計</router-link>
+        <router-link to="/settings" class="nav-link">⚙️ 設定</router-link>
       </nav>
 
       <div class="status">

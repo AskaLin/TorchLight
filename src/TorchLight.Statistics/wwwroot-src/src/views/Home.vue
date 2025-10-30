@@ -1,64 +1,67 @@
 ﻿<template>
   <div class="home">
-    <div class="welcome-card">
+    <!--<div class="welcome-card">
       <h2>歡迎使用拾取物品統計工具</h2>
       <p>此工具會自動監控遊戲日誌，統計您在異界地圖中拾取的物品</p>
-    </div>
+    </div>-->
+
+    <!-- 當前地圖資訊 -->
+    <CurrentMapInfo />
 
     <div class="stats-grid">
-      <div class="stat-card">
-<div class="stat-icon">🗺️</div>
+      <router-link to="/maps" class="stat-card clickable">
+     <div class="stat-icon">🗺️</div>
  <div class="stat-content">
    <div class="stat-label">總地圖數</div>
           <div class="stat-value">{{ mapStore.totalMaps }}</div>
         </div>
-      </div>
+      </router-link>
 
     <div class="stat-card">
-        <div class="stat-icon">📦</div>
+      <div class="stat-icon">📦</div>
         <div class="stat-content">
   <div class="stat-label">總物品種類</div>
       <div class="stat-value">{{ mapStore.totalItems }}</div>
-        </div>
+    </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon">🔍</div>
+     <div class="stat-icon">🔍</div>
 <div class="stat-content">
           <div class="stat-label">監控狀態</div>
-          <div class="stat-value status" :class="statusClass">{{ mapStore.monitoringStatus }}</div>
+   <div class="stat-value status" :class="statusClass">{{ mapStore.monitoringStatus }}</div>
         </div>
-      </div>
+  </div>
 
-      <div class="stat-card">
+    <div class="stat-card">
  <div class="stat-icon">🕒</div>
         <div class="stat-content">
           <div class="stat-label">背包上次同步</div>
           <div class="stat-value time">{{ formattedSyncTime }}</div>
-        </div>
+   </div>
       </div>
-    </div>
+ </div>
 
  <div class="quick-actions">
       <h3>快速操作</h3>
    <div class="action-buttons">
       <router-link to="/maps" class="action-btn">
-          <span class="btn-icon">??</span>
+       <span class="btn-icon">📋</span>
           <span>查看地圖記錄</span>
         </router-link>
  
         <router-link to="/statistics" class="action-btn">
-       <span class="btn-icon">??</span>
-        <span>查看統計資料</span>
+       <span class="btn-icon">📊</span>
+    <span>查看統計資料</span>
         </router-link>
 
-        <button @click="exportRecords" class="action-btn">
-          <span class="btn-icon">??</span>
-          <span>匯出記錄</span>
-        </button>
+     <button @click="exportRecords" class="action-btn">
+          <span class="btn-icon">💾</span>
+       <span>匯出記錄</span>
+     </button>
 
-        <button @click="clearRecords" class="action-btn danger">
-          <span class="btn-icon">???</span>
+  <button @click="clearRecords" class="action-btn danger">
+     <span class="btn-icon">🗑️</span>
  <span>清除所有記錄</span>
  </button>
       </div>
@@ -69,6 +72,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useMapStore } from '../stores/mapStore'
+import CurrentMapInfo from '../components/CurrentMapInfo.vue'
 
 const mapStore = useMapStore()
 
@@ -155,11 +159,23 @@ const clearRecords = async () => {
   align-items: center;
   gap: 20px;
   transition: transform 0.3s, box-shadow 0.3s;
+  text-decoration: none;
+  color: inherit;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-card.clickable:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .stat-icon {

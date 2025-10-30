@@ -9,7 +9,7 @@ public class AppConfiguration
     /// 遊戲日誌檔案可能的路徑
     /// </summary>
     public static readonly string[] CandidateLogPaths = 
-    [
+    [        
         @"C:\Program Files (x86)\Torchlight Infinite\Game\UE_game\TorchLight\Saved\Logs\UE_game.log", 
         @"D:\Torchlight Infinite Game\UE_game\TorchLight\Saved\Logs\UE_game.log"
     ];

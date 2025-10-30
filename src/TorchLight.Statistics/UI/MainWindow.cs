@@ -17,11 +17,11 @@ public class MainWindow : Form
     private readonly WebViewHub _webViewHub;
     private bool _isInitialized = false;
 
-    public MainWindow(MapPickRecordManager mapPickRecordManager, GameLogProcessor gameLogProcessor)
+    public MainWindow(MapPickRecordManager mapPickRecordManager, GameLogProcessor gameLogProcessor, WebViewHub webViewHub)
     {
         _mapPickRecordManager = mapPickRecordManager ?? throw new ArgumentNullException(nameof(mapPickRecordManager));
         _gameLogProcessor = gameLogProcessor ?? throw new ArgumentNullException(nameof(gameLogProcessor));
-        _webViewHub = new WebViewHub();
+        _webViewHub = webViewHub ?? throw new ArgumentNullException(nameof(webViewHub));
 
         // 設定視窗
         Text = "火炬之光無限 - 拾取物品統計工具";
@@ -40,6 +40,9 @@ public class MainWindow : Form
         // 註冊遊戲日誌事件
         _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
         _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
+
+        // 註冊地圖設定更新事件
+        MapMapper.OnConfigUpdated += HandleMapConfigUpdated;
 
         // 初始化 WebView2
         InitializeAsync();
@@ -174,6 +177,18 @@ public class MainWindow : Form
         {
             await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
             Log.Information("已通知前端：背包同步完成");
+        }
+    }
+
+    /// <summary>
+    /// 處理地圖設定更新事件
+    /// </summary>
+    private async void HandleMapConfigUpdated(bool success, string message)
+    {
+        if (_isInitialized)
+        {
+            await _webViewHub.NotifyMapConfigUpdatedAsync(success, message);
+            Log.Information("已通知前端：地圖設定更新 - {Success}: {Message}", success, message);
         }
     }
 

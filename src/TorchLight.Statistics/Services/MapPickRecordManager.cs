@@ -194,6 +194,36 @@ _pendingCompasses.Add(item.Name);
     }
 
     /// <summary>
+    /// 獲取當前地圖記錄（包含完整資訊）
+    /// </summary>
+    public MapRecordModel? GetCurrentMapRecord()
+    {
+        if (!IsInNetherrealmMap || _currentMapRecord == null)
+   return null;
+
+        // 創建一個包含當前拾取記錄的副本
+    var recordCopy = new MapRecordModel
+  {
+          RecordId = _currentMapRecord.RecordId,
+            Id = _currentMapRecord.Id,
+        Name = _currentMapRecord.Name,
+            MapTicket = _currentMapRecord.MapTicket,
+   Probe = _currentMapRecord.Probe,
+            StartTime = _currentMapRecord.StartTime,
+       EndTime = DateTime.Now, // 當前時間作為臨時結束時間
+     PickRecord = _currentMapPickData
+   };
+
+        // 複製羅盤資料
+   for (int i = 0; i < 4; i++)
+        {
+         recordCopy.Compass[i] = _currentMapRecord.Compass[i];
+  }
+
+ return recordCopy;
+    }
+
+    /// <summary>
     /// 重置所有記錄（登入時使用）
     /// </summary>
     public void Reset()

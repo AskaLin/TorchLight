@@ -2,8 +2,8 @@
   <div class="map-list">
     <div class="list-header">
    <h2>地圖記錄列表</h2>
-      <button @click="refreshList" class="btn-refresh" :disabled="mapStore.loading">
-  <span v-if="!mapStore.loading">?? 重新載入</span>
+    <button @click="refreshList" class="btn-refresh" :disabled="mapStore.loading">
+        <span v-if="!mapStore.loading">🔄 重新載入</span>
         <span v-else>載入中...</span>
     </button>
     </div>
@@ -30,21 +30,21 @@
         </div>
 
  <div class="record-info">
- <div v-if="record.mapTicket" class="info-item">
-     <span class="label">?? 門票:</span>
-            <span class="value">{{ record.mapTicket }}</span>
- </div>
+          <div v-if="record.mapTicket" class="info-item">
+         <span class="label">🎟️ 門票:</span>
+  <span class="value">{{ record.mapTicket }}</span>
+          </div>
 
-        <div v-if="record.compass && record.compass.length > 0" class="info-item">
-            <span class="label">?? 羅盤:</span>
+          <div v-if="record.compass && record.compass.length > 0" class="info-item">
+   <span class="label">🧭 羅盤:</span>
    <span class="value">{{ record.compass.join(', ') }}</span>
 </div>
 
 <div v-if="record.probe" class="info-item">
-       <span class="label">?? 探針:</span>
-       <span class="value">{{ record.probe }}</span>
-          </div>
-      </div>
+       <span class="label">📍 探針:</span>
+    <span class="value">{{ record.probe }}</span>
+    </div>
+   </div>
 
     <div class="record-stats">
    <div class="stat-item">

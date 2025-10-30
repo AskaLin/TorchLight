@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using TorchLight.Statistics.Services;
 using TorchLight.Statistics.Models;
+using System.Linq;
 
 namespace TorchLight.Statistics;
 
@@ -16,25 +17,30 @@ public class GameLogProcessor
     private readonly MapTransitionHandler _mapTransitionHandler;
     private readonly ConsoleLogger _logger;
     private readonly Dictionary<int, ItemModel> _itemTable;
+    private WebViewHub? _webViewHub;
 
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
     /// </summary>
+#nullable enable
     public event Action? OnLogOpenedDetected;
 
     /// <summary>
     /// 當背包同步完成時觸發
     /// </summary>
     public event Action? OnBagSyncCompleted;
+#nullable disable
 
     public GameLogProcessor(
-           Dictionary<int, ItemModel> itemTable,
-           LineParser lineParser,
-           ItemChangeBlockProcessor itemChangeProcessor)
+       Dictionary<int, ItemModel> itemTable,
+    LineParser lineParser,
+           ItemChangeBlockProcessor itemChangeProcessor,
+           WebViewHub? webViewHub = null)
     {
         _lineParser = lineParser ?? throw new ArgumentNullException(nameof(lineParser));
         _itemChangeProcessor = itemChangeProcessor ?? throw new ArgumentNullException(nameof(itemChangeProcessor));
         _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
+        _webViewHub = webViewHub;
         _bagInventoryManager = new BagInventoryManager(itemTable);
         _mapPickRecordManager = new MapPickRecordManager(itemTable);
         _mapTransitionHandler = new MapTransitionHandler(_mapPickRecordManager);
@@ -42,6 +48,14 @@ public class GameLogProcessor
 
         // 註冊事件處理
         _itemChangeProcessor.OnBagModInsideBlock += HandleBagModification;
+    }
+
+    /// <summary>
+    /// 設定 WebViewHub（用於後續通知前端）
+    /// </summary>
+    public void SetWebViewHub(WebViewHub webViewHub)
+    {
+        _webViewHub = webViewHub;
     }
 
     /// <summary>
@@ -108,7 +122,16 @@ public class GameLogProcessor
                 {
                     Log.Debug("地圖切換: {From} -> {To}", fromPath, toPath);
                     _mapTransitionHandler.HandleMapTransition(time, fromPath, toPath);
-                }
+                    
+                   // 通知前端地圖切換
+                   if (_webViewHub != null)
+                          {
+            _ = Task.Run(async () =>
+         {
+             await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+                    });
+                 }
+ }
                 return;
             }
 
@@ -153,17 +176,86 @@ public class GameLogProcessor
                 if (mapResult != null)
                 {
                     _logger.LogMapPickItem(_mapPickRecordManager.CurrentMapName, mapResult);
-                }
+              
+                    // 通知前端物品拾取
+          if (_webViewHub != null)
+            {
+     _ = Task.Run(async () =>
+     {
+         await _webViewHub.NotifyItemPickedAsync(mapResult.ItemName, mapResult.QuantityChange);
+              await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+        });
             }
+       }
+          }
 
-            // 背包同步完成事件
-            OnBagSyncCompleted?.Invoke();
-        }
+        // 背包同步完成事件
+  OnBagSyncCompleted?.Invoke();
+}
         catch (Exception ex)
         {
             Console.WriteLine($"[錯誤] 處理背包修改時發生錯誤: {ex.Message}");
-        }
+     }
     }
+
+    /// <summary>
+    /// 獲取當前地圖資料（用於通知前端）
+    /// </summary>
+    private object? GetCurrentMapData()
+    {
+        try
+   {
+   var currentRecord = _mapPickRecordManager.GetCurrentMapRecord();
+
+        if (!_mapPickRecordManager.IsInNetherrealmMap)
+        {
+      // 避難所地圖
+                return new
+              {
+        IsInMap = false,
+  MapType = "Hideout",
+        MapName = _mapPickRecordManager.CurrentMapName
+      };
+       }
+else if (currentRecord != null)
+     {
+             // 異界地圖
+        return new
+         {
+ IsInMap = true,
+        MapType = "Netherrealm",
+    MapName = currentRecord.Name,
+           RecordId = currentRecord.RecordId,
+          MapTicket = currentRecord.MapTicket,
+        Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
+  Probe = currentRecord.Probe,
+          StartTime = currentRecord.StartTime,
+             Items = currentRecord.PickRecord?.Select(p => new
+     {
+             p.Value.BaseId,
+    p.Value.Name,
+       p.Value.Total,
+   Slots = p.Value.Slots
+}).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
+        };
+         }
+        else
+            {
+          // 在異界地圖但沒有記錄
+           return new
+                {
+        IsInMap = true,
+       MapType = "Netherrealm",
+         MapName = _mapPickRecordManager.CurrentMapName
+     };
+    }
+ }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取當前地圖資料失敗");
+   return null;
+        }
+  }
 
     /// <summary>
     /// 獲取背包管理器（用於測試或外部存取）

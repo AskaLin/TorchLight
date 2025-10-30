@@ -3,6 +3,7 @@ import Home from '../views/Home.vue'
 import MapList from '../views/MapList.vue'
 import MapDetail from '../views/MapDetail.vue'
 import Statistics from '../views/Statistics.vue'
+import MapSettings from '../views/MapSettings.vue'
 
 const routes = [
   {
@@ -25,6 +26,11 @@ const routes = [
     path: '/statistics',
     name: 'Statistics',
     component: Statistics
+  },
+  {
+    path: '/settings',
+    name: 'MapSettings',
+    component: MapSettings
   }
 ]
 

@@ -3,6 +3,7 @@ using Serilog;
 using TorchLight.Statistics;
 using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.UI;
+using TorchLight.Statistics.Services;
 
 namespace TorchLight.Statistics
 {
@@ -28,6 +29,10 @@ namespace TorchLight.Statistics
             {
                 // 初始化核心組件
                 Log.Information("正在初始化...");
+                
+                // 初始化地圖映射器
+                MapMapper.Initialize();
+            
                 var itemTable = ItemIdTable.GetItemTable();
                 Log.Information("已載入 {ItemCount} 個物品定義", itemTable.Count);
 
@@ -60,6 +65,15 @@ namespace TorchLight.Statistics
                 tail.OnNewLine += logProcessor.ProcessLine;
                 tail.Start();
 
+                // 測試用, 讀取現有日誌內容 進行處理
+                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                //using StreamReader sr = new(fs, Encoding.UTF8);
+                //string line;
+                //while ((line = sr.ReadLine()) != null)
+                //{
+                //    logProcessor.ProcessLine(line);
+                //}
+
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");
                 Log.Information("提示：進入異界地圖後會自動開始統計拾取物品");
@@ -70,7 +84,15 @@ namespace TorchLight.Statistics
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                var mainWindow = new MainWindow(logProcessor.MapPickRecordManager, logProcessor);
+                // 創建 WebViewHub（需要在 MainWindow 中初始化）
+                var webViewHub = new WebViewHub();
+                
+                // 設定 GameLogProcessor 使用 WebViewHub
+                logProcessor.SetWebViewHub(webViewHub);
+                
+                // 創建 MainWindow 並傳入 WebViewHub
+                var mainWindow = new MainWindow(logProcessor.MapPickRecordManager, logProcessor, webViewHub);
+
                 Application.Run(mainWindow);
 
                 tail.Stop();
