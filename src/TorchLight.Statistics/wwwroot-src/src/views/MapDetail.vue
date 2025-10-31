@@ -1,281 +1,408 @@
 ﻿<template>
-    <div class="map-detail">
-        <div class="detail-header">
-            <button @click="goBack" class="btn-back">← 返回列表</button>
-        </div>
-
-        <div v-if="loading" class="loading">載入中...</div>
-
-        <div v-else-if="detail" class="detail-content">
-            <div class="detail-card">
-                <h2>{{ detail.name }}</h2>
-
-                <div class="detail-section">
-                    <h3>基本資訊</h3>
-                    <div class="info-grid">                        
-                        <div class="info-item">
-                            <span class="label">地圖ID：</span>
-                            <span class="value">{{ detail.id }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">開始時間：</span>
-                            <span class="value">{{ formatDateTime(detail.startTime) }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">結束時間：</span>
-                            <span class="value">{{ formatDateTime(detail.endTime) }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">用時：</span>
-                            <span class="value">{{ detail.useTime }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="detail.mapTicket || detail.compass.length > 0 || detail.probe" class="detail-section">
-                    <h3>使用材料</h3>
-                    <div class="materials">
-                        <div v-if="detail.mapTicket" class="material-item">
-                            <span class="material-icon">🎟️</span>
-                            <span>{{ detail.mapTicket }}</span>
-                        </div>
-                        <div v-for="(compass, index) in detail.compass" :key="index" class="material-item">
-                            <span class="material-icon">🧭</span>
-                            <span>{{ compass }}</span>
-                        </div>
-                        <div v-if="detail.probe" class="material-item">
-                            <span class="material-icon">📍</span>
-                            <span>{{ detail.probe }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="detail.items && detail.items.length > 0" class="detail-section">
-                    <div class="items-grid">
-                        <div v-for="item in detail.items"
-                             :key="item.baseId"
-                             class="item-card">
-                            <div class="item-name">{{ item.name }}</div>
-                            <div class="item-quantity">x{{ item.total }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div v-else class="detail-section">
-                    <p class="empty-message">本次地圖未拾取任何物品</p>
-                </div>
-            </div>
-        </div>
+  <div class="map-detail">
+    <div class="detail-header">
+      <button @click="goBack" class="btn-back">
+        ← {{ getBackButtonText() }}
+      </button>
     </div>
+
+    <div v-if="loading" class="loading">載入中...</div>
+
+    <div v-else-if="!detail" class="error">
+      <p>❌ 無法載入地圖詳情</p>
+  <p class="debug-info" v-if="fromHistory">
+    來源：歷史記錄<br>
+     RecordId: {{ route.params.id }}<br>
+        是否有 historyRecord: {{ !!route.state?.historyRecord }}<br>
+   是否有 historyData: {{ !!route.state?.historyData }}
+      </p>
+   <p class="debug-info" v-else>
+  來源：當前記錄<br>
+  RecordId: {{ route.params.id }}
+      </p>
+      <button @click="goBack" class="btn-back">返回</button>
+    </div>
+
+    <div v-else-if="detail" class="detail-content">
+      <div class="detail-card">
+        <h2>{{ detail.name }}</h2>
+
+        <div class="detail-section">
+          <h3>基本資訊</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">地圖ID：</span>
+              <span class="value">{{ detail.id }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">開始時間：</span>
+              <span class="value">{{ formatDateTime(detail.startTime) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">結束時間：</span>
+              <span class="value">{{ formatDateTime(detail.endTime) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">用時：</span>
+              <span class="value">{{ detail.useTime }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="detail.mapTicket || detail.compass.length > 0 || detail.probe" class="detail-section">
+          <h3>使用材料</h3>
+          <div class="materials">
+            <div v-if="detail.mapTicket" class="material-item">
+              <span class="material-icon">🎟️</span>
+              <span>{{ detail.mapTicket }}</span>
+            </div>
+            <div v-for="(compass, index) in detail.compass" :key="index" class="material-item">
+              <span class="material-icon">🧭</span>
+              <span>{{ compass }}</span>
+            </div>
+            <div v-if="detail.probe" class="material-item">
+              <span class="material-icon">📍</span>
+              <span>{{ detail.probe }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="detail.items && detail.items.length > 0" class="detail-section">
+          <div class="items-grid">
+            <div v-for="item in detail.items"
+                 :key="item.baseId"
+                 class="item-card">
+              <div class="item-name">{{ item.name }}</div>
+              <div class="item-quantity">x{{ item.total }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="detail-section">
+          <p class="empty-message">本次地圖未拾取任何物品</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-    import { ref, onMounted } from 'vue'
-    import { useRouter, useRoute } from 'vue-router'
-    import { useMapStore } from '../stores/mapStore'
+  import { ref, onMounted } from 'vue'
+  import { useRouter, useRoute } from 'vue-router'
+  import { useMapStore } from '../stores/mapStore'
 
-    const router = useRouter()
-    const route = useRoute()
-    const mapStore = useMapStore()
+  const router = useRouter()
+  const route = useRoute()
+  const mapStore = useMapStore()
 
-    const detail = ref(null)
-    const loading = ref(true)
+  const detail = ref(null)
+  const loading = ref(true)
+  const fromHistory = ref(false)
 
-    onMounted(async () => {
+  onMounted(async () => {
+    // 檢查是否來自歷史記錄
+    fromHistory.value = route.query.fromHistory === 'true'
+
+    if (fromHistory.value) {
+      // 🔧 來自歷史記錄，不查詢當前記錄
+console.log('Loading from history...')
+      
+ if (route.state?.historyRecord) {
+        // 從歷史記錄的地圖列表進來
+        const record = route.state.historyRecord
+   console.log('✅ Loading history record from state:', record)
+        
+        detail.value = {
+          ...record,
+     name: record.name,
+   id: record.id,
+        recordId: record.recordId,
+          startTime: record.startTime,
+          endTime: record.endTime,
+   useTime: record.useTime,
+          mapTicket: record.mapTicket || '',
+     compass: record.compass || [],
+          probe: record.probe || '',
+  items: record.pickRecord ? Object.values(record.pickRecord) : []
+   }
+      } else if (route.state?.historyData) {
+  // 舊的處理方式（相容性）
+   const historyData = route.state.historyData
         const recordId = route.params.id
-        detail.value = await mapStore.getMapDetail(recordId)
-        loading.value = false
-    })
 
-    const goBack = () => {
-        router.push('/maps')
+        console.log('🔄 Finding record in history data, recordId:', recordId)
+     
+        // 從歷史記錄中找到對應的地圖記錄
+        const record = historyData.records?.find(r => r.recordId === recordId)
+        if (record) {
+          console.log('✅ Found record in history data:', record)
+        detail.value = {
+            ...record,
+ name: record.name,
+       compass: record.compass || [],
+  items: Object.values(record.pickRecord || {})
+          }
+        } else {
+   console.error('❌ Record not found in history data')
+          detail.value = null
     }
+      } else {
+      // ❌ 沒有 state 數據，無法查詢歷史記錄
+   console.error('❌ No history data in route state')
+  detail.value = null
+      }
+      
+      loading.value = false
+    } else {
+      // 從當前記錄進來
+      console.log('Loading from current records...')
+      const recordId = route.params.id
+      detail.value = await mapStore.getMapDetail(recordId)
+      loading.value = false
+  }
+  })
 
-    const formatDateTime = (dateStr) => {
-        const date = new Date(dateStr)
-        return date.toLocaleString('zh-TW', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false, // 👈 關鍵：使用 24 小時制
+  const goBack = () => {
+  if (fromHistory.value) {
+      // 檢查是否從歷史記錄的地圖列表進來
+      if (route.state?.fromHistoryList && route.query.fileName) {
+        // 🔧 返回歷史記錄的地圖列表，重新從後端加載數據
+        router.push({
+    path: '/history/detail',
+          query: { fileName: route.query.fileName }
+     // ❌ 不再依賴 state，讓頁面自己重新加載
         })
+      } else {
+    // 返回歷史記錄主列表
+        router.push('/history')
+      }
+    } else {
+      router.push('/maps')
     }
+  }
+
+  const getBackButtonText = () => {
+    if (fromHistory.value) {
+   if (route.state?.fromHistoryList) {
+ return '返回記錄地圖列表'
+   }
+      return '返回歷史紀錄'
+  }
+    return '返回列表'
+  }
+
+  const formatDateTime = (dateStr) => {
+    const date = new Date(dateStr)
+    return date.toLocaleString('zh-TW', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    hour12: false,
+    })
+  }
 </script>
 
 <style scoped>
-    .map-detail {
-        max-width: 1200px;
-        margin: 0 auto;
+  .map-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .detail-header {
+    margin-bottom: 20px;
+  }
+
+  .btn-back {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateX(-3px);
     }
 
-    .detail-header {
-        margin-bottom: 20px;
+  .loading {
+    text-align: center;
+    padding: 60px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #f44336;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+  }
+
+  .detail-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 30px;
+    color: white;
+  }
+
+    .detail-card h2 {
+      margin: 0 0 30px 0;
+      font-size: 2rem;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 15px;
     }
 
-    .btn-back {
-        padding: 10px 20px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s;
+  .detail-section {
+    margin-bottom: 30px;
+  }
+
+    .detail-section h3 {
+      margin: 0 0 15px 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.3rem;
     }
 
-        .btn-back:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(-3px);
-        }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+  }
 
-    .loading {
-        text-align: center;
-        padding: 60px;
-        color: rgba(255, 255, 255, 0.7);
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+  }
+
+  .label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+  }
+
+  .value {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .materials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .material-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+  }
+
+  .material-icon {
+    font-size: 1.5rem;
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .item-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 8px;
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    min-height: 75px;
+    overflow: hidden;
+  }
+
+    .item-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
     }
 
-    .detail-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 30px;
-        color: white;
-    }
+  .item-name {
+    color: white;
+    font-size: 0.9rem;
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    width: 100%;
+    padding: 0 4px;
+  }
 
-        .detail-card h2 {
-            margin: 0 0 30px 0;
-            font-size: 2rem;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-            padding-bottom: 15px;
-        }
+  .item-quantity {
+    color: #4caf50;
+    font-size: 1.1rem;
+    font-weight: bold;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
-    .detail-section {
-        margin-bottom: 30px;
-    }
-
-        .detail-section h3 {
-            margin: 0 0 15px 0;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.3rem;
-        }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        padding: 15px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-    }
-
-    .label {
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 0.9rem;
-    }
-
-    .value {
-        color: white;
-        font-size: 1.1rem;
-        font-weight: 500;
-    }
-
-    .materials {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .material-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 15px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-    }
-
-    .material-icon {
-        font-size: 1.5rem;
-    }
-
+  /* 響應式設計 */
+  @media (max-width: 1200px) {
     .items-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        margin-top: 20px;
+      grid-template-columns: repeat(3, 1fr);
     }
+  }
 
-    .item-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 12px 8px;
-        background: rgba(76, 175, 80, 0.15);
-        border: 1px solid rgba(76, 175, 80, 0.3);
-        border-radius: 8px;
-        transition: transform 0.2s, box-shadow 0.2s;
-        min-height: 75px;
-        overflow: hidden;
+  @media (max-width: 900px) {
+    .items-grid {
+      grid-template-columns: repeat(2, 1fr);
     }
+  }
 
-        .item-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
-        }
-
-    .item-name {
-        color: white;
-        font-size: 0.9rem;
-        text-align: center;
-        line-height: 1.2;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%;
-        width: 100%;
-        padding: 0 4px;
+  @media (max-width: 600px) {
+    .items-grid {
+      grid-template-columns: 1fr;
     }
+  }
 
-    .item-quantity {
-        color: #4caf50;
-        font-size: 1.1rem;
-        font-weight: bold;
-        white-space: nowrap;
-        flex-shrink: 0;
-    }
+  .empty-message {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.5);
+  }
 
-    /* 響應式設計 */
-    @media (max-width: 1200px) {
-        .items-grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
+  .error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #f44336;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+  }
 
-    @media (max-width: 900px) {
-        .items-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    @media (max-width: 600px) {
-        .items-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .empty-message {
-        text-align: center;
-        padding: 40px;
-        color: rgba(255, 255, 255, 0.5);
-    }
+  .debug-info {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: left;
+    display: inline-block;
+  }
 </style>

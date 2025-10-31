@@ -12,5 +12,6 @@ namespace TorchLight.Statistics.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public PageIdType PageIdType { get; set; }
         public bool Enable { get; set; } = true;
+        public int Like { get; set; } = 0;
     }
 }

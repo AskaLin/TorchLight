@@ -707,37 +707,120 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            bool isVisible = false;
-            _mainWindow.Invoke(() =>
-            {
-                isVisible = _mainWindow.ToggleFloatingWindow();
+     bool isVisible = false;
+ _mainWindow.Invoke(() =>
+     {
+       isVisible = _mainWindow.ToggleFloatingWindow();
             });
 
             return JsonSerializer.Serialize(new
-            {
-                success = true,
+       {
+      success = true,
                 message = isVisible ? "浮動窗體已顯示" : "浮動窗體已隱藏",
-                isVisible
-            }, _ops);
-        }
+          isVisible
+      }, _ops);
+  }
         catch (Exception ex)
         {
-            Log.Error(ex, "切換浮動窗體失敗");
-            return JsonSerializer.Serialize(new
+ Log.Error(ex, "切換浮動窗體失敗");
+   return JsonSerializer.Serialize(new
             {
-                success = false,
-                message = $"切換失敗: {ex.Message}"
-            }, _ops);
+    success = false,
+        message = $"切換失敗: {ex.Message}"
+        }, _ops);
         }
     }
 
-    private class MapRecordDetail
+    /// <summary>
+    /// 🆕 獲取所有歷史記錄檔案列表
+    /// </summary>
+    public string GetHistoryRecords()
     {
+        try
+        {
+            var files = MapPickRecordManager.GetSavedRecordFiles();
+            var records = new List<object>();
+
+         foreach (var file in files)
+     {
+       var savedRecord = MapPickRecordManager.LoadSavedRecord(file);
+   if (savedRecord == null || savedRecord.Summary == null)
+          continue;
+
+   var fileName = Path.GetFileName(file);
+        records.Add(new
+           {
+       fileName,
+  filePath = file,
+       recordTime = savedRecord.Summary.TotalMaps > 0 && savedRecord.Records.Count > 0
+      ? savedRecord.Records[0].StartTime.ToString("MM/dd HH:mm")
+          : "未知",
+           totalMaps = savedRecord.Summary.TotalMaps,
+              totalItems = savedRecord.Summary.TotalItems,
+                  totalQuantity = savedRecord.Summary.TotalQuantity,
+  totalPlayTime = savedRecord.Summary.TotalPlayTime,
+    topItems = savedRecord.Summary.MostPickedItems.Take(10).ToArray(),
+           savedTime = savedRecord.SavedTime
+      });
+  }
+
+return JsonSerializer.Serialize(records, _ops);
+        }
+        catch (Exception ex)
+        {
+  Log.Error(ex, "獲取歷史記錄失敗");
+            return JsonSerializer.Serialize(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 🆕 獲取指定歷史記錄的詳細資料
+    /// </summary>
+    public string GetHistoryRecordDetail(string fileName)
+    {
+  try
+ {
+            Log.Information("📂 開始載入歷史記錄: {FileName}", fileName);
+      
+        var savedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
+       Log.Debug("  - 存檔目錄: {Directory}", savedDirectory);
+            
+ var filePath = Path.Combine(savedDirectory, fileName);
+   Log.Debug("  - 完整路徑: {FilePath}", filePath);
+
+        if (!File.Exists(filePath))
+        {
+   Log.Warning("❌ 檔案不存在: {FilePath}", filePath);
+   return JsonSerializer.Serialize(new { error = $"找不到檔案: {fileName}" }, _ops);
+}
+
+            var savedRecord = MapPickRecordManager.LoadSavedRecord(filePath);
+        if (savedRecord == null)
+            {
+     Log.Warning("❌ 無法載入記錄: {FilePath}", filePath);
+   return JsonSerializer.Serialize(new { error = "無法讀取記錄檔案，可能檔案格式錯誤" }, _ops);
+         }
+
+            Log.Information("✅ 成功載入歷史記錄");
+     Log.Debug("  - 總地圖數: {TotalMaps}", savedRecord.Summary?.TotalMaps);
+            Log.Debug("  - 記錄數量: {RecordsCount}", savedRecord.Records?.Count);
+
+  return JsonSerializer.Serialize(savedRecord, _ops);
+        }
+        catch (Exception ex)
+        {
+     Log.Error(ex, "💥 獲取歷史記錄詳情失敗: {FileName}", fileName);
+   return JsonSerializer.Serialize(new { error = $"載入失敗: {ex.Message}" }, _ops);
+   }
+    }
+
+    private class MapRecordDetail
+  {
         public string RecordId { get; set; }
-        public string Id { get; set; }
-        public string Name { get; set; }
+ public string Id { get; set; }
+  public string Name { get; set; }
         public string MapTicket { get; set; }
-        public string[] Compass { get; set; }
+ public string[] Compass { get; set; }
         public string Probe { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }

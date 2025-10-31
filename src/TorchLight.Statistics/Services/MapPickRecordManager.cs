@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System.Text.Json;
 using TorchLight.Statistics.Enums;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
@@ -20,6 +21,9 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     private readonly List<string> _pendingCompasses = [];
     private string _pendingProbe = string.Empty;
     private int _pendingResonance = 0;
+
+    // 🆕 存檔目錄
+    private static readonly string SavedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
 
     public bool IsInMap { get; private set; }
     public string CurrentMapName { get; private set; } = string.Empty;
@@ -125,12 +129,15 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         Log.Information("{Time} 離開異界地圖: {MapName}({Token}) - 用時: {Duration}", endTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId, _currentMapRecord.UseTime);
 
         // 顯示當前地圖的拾取記錄
-        PrintCurrentMapRecord(_currentMapRecord);
+     PrintCurrentMapRecord(_currentMapRecord);
+
+        // 🆕 自動存檔
+     SaveRecordsToFile();
 
         // 重置
         _currentMapRecord = new();
         _currentMapPickData = [];
-        IsInMap = false;
+   IsInMap = false;
     }
 
     /// <summary>
@@ -300,9 +307,137 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         }
     }
 
-    private string GetItemName(int configBaseId)
+    // 🆕 自動存檔功能
+    private void SaveRecordsToFile()
     {
-        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})";
+        try
+        {
+            if (_mapRecords.Count == 0)
+     return;
+
+        // 確保目錄存在
+            if (!Directory.Exists(SavedDirectory))
+            {
+    Directory.CreateDirectory(SavedDirectory);
+      }
+
+            // 生成檔案名稱：TorchPickRecord_MMdd_HHmm.json
+            var firstRecord = _mapRecords[0];
+            var fileName = $"TorchPickRecord_{firstRecord.StartTime:MMdd_HHmm}.json";
+  var filePath = Path.Combine(SavedDirectory, fileName);
+
+            // 準備保存的資料
+            var savedRecord = new SavedRecordModel
+            {
+         Summary = GenerateSummary(),
+                Records = [.. _mapRecords],
+      SavedTime = DateTime.Now
+      };
+
+    // 序列化並寫入檔案
+            var options = new JsonSerializerOptions
+  {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+      WriteIndented = true,
+           Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
+  var json = JsonSerializer.Serialize(savedRecord, options);
+            File.WriteAllText(filePath, json);
+
+    Log.Information("記錄已自動保存至: {FilePath}", filePath);
+        }
+catch (Exception ex)
+        {
+     Log.Error(ex, "自動保存記錄失敗");
+        }
+ }
+
+    // 🆕 生成統計摘要
+    private RecordSummary GenerateSummary()
+    {
+        var totalPlayTime = TimeSpan.FromSeconds(_mapRecords.Sum(r => (r.EndTime - r.StartTime).TotalSeconds));
+
+        // 收集所有拾取的物品
+        var allItems = _mapRecords
+   .SelectMany(r => r.PickRecord?.Values ?? Enumerable.Empty<PickedItemDataModel>())
+            .GroupBy(p => p.BaseId)
+     .Select(g => new
+      {
+      BaseId = g.Key,
+       Name = g.First().Name,
+      TotalQuantity = g.Sum(p => p.Total),
+        // 🔧 修正：從 ItemInfoMapper 獲取 Like 值
+           Like = ItemInfoMapper.GetAllItemConfigs()
+    .FirstOrDefault(item => item.Id == g.Key)?.Like ?? 0
+ })
+    .Where(x => x.TotalQuantity > 0) // 排除數量為 0 的物品
+  .OrderByDescending(x => x.Like) // 先按 Like 排序
+     .ThenByDescending(x => x.TotalQuantity) // Like 相同時按數量排序
+          .Take(10)
+      .ToList();
+
+     return new RecordSummary
+        {
+TotalMaps = _mapRecords.Count,
+        TotalItems = _mapRecords.Sum(r => r.PickRecord?.Count ?? 0),
+     TotalQuantity = _mapRecords.Sum(r => r.PickRecord?.Sum(p => p.Value.Total) ?? 0),
+     TotalPlayTime = totalPlayTime.ToString(@"hh\:mm\:ss"),
+        MostPickedItems = allItems.Select(x => new TopPickedItem
+{
+   BaseId = x.BaseId,
+        Name = x.Name,
+       TotalQuantity = x.TotalQuantity,
+           Like = x.Like
+   }).ToList()
+        };
+    }
+
+    // 🆕 獲取所有歷史記錄檔案
+    public static List<string> GetSavedRecordFiles()
+    {
+        try
+        {
+   if (!Directory.Exists(SavedDirectory))
+      return [];
+
+       return Directory.GetFiles(SavedDirectory, "TorchPickRecord_*.json")
+      .OrderByDescending(f => f)
+   .ToList();
+        }
+        catch (Exception ex)
+        {
+  Log.Error(ex, "獲取歷史記錄檔案失敗");
+  return [];
+        }
+    }
+
+    // 🆕 讀取歷史記錄檔案
+    public static SavedRecordModel LoadSavedRecord(string filePath)
+    {
+        try
+     {
+     if (!File.Exists(filePath))
+         return null;
+
+      var json = File.ReadAllText(filePath);
+      var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+  };
+
+            return JsonSerializer.Deserialize<SavedRecordModel>(json, options);
+        }
+      catch (Exception ex)
+        {
+    Log.Error(ex, "讀取歷史記錄檔案失敗: {FilePath}", filePath);
+    return null;
+        }
+    }
+
+    private string GetItemName(int configBaseId)
+{
+   return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})";
     }
 }
 
@@ -321,4 +456,37 @@ public class MapPickResult
     public bool IsFirstTimeInMap { get; set; }
     public bool IsNewSlot { get; set; }
     public bool IsExistingSlot { get; set; }
+}
+
+/// <summary>
+/// 自動存檔的資料模型
+/// </summary>
+public class SavedRecordModel
+{
+    public RecordSummary Summary { get; set; }
+    public List<MapRecordModel> Records { get; set; }
+    public DateTime SavedTime { get; set; }
+}
+
+/// <summary>
+/// 統計摘要
+/// </summary>
+public class RecordSummary
+{
+    public int TotalMaps { get; set; }
+    public int TotalItems { get; set; }
+    public int TotalQuantity { get; set; }
+    public string TotalPlayTime { get; set; }
+    public List<TopPickedItem> MostPickedItems { get; set; }
+}
+
+/// <summary>
+/// 最受歡迎的拾取物品
+/// </summary>
+public class TopPickedItem
+{
+    public int BaseId { get; set; }
+    public string Name { get; set; }
+    public int TotalQuantity { get; set; }
+    public int Like { get; set; }
 }
