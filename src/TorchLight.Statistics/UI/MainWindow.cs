@@ -67,8 +67,8 @@ public class MainWindow : Form
         // 這樣它才能真正獨立顯示在最上層
         _floatingStatsWindow.Owner = null;
 
-        // 顯示窗體
-        _floatingStatsWindow.Show();
+        // 預設關閉 顯示窗體
+        _floatingStatsWindow.Hide();
 
         // 🆕 強制將懸浮窗體帶到前面
         _floatingStatsWindow.BringToFront();
@@ -293,8 +293,9 @@ public class MainWindow : Form
     {
         if (_isInitialized)
         {
-            await _webViewHub.NotifyLogMonitoringStatusAsync("監控日誌中");
-            Log.Information("已通知前端：監控日誌中");
+          // ❌ 移除：不再需要通知 logMonitoringStatus
+            // await _webViewHub.NotifyLogMonitoringStatusAsync("監控日誌中");
+ Log.Information("已檢測到：已開啟日誌");
         }
     }
 

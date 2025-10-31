@@ -75,9 +75,9 @@ public class FloatingStatsWindow : Form
         MouseDown += OnMouseDown;
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
-     
+
         // 🆕 雙擊事件
-   DoubleClick += OnDoubleClick;
+        DoubleClick += OnDoubleClick;
 
         // 當窗體顯示時，強制置頂
         Shown += OnShown;
@@ -94,7 +94,7 @@ public class FloatingStatsWindow : Form
 
     // 🆕 切換顯示模式
     private void ToggleDisplayMode()
-  {
+    {
         _displayMode = _displayMode == DisplayMode.Vertical ? DisplayMode.Horizontal : DisplayMode.Vertical;
 
         // 根據模式調整窗體大小
@@ -103,14 +103,14 @@ public class FloatingStatsWindow : Form
             Width = VerticalWidth;
             Height = VerticalHeight;
         }
-     else
-   {
+        else
+        {
             Width = HorizontalWidth;
             Height = HorizontalHeight;
         }
 
         // 重新計算統計項目位置
-     RecalculateItemPositions();
+        RecalculateItemPositions();
 
         Invalidate();
     }
@@ -118,26 +118,26 @@ public class FloatingStatsWindow : Form
     // 🆕 根據顯示模式重新計算項目位置
     private void RecalculateItemPositions()
     {
-   if (_displayMode == DisplayMode.Vertical)
+        if (_displayMode == DisplayMode.Vertical)
         {
-      // 直排模式：垂直排列
+            // 直排模式：垂直排列
             int startY = 40;
             int spacing = 60;
             for (int i = 0; i < _statItems.Count; i++)
-      {
-     _statItems[i].Y = startY + (i * spacing);
+            {
+                _statItems[i].Y = startY + (i * spacing);
             }
         }
         else
         {
-         // 橫列模式：水平排列
-       int startX = 10;
-     int itemWidth = (Width - 20) / _statItems.Count;
-  for (int i = 0; i < _statItems.Count; i++)
+            // 橫列模式：水平排列
+            int startX = 10;
+            int itemWidth = (Width - 20) / _statItems.Count;
+            for (int i = 0; i < _statItems.Count; i++)
             {
-     _statItems[i].X = startX + (i * itemWidth);
+                _statItems[i].X = startX + (i * itemWidth);
                 _statItems[i].Y = 40;
-     }
+            }
         }
     }
 
@@ -180,12 +180,12 @@ public class FloatingStatsWindow : Form
     }
 
     private void InitializeStatItems()
- {
-     _statItems.Add(new StatItem("地圖數", "0", 40, 0));
+    {
+        _statItems.Add(new StatItem("地圖數", "0", 40, 0));
         _statItems.Add(new StatItem("物品種類", "0", 100, 0));
         _statItems.Add(new StatItem("總數量", "0", 160, 0));
         _statItems.Add(new StatItem("遊戲時間", "00:00:00", 220, 0));
-     _statItems.Add(new StatItem("當前地圖", "待機中", 280, 0));
+        _statItems.Add(new StatItem("當前地圖", "待機中", 280, 0));
         _statItems.Add(new StatItem("拾取數", "0", 340, 0));
     }
 
@@ -196,9 +196,9 @@ public class FloatingStatsWindow : Form
     {
         var item = _statItems.FirstOrDefault(s => s.Label == label);
         if (item != null)
-   {
-      item.Value = value;
-       Invalidate();
+        {
+            item.Value = value;
+            Invalidate();
         }
     }
 
@@ -207,7 +207,7 @@ public class FloatingStatsWindow : Form
     /// </summary>
     public void UpdateStats(Dictionary<string, string> stats)
     {
-     foreach (var kvp in stats)
+        foreach (var kvp in stats)
         {
             UpdateStat(kvp.Key, kvp.Value);
         }
@@ -217,13 +217,13 @@ public class FloatingStatsWindow : Form
     {
         base.OnPaint(e);
 
-var g = e.Graphics;
+        var g = e.Graphics;
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
         DrawBackground(g);
         DrawTitle(g);
-    DrawStatItems(g);
+        DrawStatItems(g);
     }
 
     private void DrawBackground(Graphics g)
@@ -234,7 +234,7 @@ var g = e.Graphics;
         var rect = new Rectangle(1, 1, Width - 2, Height - 2);
         var radius = 10;
 
-     using var path = GetRoundedRectPath(rect, radius);
+        using var path = GetRoundedRectPath(rect, radius);
         g.FillPath(backgroundBrush, path);
         g.DrawPath(borderPen, path);
     }
@@ -248,54 +248,54 @@ var g = e.Graphics;
         var titleText = _displayMode == DisplayMode.Vertical ? "🔥 統計面板" : "🔥 統計面板 (雙擊切換模式)";
         var titleRect = new RectangleF(0, 5, Width, 25);
         var titleFormat = new StringFormat
-  {
-          Alignment = StringAlignment.Center,
+        {
+            Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
 
         g.DrawString(titleText, titleFont, titleBrush, titleRect, titleFormat);
 
- using var linePen = new Pen(Color.FromArgb(60, 60, 80), 1);
-      g.DrawLine(linePen, 20, 30, Width - 20, 30);
+        using var linePen = new Pen(Color.FromArgb(60, 60, 80), 1);
+        g.DrawLine(linePen, 20, 30, Width - 20, 30);
     }
 
     private void DrawStatItems(Graphics g)
     {
-    using var labelFont = new Font("微軟正黑體", 8);
+        using var labelFont = new Font("微軟正黑體", 8);
         using var valueFont = new Font("Consolas", 10, FontStyle.Bold);
         using var labelBrush = new SolidBrush(_labelColor);
-     using var valueBrush = new SolidBrush(_valueColor);
+        using var valueBrush = new SolidBrush(_valueColor);
 
         if (_displayMode == DisplayMode.Vertical)
         {
-         // 直排模式：垂直排列
-     foreach (var item in _statItems)
-          {
- var labelRect = new RectangleF(15, item.Y, Width - 30, 15);
+            // 直排模式：垂直排列
+            foreach (var item in _statItems)
+            {
+                var labelRect = new RectangleF(15, item.Y, Width - 30, 15);
                 g.DrawString(item.Label, labelFont, labelBrush, labelRect);
 
-       var valueRect = new RectangleF(15, item.Y + 18, Width - 30, 20);
- var valueFormat = new StringFormat { Alignment = StringAlignment.Far };
-           g.DrawString(item.Value, valueFont, valueBrush, valueRect, valueFormat);
+                var valueRect = new RectangleF(15, item.Y + 18, Width - 30, 20);
+                var valueFormat = new StringFormat { Alignment = StringAlignment.Far };
+                g.DrawString(item.Value, valueFont, valueBrush, valueRect, valueFormat);
+            }
         }
-        }
-      else
+        else
         {
-        // 橫列模式：水平排列
-   int itemWidth = (Width - 20) / _statItems.Count;
+            // 橫列模式：水平排列
+            int itemWidth = (Width - 20) / _statItems.Count;
             for (int i = 0; i < _statItems.Count; i++)
-     {
-      var item = _statItems[i];
-      float x = 10 + (i * itemWidth);
+            {
+                var item = _statItems[i];
+                float x = 10 + (i * itemWidth);
 
-    var labelRect = new RectangleF(x, 40, itemWidth - 5, 15);
-       var labelFormat = new StringFormat { Alignment = StringAlignment.Center };
-       g.DrawString(item.Label, labelFont, labelBrush, labelRect, labelFormat);
+                var labelRect = new RectangleF(x, 40, itemWidth - 5, 15);
+                var labelFormat = new StringFormat { Alignment = StringAlignment.Center };
+                g.DrawString(item.Label, labelFont, labelBrush, labelRect, labelFormat);
 
-   var valueRect = new RectangleF(x, 58, itemWidth - 5, 20);
-           var valueFormat = new StringFormat { Alignment = StringAlignment.Center };
-          g.DrawString(item.Value, valueFont, valueBrush, valueRect, valueFormat);
-}
+                var valueRect = new RectangleF(x, 58, itemWidth - 5, 20);
+                var valueFormat = new StringFormat { Alignment = StringAlignment.Center };
+                g.DrawString(item.Value, valueFont, valueBrush, valueRect, valueFormat);
+            }
         }
     }
 
@@ -305,8 +305,8 @@ var g = e.Graphics;
         int diameter = radius * 2;
 
         path.AddArc(rect.X, rect.Y, diameter, diameter, 180, 90);
-     path.AddArc(rect.Right - diameter, rect.Y, diameter, diameter, 270, 90);
-     path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
+        path.AddArc(rect.Right - diameter, rect.Y, diameter, diameter, 270, 90);
+        path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
         path.AddArc(rect.X, rect.Bottom - diameter, diameter, diameter, 90, 90);
         path.CloseFigure();
 
@@ -318,22 +318,22 @@ var g = e.Graphics;
     private void OnMouseDown(object sender, MouseEventArgs e)
     {
         if (e.Button == MouseButtons.Left)
-  {
-         var direction = GetResizeDirection(e.Location);
+        {
+            var direction = GetResizeDirection(e.Location);
 
             if (direction != ResizeDirection.None)
             {
-     _isResizing = true;
-       _resizeDirection = direction;
-            _resizeStartPoint = e.Location;
-           _resizeStartSize = Size;
-    }
+                _isResizing = true;
+                _resizeDirection = direction;
+                _resizeStartPoint = e.Location;
+                _resizeStartSize = Size;
+            }
             else
-  {
- _isDragging = true;
+            {
+                _isDragging = true;
                 _dragStartPoint = e.Location;
             }
- }
+        }
     }
 
     private void OnMouseMove(object sender, MouseEventArgs e)
@@ -341,43 +341,43 @@ var g = e.Graphics;
         if (_isResizing)
         {
             HandleResize(e.Location);
-      }
+        }
         else if (_isDragging)
         {
-  var newLocation = new Point(
-            Location.X + e.X - _dragStartPoint.X,
-  Location.Y + e.Y - _dragStartPoint.Y
-            );
-    Location = newLocation;
-     }
+            var newLocation = new Point(
+                      Location.X + e.X - _dragStartPoint.X,
+            Location.Y + e.Y - _dragStartPoint.Y
+                      );
+            Location = newLocation;
+        }
         else
         {
-  UpdateCursor(e.Location);
+            UpdateCursor(e.Location);
         }
     }
 
     private void OnMouseUp(object sender, MouseEventArgs e)
     {
         _isDragging = false;
-    _isResizing = false;
-_resizeDirection = ResizeDirection.None;
+        _isResizing = false;
+        _resizeDirection = ResizeDirection.None;
         Cursor = Cursors.Default;
     }
 
     private ResizeDirection GetResizeDirection(Point location)
     {
         bool onLeft = location.X <= ResizeBorderWidth;
-     bool onRight = location.X >= Width - ResizeBorderWidth;
+        bool onRight = location.X >= Width - ResizeBorderWidth;
         bool onTop = location.Y <= ResizeBorderWidth;
         bool onBottom = location.Y >= Height - ResizeBorderWidth;
 
-  if (onLeft && onTop) return ResizeDirection.TopLeft;
+        if (onLeft && onTop) return ResizeDirection.TopLeft;
         if (onRight && onTop) return ResizeDirection.TopRight;
         if (onLeft && onBottom) return ResizeDirection.BottomLeft;
         if (onRight && onBottom) return ResizeDirection.BottomRight;
         if (onLeft) return ResizeDirection.Left;
         if (onRight) return ResizeDirection.Right;
-     if (onTop) return ResizeDirection.Top;
+        if (onTop) return ResizeDirection.Top;
         if (onBottom) return ResizeDirection.Bottom;
 
         return ResizeDirection.None;
@@ -385,14 +385,14 @@ _resizeDirection = ResizeDirection.None;
 
     private void UpdateCursor(Point location)
     {
-      var direction = GetResizeDirection(location);
+        var direction = GetResizeDirection(location);
 
         Cursor = direction switch
         {
-       ResizeDirection.Left or ResizeDirection.Right => Cursors.SizeWE,
-   ResizeDirection.Top or ResizeDirection.Bottom => Cursors.SizeNS,
-     ResizeDirection.TopLeft or ResizeDirection.BottomRight => Cursors.SizeNWSE,
-        ResizeDirection.TopRight or ResizeDirection.BottomLeft => Cursors.SizeNESW,
+            ResizeDirection.Left or ResizeDirection.Right => Cursors.SizeWE,
+            ResizeDirection.Top or ResizeDirection.Bottom => Cursors.SizeNS,
+            ResizeDirection.TopLeft or ResizeDirection.BottomRight => Cursors.SizeNWSE,
+            ResizeDirection.TopRight or ResizeDirection.BottomLeft => Cursors.SizeNESW,
             _ => Cursors.Default
         };
     }
@@ -400,57 +400,57 @@ _resizeDirection = ResizeDirection.None;
     private void HandleResize(Point currentLocation)
     {
         int deltaX = currentLocation.X - _resizeStartPoint.X;
-     int deltaY = currentLocation.Y - _resizeStartPoint.Y;
+        int deltaY = currentLocation.Y - _resizeStartPoint.Y;
 
         int newWidth = Width;
         int newHeight = Height;
         int newX = Location.X;
-   int newY = Location.Y;
+        int newY = Location.Y;
 
         switch (_resizeDirection)
- {
+        {
             case ResizeDirection.Right:
-      newWidth = _resizeStartSize.Width + deltaX;
-break;
+                newWidth = _resizeStartSize.Width + deltaX;
+                break;
 
-case ResizeDirection.Left:
-      newWidth = _resizeStartSize.Width - deltaX;
+            case ResizeDirection.Left:
+                newWidth = _resizeStartSize.Width - deltaX;
                 newX = Location.X + deltaX;
-      break;
+                break;
 
- case ResizeDirection.Bottom:
-             newHeight = _resizeStartSize.Height + deltaY;
-           break;
+            case ResizeDirection.Bottom:
+                newHeight = _resizeStartSize.Height + deltaY;
+                break;
 
             case ResizeDirection.Top:
-    newHeight = _resizeStartSize.Height - deltaY;
-       newY = Location.Y + deltaY;
-         break;
+                newHeight = _resizeStartSize.Height - deltaY;
+                newY = Location.Y + deltaY;
+                break;
 
-    case ResizeDirection.TopLeft:
-       newWidth = _resizeStartSize.Width - deltaX;
-   newHeight = _resizeStartSize.Height - deltaY;
-          newX = Location.X + deltaX;
-              newY = Location.Y + deltaY;
-          break;
-
-    case ResizeDirection.TopRight:
-       newWidth = _resizeStartSize.Width + deltaX;
-        newHeight = _resizeStartSize.Height - deltaY;
-        newY = Location.Y + deltaY;
-   break;
-
-          case ResizeDirection.BottomLeft:
-              newWidth = _resizeStartSize.Width - deltaX;
-        newHeight = _resizeStartSize.Height + deltaY;
+            case ResizeDirection.TopLeft:
+                newWidth = _resizeStartSize.Width - deltaX;
+                newHeight = _resizeStartSize.Height - deltaY;
                 newX = Location.X + deltaX;
-     break;
+                newY = Location.Y + deltaY;
+                break;
+
+            case ResizeDirection.TopRight:
+                newWidth = _resizeStartSize.Width + deltaX;
+                newHeight = _resizeStartSize.Height - deltaY;
+                newY = Location.Y + deltaY;
+                break;
+
+            case ResizeDirection.BottomLeft:
+                newWidth = _resizeStartSize.Width - deltaX;
+                newHeight = _resizeStartSize.Height + deltaY;
+                newX = Location.X + deltaX;
+                break;
 
             case ResizeDirection.BottomRight:
-  newWidth = _resizeStartSize.Width + deltaX;
-    newHeight = _resizeStartSize.Height + deltaY;
-     break;
-      }
+                newWidth = _resizeStartSize.Width + deltaX;
+                newHeight = _resizeStartSize.Height + deltaY;
+                break;
+        }
 
         newWidth = Math.Max(MinWidth, Math.Min(MaxWidth, newWidth));
         newHeight = Math.Max(MinHeight, Math.Min(MaxHeight, newHeight));
@@ -458,8 +458,8 @@ case ResizeDirection.Left:
         if (_resizeDirection == ResizeDirection.Left ||
         _resizeDirection == ResizeDirection.TopLeft ||
          _resizeDirection == ResizeDirection.BottomLeft)
-  {
-    int actualWidthChange = newWidth - Width;
+        {
+            int actualWidthChange = newWidth - Width;
             newX = Location.X - actualWidthChange;
         }
 
@@ -467,15 +467,15 @@ case ResizeDirection.Left:
             _resizeDirection == ResizeDirection.TopLeft ||
           _resizeDirection == ResizeDirection.TopRight)
         {
-  int actualHeightChange = newHeight - Height;
-      newY = Location.Y - actualHeightChange;
-}
+            int actualHeightChange = newHeight - Height;
+            newY = Location.Y - actualHeightChange;
+        }
 
         Location = new Point(newX, newY);
         Size = new Size(newWidth, newHeight);
-        
-   // 🆕 調整大小後重新計算項目位置
- RecalculateItemPositions();
+
+        // 🆕 調整大小後重新計算項目位置
+        RecalculateItemPositions();
     }
 
     private enum ResizeDirection
@@ -485,9 +485,9 @@ case ResizeDirection.Left:
         Right,
         Top,
         Bottom,
-  TopLeft,
+        TopLeft,
         TopRight,
-    BottomLeft,
+        BottomLeft,
         BottomRight
     }
 
@@ -496,23 +496,23 @@ case ResizeDirection.Left:
     // 🆕 顯示模式列舉
     private enum DisplayMode
     {
-     Vertical,    // 直排
+        Vertical,    // 直排
         Horizontal   // 橫列
     }
 
     private class StatItem
-  {
-   public string Label { get; set; }
+    {
+        public string Label { get; set; }
         public string Value { get; set; }
-     public int Y { get; set; }
+        public int Y { get; set; }
         public int X { get; set; }  // 🆕 新增 X 座標
 
         public StatItem(string label, string value, int y, int x)
         {
             Label = label;
             Value = value;
-    Y = y;
+            Y = y;
             X = x;
-   }
+        }
     }
 }

@@ -18,6 +18,8 @@ public class GameLogProcessor
     private readonly ConsoleLogger _logger;
     private readonly Dictionary<int, ItemModel> _itemTable;
     private WebViewHub _webViewHub;
+    // 🆕 SafeFileTailWatcher 引用
+    private SafeFileTailWatcher _fileTailWatcher;
 
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
@@ -57,6 +59,14 @@ public class GameLogProcessor
         _webViewHub = webViewHub;
     }
 
+    /// <summary>
+    /// 🆕 設定 SafeFileTailWatcher（用於控制檔案大小監控）
+    /// </summary>
+    public void SetFileTailWatcher(SafeFileTailWatcher fileTailWatcher)
+    {
+        _fileTailWatcher = fileTailWatcher;
+    }
+
     private bool _openMapFlag = false;
     /// <summary>
     /// 處理遊戲日誌
@@ -92,6 +102,10 @@ public class GameLogProcessor
             if (LineParser.IsLogOpenedMessage(line))
             {
                 Log.Information("檢測到 '已開啟日誌' 訊息");
+
+                // 🆕 啟用檔案大小監控
+                _fileTailWatcher?.EnableLogMonitoring();
+
                 OnLogOpenedDetected?.Invoke();
                 return;
             }
@@ -131,6 +145,10 @@ public class GameLogProcessor
                 _bagInventoryManager.Reset();
                 _mapPickRecordManager.Reset();
                 _lineParser.ResetInitializationState();
+
+                // 🆕 停用檔案大小監控（等待下次"已開啟日誌"訊息）
+                _fileTailWatcher?.DisableLogMonitoring();
+
                 return;
             }
 

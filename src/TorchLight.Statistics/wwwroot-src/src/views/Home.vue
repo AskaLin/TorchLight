@@ -28,7 +28,7 @@
                 <div class="stat-icon">🔍</div>
                 <div class="stat-content">
                     <div class="stat-label">監控狀態</div>
-                    <div class="stat-value status" :class="statusClass">{{ mapStore.monitoringStatus }}</div>
+                    <div class="stat-value status" :class="statusClass">{{ mapStore.logFileSize }}</div>
                 </div>
             </div>
 
@@ -76,20 +76,28 @@
     const mapStore = useMapStore()
 
     const statusClass = computed(() => {
-        if (mapStore.monitoringStatus === '監控日誌中') return 'active'
-        if (mapStore.currentMapInfo.isInMap) return 'in-map'
+        // 🆕 根據 logFileSize 判斷狀態
+      const size = mapStore.logFileSize
+        
+    // 如果顯示檔案大小（非"待機中"），表示正在監控
+     if (size !== '待機中') return 'active'
+        
+        // 如果在地圖中
+ if (mapStore.currentMapInfo.isInMap) return 'in-map'
+ 
+     // 預設狀態
         return 'idle'
     })
 
     const formattedSyncTime = computed(() => {
-        if (!mapStore.lastBagSyncTime) return '未同步'
+     if (!mapStore.lastBagSyncTime) return '未同步'
 
         const time = new Date(mapStore.lastBagSyncTime)
-        return time.toLocaleTimeString('zh-TW', {
-            hour: '2-digit',
-            minute: '2-digit',
+    return time.toLocaleTimeString('zh-TW', {
+    hour: '2-digit',
+  minute: '2-digit',
             second: '2-digit',
-            hour12: false, // 👈 關鍵：使用 24 小時制
+          hour12: false,
         })
     })
 

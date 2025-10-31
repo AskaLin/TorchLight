@@ -1,6 +1,6 @@
 ﻿using TorchLight.Statistics.Enums;
 
-namespace TorchLight.Statistics.Core;
+namespace TorchLight.Statistics.Models;
 
 /// <summary>
 /// 地圖資訊

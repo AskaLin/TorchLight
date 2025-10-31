@@ -2,10 +2,13 @@
 using Timer = System.Threading.Timer;
 
 namespace TorchLight.Statistics;
+
 public sealed class SafeFileTailWatcher : IDisposable
 {
-    public event Action<string> OnNewText;         // 原始追加文字（可能包含多行）
-    public event Action<string> OnNewLine;         // 逐行回傳（已去除結尾換行）
+    public event Action<string> OnNewText;// 原始追加文字（可能包含多行）
+    public event Action<string> OnNewLine;   // 逐行回傳（已去除結尾換行）
+    // 檔案大小變更事件
+    public event Action<long> OnFileSizeChanged;   // 檔案大小（bytes）
 
     private readonly string _filePath;
     private readonly string _dir;
@@ -23,6 +26,12 @@ public sealed class SafeFileTailWatcher : IDisposable
     private Task _pollTask;
     private readonly object _lock = new();
 
+    // 記錄上次檔案大小，避免重複通知
+    private long _lastFileSize = -1;
+
+    // 🆕 日誌監控狀態（只有在檢測到"已開啟日誌"後才為 true）
+    private bool _isLogMonitoringActive = false;
+
     /// <summary>
     /// 
     /// </summary>
@@ -36,7 +45,7 @@ public sealed class SafeFileTailWatcher : IDisposable
     public SafeFileTailWatcher(
         string filePath, Encoding encoding = null,
         TimeSpan? debounce = null, TimeSpan? pollInterval = null,
-        bool startFromEnd = true)
+  bool startFromEnd = true)
     {
         _filePath = filePath ?? throw new ArgumentNullException(nameof(filePath));
         _dir = Path.GetDirectoryName(_filePath) ?? throw new ArgumentException("Invalid path.", nameof(filePath));
@@ -45,6 +54,26 @@ public sealed class SafeFileTailWatcher : IDisposable
         _debounce = debounce ?? TimeSpan.FromMilliseconds(200);
         _pollInterval = pollInterval ?? TimeSpan.FromSeconds(2);
         _startFromEnd = startFromEnd;
+    }
+
+    // 🆕 啟用日誌監控（當檢測到"已開啟日誌"訊息後調用）
+    public void EnableLogMonitoring()
+    {
+        lock (_lock)
+        {
+            _isLogMonitoringActive = true;
+        }
+    }
+
+    // 🆕 停用日誌監控（重新登入時調用）
+    public void DisableLogMonitoring()
+    {
+        lock (_lock)
+        {
+            _isLogMonitoringActive = false;
+            // 通知前端大小為 0（待機中）
+            NotifyFileSizeChanged(0);
+        }
     }
 
     public void Start()
@@ -59,6 +88,7 @@ public sealed class SafeFileTailWatcher : IDisposable
             {
                 var len = new FileInfo(_filePath).Length;
                 _lastPosition = _startFromEnd ? len : 0;
+                // 初始化時不通知檔案大小（等待檢測到"已開啟日誌"）
             }
             else
             {
@@ -72,7 +102,7 @@ public sealed class SafeFileTailWatcher : IDisposable
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.FileName,
                 IncludeSubdirectories = false,
                 EnableRaisingEvents = true,
-                InternalBufferSize = 64 * 1024 // 放大到上限，降低 overflow 機率
+                InternalBufferSize = 64 * 1024
             };
 
             _watcher.Changed += OnFsChanged;
@@ -136,7 +166,6 @@ public sealed class SafeFileTailWatcher : IDisposable
 
     private void OnFsChanged(object sender, FileSystemEventArgs e)
     {
-        // Debounce：短時間多次變動合併成一次讀取
         lock (_lock)
         {
             if (_debounceTimer == null) return;
@@ -146,8 +175,6 @@ public sealed class SafeFileTailWatcher : IDisposable
 
     private void OnFsRenamed(object sender, RenamedEventArgs e)
     {
-        // 常見的 log 轮转：舊檔被改名，新的同名檔案出現
-        // 這裡直接重置位置，等下一次 Changed/Created 讀新檔
         lock (_lock)
         {
             _lastPosition = 0;
@@ -158,25 +185,39 @@ public sealed class SafeFileTailWatcher : IDisposable
 
     private void OnFsDeleted(object sender, FileSystemEventArgs e)
     {
-        // 檔案被刪除：等再出現時 (Created) 重新開始
         lock (_lock)
         {
             _lastPosition = 0;
+            // 檔案刪除時，如果監控已啟用才通知大小為 0
+            if (_isLogMonitoringActive)
+            {
+                NotifyFileSizeChanged(0);
+            }
         }
     }
 
     private void OnFsError(object sender, ErrorEventArgs e)
     {
-        // 例如 InternalBufferOverflowException
-        // 發生時做一次保險讀取
         ReadNewDataSafe();
+    }
+
+    // 🆕 通知檔案大小變更（只有在日誌監控啟用後才通知）
+    private void NotifyFileSizeChanged(long fileSize)
+    {
+        if (!_isLogMonitoringActive)
+            return;
+
+        if (_lastFileSize != fileSize)
+        {
+            _lastFileSize = fileSize;
+            OnFileSizeChanged?.Invoke(fileSize);
+        }
     }
 
     private void ReadNewDataSafe()
     {
         lock (_lock)
         {
-            // 節流：避免同時被 FS 事件與 Poll 連續觸發造成重複讀
             if ((DateTime.UtcNow - _lastHandleTime) < TimeSpan.FromMilliseconds(50))
                 return;
             _lastHandleTime = DateTime.UtcNow;
@@ -184,11 +225,21 @@ public sealed class SafeFileTailWatcher : IDisposable
 
         try
         {
-            if (!File.Exists(_filePath)) return;
+            if (!File.Exists(_filePath))
+            {
+                // 檔案不存在時，如果監控已啟用才通知大小為 0
+                if (_isLogMonitoringActive)
+                {
+                    NotifyFileSizeChanged(0);
+                }
+                return;
+            }
 
             long fileLen = new FileInfo(_filePath).Length;
 
-            // 檔案被截斷或輪轉（長度變小）
+            // 🆕 只有在日誌監控啟用後才通知檔案大小變更
+            NotifyFileSizeChanged(fileLen);
+
             if (fileLen < _lastPosition)
             {
                 _lastPosition = 0;
@@ -199,14 +250,13 @@ public sealed class SafeFileTailWatcher : IDisposable
             if (toRead <= 0) return;
 
             using var fs = new FileStream(
-                _filePath,
-                FileMode.Open,
+  _filePath,
+      FileMode.Open,
                 FileAccess.Read,
-                FileShare.ReadWrite | FileShare.Delete);
+    FileShare.ReadWrite | FileShare.Delete);
 
             fs.Seek(_lastPosition, SeekOrigin.Begin);
 
-            // 以 buffer 讀取，避免一次 ReadToEnd 造成大檔大量字串配置
             using var ms = new MemoryStream(capacity: (int)Math.Min(toRead, 1024 * 1024));
             var buffer = new byte[81920];
             long remaining = toRead;
@@ -226,23 +276,17 @@ public sealed class SafeFileTailWatcher : IDisposable
 
             string text = _encoding.GetString(ms.ToArray());
 
-            // 事件回呼
             OnNewText?.Invoke(text);
-
-            // 逐行拆分（保留跨批次的行尾）
             EmitLines(text);
         }
         catch (IOException)
         {
-            // 檔案可能仍在寫入中：本次略過，交給下次觸發/輪詢
         }
         catch (UnauthorizedAccessException)
         {
-            // 權限或被獨占寫入：略過
         }
     }
 
-    // —— 逐行輸出 —— //
     private string _lineCarry = string.Empty;
 
     private void EmitLines(string appended)
@@ -250,10 +294,8 @@ public sealed class SafeFileTailWatcher : IDisposable
         var combined = _lineCarry + appended;
         _lineCarry = string.Empty;
 
-        // 同時支援 \r\n / \n / \r
         var lines = combined.Split(["\r\n", "\n", "\r"], StringSplitOptions.None);
 
-        // 若最後一段非完整換行，暫存至下次
         for (int i = 0; i < lines.Length; i++)
         {
             bool isLast = (i == lines.Length - 1);

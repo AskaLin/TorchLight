@@ -27,7 +27,7 @@
       </div>
 
       <div class="actions">
-        <!-- 🆕 浮動窗體控制按鈕 -->
+        <!-- 浮動窗體控制按鈕 -->
         <button @click="toggleFloatingWindow" class="btn-icon btn-float" :title="floatingWindowVisible ? '隱藏浮動窗體' : '顯示浮動窗體'">
           <span>{{ floatingWindowVisible ? '📊' : '📉' }}</span>
         </button>
@@ -51,7 +51,7 @@
   const mapStore = useMapStore()
   const currentMapInfo = computed(() => mapStore.currentMapInfo)
   const isSettling = ref(false)
-  const floatingWindowVisible = ref(true)  // 🆕 浮動窗體顯示狀態
+  const floatingWindowVisible = ref(true)
 
   const minimizeWindow = () => {
     apiCall('MinimizeWindow').catch(console.error)
@@ -92,7 +92,7 @@
     }
   }
 
-  // 🆕 切換浮動窗體顯示
+  // 切換浮動窗體顯示
   const toggleFloatingWindow = async () => {
     try {
       const result = await apiCall('ToggleFloatingStatsWindow')
@@ -146,15 +146,15 @@
     transition: all 0.3s;
   }
 
-  .nav-link:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-  }
+    .nav-link:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
 
-  .nav-link.router-link-active {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
+    .nav-link.router-link-active {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
 
   .status {
     -webkit-app-region: no-drag;
@@ -255,7 +255,7 @@
       background: rgba(255, 255, 255, 0.2);
     }
 
-  /* 🆕 浮動窗體按鈕特殊樣式 */
+  /* 浮動窗體按鈕特殊樣式 */
   .btn-float {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }

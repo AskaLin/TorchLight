@@ -76,18 +76,6 @@ public class WebViewHub
     }
 
     /// <summary>
-    /// 通知前端：日誌監控狀態變更
-    /// </summary>
-    public Task NotifyLogMonitoringStatusAsync(string status, DateTime? syncTime = null)
-    {
-        return SendMessageAsync("logMonitoringStatus", new
-        {
-            status,
-            syncTime = syncTime ?? DateTime.Now
-        });
-    }
-
-    /// <summary>
     /// 通知前端：背包同步狀態
     /// </summary>
     public Task NotifyBagSyncStatusAsync(DateTime syncTime)
@@ -147,6 +135,29 @@ public class WebViewHub
         {
             success,
             message
+        });
+    }
+
+    /// <summary>
+    /// 🆕 通知前端：log 檔案大小變更
+    /// </summary>
+    public Task NotifyLogFileSizeAsync(long fileSizeBytes)
+    {
+        // 格式化檔案大小
+        string formattedSize;
+        if (fileSizeBytes >= 1024 * 1024 * 1024) // >= 1GB
+        {
+            formattedSize = $"{fileSizeBytes / (1024.0 * 1024.0 * 1024.0):F2} GB";
+        }
+        else // < 1GB，顯示為 MB
+        {
+            formattedSize = $"{fileSizeBytes / (1024.0 * 1024.0):F2} MB";
+        }
+
+        return SendMessageAsync("logFileSize", new
+        {
+            fileSizeBytes,
+            formattedSize
         });
     }
 }
