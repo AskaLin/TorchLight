@@ -642,6 +642,95 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         }
     }
 
+    /// <summary>
+    /// 🆕 顯示浮動統計窗體
+    /// </summary>
+    public string ShowFloatingStatsWindow()
+    {
+        try
+        {
+            _mainWindow.Invoke(() =>
+            {
+                _mainWindow.ShowFloatingWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "浮動窗體已顯示"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "顯示浮動窗體失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"顯示失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 隱藏浮動統計窗體
+    /// </summary>
+    public string HideFloatingStatsWindow()
+    {
+        try
+        {
+            _mainWindow.Invoke(() =>
+            {
+                _mainWindow.HideFloatingWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "浮動窗體已隱藏"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "隱藏浮動窗體失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"隱藏失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 切換浮動統計窗體顯示狀態
+    /// </summary>
+    public string ToggleFloatingStatsWindow()
+    {
+        try
+        {
+            bool isVisible = false;
+            _mainWindow.Invoke(() =>
+            {
+                isVisible = _mainWindow.ToggleFloatingWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = isVisible ? "浮動窗體已顯示" : "浮動窗體已隱藏",
+                isVisible
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "切換浮動窗體失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"切換失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
     private class MapRecordDetail
     {
         public string RecordId { get; set; }

@@ -18,6 +18,9 @@ public class MainWindow : Form
     private readonly WebViewHub _webViewHub;
     private bool _isInitialized = false;
 
+    // 🆕 懸浮統計窗體
+    private FloatingStatsWindow _floatingStatsWindow;
+
     public MainWindow(MapPickRecordManager mapPickRecordManager, GameLogProcessor gameLogProcessor, WebViewHub webViewHub)
     {
         _mapPickRecordManager = mapPickRecordManager ?? throw new ArgumentNullException(nameof(mapPickRecordManager));
@@ -38,6 +41,9 @@ public class MainWindow : Form
 
         Controls.Add(_webView);
 
+        // 🆕 創建懸浮統計窗體
+        InitializeFloatingStatsWindow();
+
         // 註冊遊戲日誌事件
         _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
         _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
@@ -50,6 +56,126 @@ public class MainWindow : Form
 
         // 初始化 WebView2
         InitializeAsync();
+    }
+
+    // 🆕 初始化懸浮統計窗體
+    private void InitializeFloatingStatsWindow()
+    {
+        _floatingStatsWindow = new FloatingStatsWindow();
+
+        // 🆕 確保懸浮窗體不是主窗體的子窗體
+        // 這樣它才能真正獨立顯示在最上層
+        _floatingStatsWindow.Owner = null;
+
+        // 顯示窗體
+        _floatingStatsWindow.Show();
+
+        // 🆕 強制將懸浮窗體帶到前面
+        _floatingStatsWindow.BringToFront();
+        _floatingStatsWindow.Focus();
+
+        // 定時更新統計數據
+        var updateTimer = new System.Windows.Forms.Timer
+        {
+            Interval = 1000  // 每秒更新一次
+        };
+        updateTimer.Tick += UpdateFloatingStats;
+        updateTimer.Start();
+    }
+
+    // 🆕 更新懸浮窗體的統計數據
+    private void UpdateFloatingStats(object sender, EventArgs e)
+    {
+        if (_floatingStatsWindow == null || _floatingStatsWindow.IsDisposed)
+            return;
+
+        try
+        {
+            var records = _mapPickRecordManager.MapRecords;
+            var currentMap = _mapPickRecordManager.IsInMap
+                ? _mapPickRecordManager.CurrentMapName
+                : "待機中";
+
+            // 計算總遊戲時間
+            var totalSeconds = records.Sum(r => (r.EndTime - r.StartTime).TotalSeconds);
+            var totalTime = TimeSpan.FromSeconds(totalSeconds).ToString(@"hh\:mm\:ss");
+
+            // 計算當前地圖拾取數
+            var currentMapPickCount = _mapPickRecordManager.IsInMap
+                ? _mapPickRecordManager.GetCurrentMapRecord()?.PickRecord?.Sum(p => p.Value.Total) ?? 0
+                : 0;
+
+            var stats = new Dictionary<string, string>
+            {
+                { "地圖數", records.Count.ToString() },
+                { "物品種類", records.Sum(r => r.PickRecord?.Count ?? 0).ToString() },
+                { "總數量", records.Sum(r => r.PickRecord?.Select(p=>p.Value.Total).Sum() ?? 0).ToString() },
+                { "遊戲時間", totalTime },
+                { "當前地圖", currentMap },
+                { "拾取數", currentMapPickCount.ToString() }
+            };
+
+            _floatingStatsWindow.UpdateStats(stats);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "更新懸浮統計窗體失敗");
+        }
+    }
+
+    // 🆕 顯示浮動窗體
+    public void ShowFloatingWindow()
+    {
+        if (_floatingStatsWindow != null && !_floatingStatsWindow.IsDisposed)
+        {
+            _floatingStatsWindow.Show();
+            _floatingStatsWindow.BringToFront();
+            Log.Information("浮動統計窗體已顯示");
+        }
+    }
+
+    // 🆕 隱藏浮動窗體
+    public void HideFloatingWindow()
+    {
+        if (_floatingStatsWindow != null && !_floatingStatsWindow.IsDisposed)
+        {
+            _floatingStatsWindow.Hide();
+            Log.Information("浮動統計窗體已隱藏");
+        }
+    }
+
+    // 🆕 切換浮動窗體顯示狀態
+    public bool ToggleFloatingWindow()
+    {
+        if (_floatingStatsWindow == null || _floatingStatsWindow.IsDisposed)
+        {
+            return false;
+        }
+
+        if (_floatingStatsWindow.Visible)
+        {
+            _floatingStatsWindow.Hide();
+            Log.Information("浮動統計窗體已隱藏");
+            return false;
+        }
+        else
+        {
+            _floatingStatsWindow.Show();
+            _floatingStatsWindow.BringToFront();
+            Log.Information("浮動統計窗體已顯示");
+            return true;
+        }
+    }
+
+    // 🆕 覆寫 Dispose 以確保懸浮窗體也被關閉
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _floatingStatsWindow?.Close();
+            _floatingStatsWindow?.Dispose();
+        }
+        base.Dispose(disposing);
     }
 
     private async void InitializeAsync()
@@ -191,19 +317,19 @@ public class MainWindow : Form
     {
         if (_isInitialized)
         {
-   await _webViewHub.NotifyMapConfigUpdatedAsync(success, message);
-      Log.Information("地圖設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
+            await _webViewHub.NotifyMapConfigUpdatedAsync(success, message);
+            Log.Information("地圖設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
         }
     }
 
     /// <summary>
     /// 處理拾取統計設定更新事件
-  /// </summary>
-  private async void HandlePickupStatisticsConfigUpdated(bool success, string message)
+    /// </summary>
+    private async void HandlePickupStatisticsConfigUpdated(bool success, string message)
     {
         if (_isInitialized)
-  {
-      await _webViewHub.NotifyPickupStatisticsConfigUpdatedAsync(success, message);
+        {
+            await _webViewHub.NotifyPickupStatisticsConfigUpdatedAsync(success, message);
             Log.Information("拾取統計設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
         }
     }
@@ -211,7 +337,7 @@ public class MainWindow : Form
     /// <summary>
     /// 通知前端背包同步狀態
     /// </summary>
- public async Task NotifyBagSyncAsync()
+    public async Task NotifyBagSyncAsync()
     {
         if (_isInitialized)
         {

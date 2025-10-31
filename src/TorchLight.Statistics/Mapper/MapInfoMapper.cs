@@ -27,7 +27,7 @@ public class MapInfoMapper
     private static readonly List<MapConfigItem> DefaultMapConfigs =
     [
         new() { Id = "XZ_YuJinZhiXiBiNanSuo200", Name = "餘燼之息", Type = MapType.Hideout },
-        new() { Id = "GeBuLinCunLuo01", Name = "隔壁林村落01", Type = MapType.Netherrealm },
+        new() { Id = "GeBuLinCunLuo01", Name = "災厄之林", Type = MapType.Netherrealm },
         new() { Id = "YJ_TaiYangWangTing200", Name = "長明宮城", Type = MapType.Netherrealm },
         new() { Id = "SQ_JingJiHuiTu100", Name = "荊棘穢土", Type = MapType.Netherrealm },
         new() { Id = "KD_AiRenDiErCeng01", Name = "悲鳴礦區", Type = MapType.Netherrealm },
@@ -47,23 +47,28 @@ public class MapInfoMapper
         new() { Id = "YL_BeiFengLinDi201", Name = "悲風林地", Type = MapType.Netherrealm },
         new() { Id = "SD_GeBuLinShanZhai", Name = "暗影前哨", Type = MapType.Netherrealm },
         new() { Id = "KD_AiRenKuangDong01", Name = "荒棄礦場", Type = MapType.Netherrealm },
-        new() { Id =  "YL_XiDiChongGu200", Name =  "母巢密林", Type = MapType.Netherrealm },
-        new() { Id =  "DD_QunLangJieXiang200", Name =  "幽暗街巷", Type = MapType.Netherrealm },
-        new() { Id =  "JH_ShenHeJuSuo000", Name =  "流光神座", Type = MapType.Netherrealm },
-        new() { Id =  "JH_YiWangMiDian000", Name =  "苦痛秘殿", Type = MapType.Netherrealm },
-        new() { Id =  "DD_ShengTingZhuangYuan000", Name =  "常世宮闈", Type = MapType.Netherrealm },
-        new() { Id =  "YL_MaNeiLaYuLin100", Name =  "汙濁叢林", Type = MapType.Netherrealm },
-        new() { Id =  "YJ_ShuXiDaTing200", Name =  "鏡中禮堂", Type = MapType.Netherrealm },
-        new() { Id =  "SQ_EWuHuangCun100", Name =  "惡武荒村", Type = MapType.Netherrealm },
-        new() { Id =  "KD_CangBaoDongKu000", Name =  "乾涸礦場", Type = MapType.Netherrealm },
-        new() { Id =  "DD_TanXiZhiQiang000", Name =  "悲歌之牆", Type = MapType.Netherrealm },
-        new() { Id =  "YJ_LiuJinJieQu200", Name =  "新月長廊", Type = MapType.Netherrealm },
-        new() { Id =  "SD_ShengHuoLing0203", Name =  "霧雨密林", Type = MapType.Netherrealm },
-        new() { Id =  "SQ_XiongShiZhiXin200", Name =  "王者樞紐", Type = MapType.Netherrealm },
-        new() { Id =  "SQ_NvShenQunBai100", Name =  "不潔綠洲", Type = MapType.Netherrealm },
-        new() { Id =  "JH_JiaoTangDaTing000", Name =  "禱告聖堂", Type = MapType.Netherrealm }
-        // Next
-        
+        new() { Id = "YL_XiDiChongGu200", Name = "母巢密林", Type = MapType.Netherrealm },
+        new() { Id = "DD_QunLangJieXiang200", Name = "幽暗街巷", Type = MapType.Netherrealm },
+        new() { Id = "JH_ShenHeJuSuo000", Name = "流光神座", Type = MapType.Netherrealm },
+        new() { Id = "JH_YiWangMiDian000", Name = "苦痛秘殿", Type = MapType.Netherrealm },
+        new() { Id = "DD_ShengTingZhuangYuan000", Name = "常世宮闈", Type = MapType.Netherrealm },
+        new() { Id = "YL_MaNeiLaYuLin100", Name = "汙濁叢林", Type = MapType.Netherrealm },
+        new() { Id = "YJ_ShuXiDaTing200", Name = "鏡中禮堂", Type = MapType.Netherrealm },
+        new() { Id = "SQ_EWuHuangCun100", Name = "惡武荒村", Type = MapType.Netherrealm },
+        new() { Id = "KD_CangBaoDongKu000", Name = "乾涸礦場", Type = MapType.Netherrealm },
+        new() { Id = "DD_TanXiZhiQiang000", Name = "悲歌之牆", Type = MapType.Netherrealm },
+        new() { Id = "YJ_LiuJinJieQu200", Name = "新月長廊", Type = MapType.Netherrealm },
+        new() { Id = "SD_ShengHuoLing0203", Name = "霧雨密林", Type = MapType.Netherrealm },
+        new() { Id = "SQ_XiongShiZhiXin200", Name = "王者樞紐", Type = MapType.Netherrealm },
+        new() { Id = "SQ_NvShenQunBai100", Name = "不潔綠洲", Type = MapType.Netherrealm },
+        new() { Id = "JH_JiaoTangDaTing000", Name = "禱告聖堂", Type = MapType.Netherrealm },
+        new() { Id = "SD_DuiLongJuQiang211", Name = "雲間高牆", Type = MapType.Netherrealm },
+        new() { Id = "YJ_RiXiShenMiao200", Name = "日棲神廟", Type = MapType.Netherrealm },
+        new() { Id = "DD_JueWangZhiQiang000", Name = "無垢之牆", Type = MapType.Netherrealm },
+        new() { Id = "JH_TongKuMiDian000", Name = "苦罰秘殿", Type = MapType.Netherrealm },
+        new() { Id = "SD_YuanGuTongDao101", Name = "聚獸平原", Type = MapType.Netherrealm },
+        new() { Id = "DD_YinYanJieXiang200", Name = "遺落街巷", Type = MapType.Netherrealm },
+        new() { Id = "DD_ZaWuJieQu000", Name = "雜蕪街區", Type = MapType.Netherrealm }
     ];
 
     /// <summary>
@@ -359,7 +364,7 @@ public class MapInfoMapper
                 .GroupBy(m => m.Type)
                 .ToDictionary(g => g.Key, g => g.OrderBy(m => m.Name).ToList());
         }
-    }    
+    }
 
     /// <summary>
     /// 停止檔案監控

@@ -27,6 +27,11 @@
       </div>
 
       <div class="actions">
+        <!-- 🆕 浮動窗體控制按鈕 -->
+        <button @click="toggleFloatingWindow" class="btn-icon btn-float" :title="floatingWindowVisible ? '隱藏浮動窗體' : '顯示浮動窗體'">
+          <span>{{ floatingWindowVisible ? '📊' : '📉' }}</span>
+        </button>
+
         <button @click="minimizeWindow" class="btn-icon" title="最小化">
           <span>-</span>
         </button>
@@ -46,6 +51,7 @@
   const mapStore = useMapStore()
   const currentMapInfo = computed(() => mapStore.currentMapInfo)
   const isSettling = ref(false)
+  const floatingWindowVisible = ref(true)  // 🆕 浮動窗體顯示狀態
 
   const minimizeWindow = () => {
     apiCall('MinimizeWindow').catch(console.error)
@@ -83,6 +89,22 @@
       alert(`結算失敗：${error.message}`)
     } finally {
       isSettling.value = false
+    }
+  }
+
+  // 🆕 切換浮動窗體顯示
+  const toggleFloatingWindow = async () => {
+    try {
+      const result = await apiCall('ToggleFloatingStatsWindow')
+
+      if (result && result.success) {
+        floatingWindowVisible.value = result.isVisible
+        console.log(result.message)
+      } else {
+        console.error('切換浮動窗體失敗:', result?.message)
+      }
+    } catch (error) {
+      console.error('切換浮動窗體時發生錯誤:', error)
     }
   }
 </script>
@@ -124,15 +146,15 @@
     transition: all 0.3s;
   }
 
-    .nav-link:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-    }
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+  }
 
-    .nav-link.router-link-active {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-    }
+  .nav-link.router-link-active {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
 
   .status {
     -webkit-app-region: no-drag;
@@ -231,6 +253,16 @@
 
     .btn-icon:hover {
       background: rgba(255, 255, 255, 0.2);
+    }
+
+  /* 🆕 浮動窗體按鈕特殊樣式 */
+  .btn-float {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+    .btn-float:hover {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      transform: scale(1.1);
     }
 
   .btn-close:hover {
