@@ -13,7 +13,7 @@ public class MapInfoMapper
 {
     private static readonly object _lock = new();
     private static List<MapConfigItem> _mapConfigs = [];
-    private static ConfigFileWatcher<MapConfigItem>? _configWatcher;
+    private static ConfigFileWatcher<MapConfigItem> _configWatcher;
     private static readonly JsonSerializerOptions _ops = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -43,11 +43,27 @@ public class MapInfoMapper
         new() { Id = "SD_ShouGuLinDi000", Name = "曲折谷地", Type = MapType.Netherrealm },
         new() { Id = "YJ_LuoRiQiongDi200", Name = "落日穹底", Type = MapType.Netherrealm },
         new() { Id = "KD_YuanSuKuangDong000", Name = "元素礦洞", Type = MapType.Netherrealm },
-
         new() { Id = "YanYuZhiGu", Name = "炎獄之谷", Type = MapType.Boss },
         new() { Id = "YL_BeiFengLinDi201", Name = "悲風林地", Type = MapType.Netherrealm },
         new() { Id = "SD_GeBuLinShanZhai", Name = "暗影前哨", Type = MapType.Netherrealm },
-        new() { Id = "KD_AiRenKuangDong01", Name = "荒棄礦場", Type = MapType.Netherrealm }
+        new() { Id = "KD_AiRenKuangDong01", Name = "荒棄礦場", Type = MapType.Netherrealm },
+        new() { Id =  "YL_XiDiChongGu200", Name =  "母巢密林", Type = MapType.Netherrealm },
+        new() { Id =  "DD_QunLangJieXiang200", Name =  "幽暗街巷", Type = MapType.Netherrealm },
+        new() { Id =  "JH_ShenHeJuSuo000", Name =  "流光神座", Type = MapType.Netherrealm },
+        new() { Id =  "JH_YiWangMiDian000", Name =  "苦痛秘殿", Type = MapType.Netherrealm },
+        new() { Id =  "DD_ShengTingZhuangYuan000", Name =  "常世宮闈", Type = MapType.Netherrealm },
+        new() { Id =  "YL_MaNeiLaYuLin100", Name =  "汙濁叢林", Type = MapType.Netherrealm },
+        new() { Id =  "YJ_ShuXiDaTing200", Name =  "鏡中禮堂", Type = MapType.Netherrealm },
+        new() { Id =  "SQ_EWuHuangCun100", Name =  "惡武荒村", Type = MapType.Netherrealm },
+        new() { Id =  "KD_CangBaoDongKu000", Name =  "乾涸礦場", Type = MapType.Netherrealm },
+        new() { Id =  "DD_TanXiZhiQiang000", Name =  "悲歌之牆", Type = MapType.Netherrealm },
+        new() { Id =  "YJ_LiuJinJieQu200", Name =  "新月長廊", Type = MapType.Netherrealm },
+        new() { Id =  "SD_ShengHuoLing0203", Name =  "霧雨密林", Type = MapType.Netherrealm },
+        new() { Id =  "SQ_XiongShiZhiXin200", Name =  "王者樞紐", Type = MapType.Netherrealm },
+        new() { Id =  "SQ_NvShenQunBai100", Name =  "不潔綠洲", Type = MapType.Netherrealm },
+        new() { Id =  "JH_JiaoTangDaTing000", Name =  "禱告聖堂", Type = MapType.Netherrealm }
+        // Next
+        
     ];
 
     /// <summary>
@@ -58,7 +74,7 @@ public class MapInfoMapper
     /// <summary>
     /// 當地圖設定更新時觸發
     /// </summary>
-    public static event Action<bool, string>? OnConfigUpdated;
+    public static event Action<bool, string> OnConfigUpdated;
 
     /// <summary>
     /// 初始化地圖映射器（從 JSON 載入）
@@ -194,7 +210,7 @@ public class MapInfoMapper
         {
             var mapId = ExtractMapId(fullMapPath);
             var mapName = GetMapName(mapId);
-            var mapType = DetermineMapType(mapId);
+            var mapType = GetMapType(mapId);
 
             return new MapInfo
             {
@@ -224,27 +240,27 @@ public class MapInfoMapper
             var config = _mapConfigs.FirstOrDefault(m => m.Id == mapId);
             return config?.Name ?? mapId;
         }
-    } 
+    }
 
     /// <summary>
-    /// 取得地圖類型
+    /// 判斷地圖類型
     /// </summary>
     /// <param name="mapIdOrPath"></param>
     /// <param name="mapType"></param>
     /// <returns></returns>
-    public static bool MapTypeCheck(string mapIdOrPath, MapType mapType)
+    public static bool CheckMapType(string mapIdOrPath, MapType mapType)
     {
         lock (_lock)
         {
             var mapId = mapIdOrPath.Contains('/') ? ExtractMapId(mapIdOrPath) : mapIdOrPath;
             return _mapConfigs.Any(m => m.Id == mapId && m.Type == mapType);
         }
-    }   
+    }
 
     /// <summary>
-    /// 判斷地圖類型
+    /// 取得地圖類型
     /// </summary>
-    private static MapType DetermineMapType(string mapId)
+    public static MapType GetMapType(string mapId)
     {
         var config = _mapConfigs.FirstOrDefault(m => m.Id == mapId);
         return config?.Type ?? MapType.Unknown;
@@ -328,7 +344,7 @@ public class MapInfoMapper
     {
         lock (_lock)
         {
-            return _mapConfigs.OrderBy(m => m.Type).ThenBy(m => m.Name).ToList();
+            return [.. _mapConfigs.OrderBy(m => m.Type).ThenBy(m => m.Name)];
         }
     }
 

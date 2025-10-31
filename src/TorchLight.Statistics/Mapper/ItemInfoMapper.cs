@@ -15,7 +15,7 @@ namespace TorchLight.Statistics.Mapper
     {
         private static readonly object _lock = new();
         private static List<ItemBaseModel> _itemConfigs = [];
-        private static ConfigFileWatcher<ItemBaseModel>? _configWatcher;
+        private static ConfigFileWatcher<ItemBaseModel> _configWatcher;
         private static readonly JsonSerializerOptions _ops = new()
         {
             PropertyNameCaseInsensitive = true,
@@ -282,7 +282,7 @@ namespace TorchLight.Statistics.Mapper
         /// <summary>
         /// 當物品設定更新時觸發
         /// </summary>
-        public static event Action<bool, string>? OnConfigUpdated;
+        public static event Action<bool, string> OnConfigUpdated;
 
         /// <summary>
         /// 初始化物品映射器（從 JSON 載入）
@@ -478,7 +478,7 @@ namespace TorchLight.Statistics.Mapper
         {
             lock (_lock)
             {
-                return _itemConfigs.OrderBy(i => i.Type).ThenBy(i => i.Name).ToList();
+                return [.. _itemConfigs.OrderBy(i => i.Type).ThenBy(i => i.Name)];
             }
         }
 

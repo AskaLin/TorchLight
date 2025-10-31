@@ -1,11 +1,13 @@
-﻿namespace TorchLight.Statistics.Models
+﻿using TorchLight.Statistics.Enums;
+
+namespace TorchLight.Statistics.Models
 {
     public class MapRecordModel
     {
         /// <summary>
         /// 唯一識別碼
         /// </summary>
-        public Guid RecordId { get; set; } = Guid.NewGuid();
+        // public Guid RecordId { get; set; } = Guid.NewGuid();
 
         /// <summary>
         /// 地圖ID
@@ -15,7 +17,9 @@
         /// <summary>
         /// 地圖Token
         /// </summary>
-        public string Token { get; set; }
+        public string RecordId { get; set; }
+
+        public MapType Type { get; set; }
         /// <summary>
         /// 地圖名稱
         /// </summary>

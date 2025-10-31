@@ -32,22 +32,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            var records = _mapPickRecordManager.MapRecords
-                .Select(r => new
-                {
-                    r.RecordId,
-                    r.Id,
-                    Name = MapInfoMapper.GetMapName(r.Id), // 即時從 MapMapper 取得最新名稱
-                    r.MapTicket,
-                    Compass = r.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
-                    r.Probe,
-                    r.StartTime,
-                    r.EndTime,
-                    r.UseTime,
-                    ItemCount = r.PickRecord?.Count ?? 0,
-                    TotalQuantity = r.PickRecord?.Sum(p => p.Value.Total) ?? 0
-                }).ToList();
-
+            var records = _mapPickRecordManager.MapRecords.Select(r => GetMapRecord(r)).ToList();
             return JsonSerializer.Serialize(records, _ops);
         }
         catch (Exception ex)
@@ -60,15 +45,10 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     /// <summary>
     /// 獲取指定地圖的詳細資訊
     /// </summary>
-    public string GetMapRecordDetail(string recordIdStr)
+    public string GetMapRecordDetail(string recordId)
     {
         try
         {
-            if (!Guid.TryParse(recordIdStr, out var recordId))
-            {
-                return JsonSerializer.Serialize(new { error = "無效的記錄ID" });
-            }
-
             var record = _mapPickRecordManager.MapRecords.FirstOrDefault(r => r.RecordId == recordId);
 
             if (record == null)
@@ -76,27 +56,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 return JsonSerializer.Serialize(new { error = "找不到指定的記錄" });
             }
 
-            var detail = new
-            {
-                record.RecordId,
-                record.Id,
-                Name = MapInfoMapper.GetMapName(record.Id), // 即時從 MapMapper 取得最新名稱
-                record.MapTicket,
-                Compass = record.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
-                record.Probe,
-                record.StartTime,
-                record.EndTime,
-                record.UseTime,
-                Items = record.PickRecord?.Select(p => new
-                {
-                    p.Value.BaseId,
-                    p.Value.Name,
-                    p.Value.Total,
-                    p.Value.Slots
-                }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
-            };
-
-            return JsonSerializer.Serialize(detail, _ops);
+            return JsonSerializer.Serialize(GetMapRecord(record), _ops);
         }
         catch (Exception ex)
         {
@@ -105,78 +65,38 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         }
     }
 
+    private static MapRecordDetail GetMapRecord(MapRecordModel model)
+    {        
+        return new MapRecordDetail
+        {
+            RecordId = model.RecordId,
+            Id = model.Id,
+            Name = MapInfoMapper.GetMapName(model.Id), // 即時從 MapMapper 取得最新名稱
+            MapTicket = model.MapTicket,
+            Compass = [.. model.Compass.Where(c => !string.IsNullOrEmpty(c))],
+            Probe = model.Probe,
+            StartTime = model.StartTime,
+            EndTime = model.EndTime,
+            UseTime = model.UseTime,
+            ItemCount = model.PickRecord?.Count ?? 0,
+            TotalQuantity = model.PickRecord?.Sum(p => p.Value.Total) ?? 0,
+            Items = model.PickRecord?.Select(p => new
+            {
+                p.Value.BaseId,
+                p.Value.Name,
+                p.Value.Total,
+                p.Value.Slots
+            }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()          
+        };
+    }
+
     /// <summary>
     /// 獲取當前地圖資訊
     /// </summary>
     public string GetCurrentMapInfo()
     {
-        try
-        {
-            var currentRecord = _mapPickRecordManager.GetCurrentMapRecord();
-
-            if (!_mapPickRecordManager.IsInNetherrealmMap)
-            {
-                // 避難所地圖 - 只顯示地圖名稱
-                return JsonSerializer.Serialize(new
-                {
-                    IsInMap = false,
-                    MapType = MapType.Hideout.ToString(),  // ✅ 轉換為字串
-                    MapName = _mapPickRecordManager.CurrentMapName,
-                    RecordId = (Guid?)null,
-                    MapTicket = "",
-                    Compass = Array.Empty<string>(),
-                    Probe = "",
-                    StartTime = (DateTime?)null,
-                    Items = Array.Empty<object>(),
-
-                }, _ops);
-            }
-            else if (currentRecord != null)
-            {
-                // 異界地圖 - 顯示完整資訊
-                return JsonSerializer.Serialize(new
-                {
-                    IsInMap = true,
-                    MapType = MapType.Netherrealm.ToString(),  // ✅ 轉換為字串
-                    currentRecord.Token,
-                    MapName = MapInfoMapper.GetMapName(currentRecord.Id), // 即時取得最新名稱
-                    currentRecord.RecordId,
-                    currentRecord.MapTicket,
-                    Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
-                    currentRecord.Probe,
-                    currentRecord.StartTime,
-                    Items = currentRecord.PickRecord?.Select(p => new
-                    {
-                        p.Value.BaseId,
-                        p.Value.Name,
-                        p.Value.Total,
-                        p.Value.Slots
-                    }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
-                }, _ops);
-            }
-            else
-            {
-                // 在異界地圖但沒有記錄
-                return JsonSerializer.Serialize(new
-                {
-                    IsInMap = true,
-                    MapType = MapType.Netherrealm.ToString(),  // ✅ 轉換為字串
-                    _mapPickRecordManager.Token,
-                    MapName = _mapPickRecordManager.CurrentMapName,
-                    RecordId = (Guid?)null,
-                    MapTicket = "",
-                    Compass = Array.Empty<string>(),
-                    Probe = "",
-                    StartTime = (DateTime?)null,
-                    Items = Array.Empty<object>()
-                }, _ops);
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "獲取當前地圖資訊失敗");
-            return JsonSerializer.Serialize(new { error = ex.Message });
-        }
+        var result = _gameLogProcessor.GetCurrentMapData();
+        return JsonSerializer.Serialize(result, _ops);
     }
 
     /// <summary>
@@ -192,7 +112,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             {
                 TotalMaps = records.Count,
                 TotalItems = records.Sum(r => r.PickRecord?.Count ?? 0),
-                TotalQuantity = records.Sum(r => r.PickRecord?.Sum(p => p.Value.Total) ?? 0),
+                TotalQuantity = records.Select(r => r.PickRecord?.Sum(p => p.Value.Total) ?? 0).Sum(),
                 TotalPlayTime = TimeSpan.FromSeconds(records.Sum(r => (r.EndTime - r.StartTime).TotalSeconds)).ToString(@"hh\:mm\:ss"),
                 MostPickedItems = records.SelectMany(r => r.PickRecord?.Values ?? Enumerable.Empty<PickedItemDataModel>())
                                          .GroupBy(p => p.BaseId)
@@ -321,7 +241,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     /// <summary>
     /// 刪除地圖設定
     /// </summary>
-    public string DeleteMapConfig(string mapType, string mapId)
+    public string DeleteMapConfig(string mapId)
     {
         try
         {
@@ -355,8 +275,9 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                     Name = t switch
                     {
                         MapType.Hideout => "🏠 藏身處",
-                        MapType.Netherrealm => "🌌 異界地圖",
+                        MapType.Netherrealm => "🌌 異界",
                         MapType.SecretRealm => "🔮 秘境",
+                        MapType.Boss => "👑 首領",
                         _ => t.ToString()
                     },
                     Description = t switch
@@ -364,6 +285,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                         MapType.Hideout => "玩家的安全區域",
                         MapType.Netherrealm => "可統計拾取的地圖",
                         MapType.SecretRealm => "特殊秘境地圖",
+                        MapType.Boss => "首領地圖",
                         _ => ""
                     }
                 }).ToArray();
@@ -550,17 +472,19 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 var pageId = (int)item.PageIdType;
                 var itemType = item.Type.ToString();
 
-                if (!configsByPageId.ContainsKey(pageId))
+                if (!configsByPageId.TryGetValue(pageId, out Dictionary<string, List<object>> value))
                 {
-                    configsByPageId[pageId] = new Dictionary<string, List<object>>();
+                    value = [];
+                    configsByPageId[pageId] = value;
                 }
 
-                if (!configsByPageId[pageId].ContainsKey(itemType))
+                if (!value.TryGetValue(itemType, out List<object> value1))
                 {
-                    configsByPageId[pageId][itemType] = [];
+                    value1 = [];
+                    value[itemType] = value1;
                 }
 
-                configsByPageId[pageId][itemType].Add(new
+                value1.Add(new
                 {
                     ItemId = item.Id,
                     ItemName = item.Name,
@@ -631,7 +555,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     /// <summary>
     /// 刪除拾取統計項目（將 Enable 設為 false）
     /// </summary>
-    public string DeletePickupStatisticsItem(int pageId, int itemId)
+    public string DeletePickupStatisticsItem(int itemId)
     {
         try
         {
@@ -667,5 +591,21 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             Log.Error(ex, "刪除拾取統計項目失敗");
             return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
         }
+    }
+
+    private class MapRecordDetail
+    {
+        public string RecordId { get; set; }
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public string MapTicket { get; set; }
+        public string[] Compass { get; set; }
+        public string Probe { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public string UseTime { get; set; }
+        public object[] Items { get; set; }
+        public int ItemCount { get; set; }
+        public int TotalQuantity { get; set; }
     }
 }

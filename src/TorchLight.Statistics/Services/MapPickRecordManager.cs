@@ -8,32 +8,27 @@ namespace TorchLight.Statistics.Services;
 /// <summary>
 /// 管理異界地圖的拾取記錄
 /// </summary>
-public class MapPickRecordManager
+public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
 {
     private readonly List<MapRecordModel> _mapRecords = [];
     private MapRecordModel _currentMapRecord = new();
     private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
-    private readonly Dictionary<int, ItemModel> _itemTable;
+    private readonly Dictionary<int, ItemModel> _itemTable = itemTable;
 
     // 暫存開圖材料
     private string _pendingMapTicket = string.Empty;
     private readonly List<string> _pendingCompasses = [];
     private string _pendingProbe = string.Empty;
     private int _pendingResonance = 0;
-    
 
-    public MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
-    {
-        _itemTable = itemTable;
-    }
-
-    public bool IsInNetherrealmMap { get; private set; }
+    public bool IsInMap { get; private set; }
     public string CurrentMapName { get; private set; } = string.Empty;
     public string Token { get; private set; } = string.Empty;
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
 
     public void SetMapToken(string token)
     {
+        Log.Debug("設定 Map Token {tok}", token);
         Token = token;
     }
     /// <summary>
@@ -77,14 +72,16 @@ public class MapPickRecordManager
     /// </summary>
     public void StartMapRecord(string mapId, string mapName, DateTime startTime)
     {
+        var recordMapId = MapInfoMapper.ExtractMapId(mapId);
         _currentMapRecord = new MapRecordModel
         {
-            Id = MapInfoMapper.ExtractMapId(mapId),
+            Id = recordMapId,
             Name = mapName,
             StartTime = startTime,
             MapTicket = _pendingMapTicket,
             Probe = _pendingProbe,
-            Token = Token            
+            RecordId = Token,
+            Type = MapInfoMapper.GetMapType(recordMapId)
         };
 
         // 複製羅盤資料到陣列
@@ -94,10 +91,10 @@ public class MapPickRecordManager
         }
 
         _currentMapPickData = [];
-        IsInNetherrealmMap = true;
+        IsInMap = true;
         CurrentMapName = mapName;
 
-        Log.Information("{Time} 進入異界地圖: {MapName} {tk}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), CurrentMapName, _currentMapRecord.Token);
+        Log.Information("{Time} 進入異界地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);        
 
         if (!string.IsNullOrEmpty(_pendingMapTicket))
         {
@@ -125,7 +122,7 @@ public class MapPickRecordManager
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
-        Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", endTime.ToString("yyyy/MM/dd HH:mm:ss"), CurrentMapName, _currentMapRecord.UseTime);
+        Log.Information("{Time} 離開異界地圖: {MapName}({Token}) - 用時: {Duration}", endTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId, _currentMapRecord.UseTime);
 
         // 顯示當前地圖的拾取記錄
         PrintCurrentMapRecord(_currentMapRecord);
@@ -133,7 +130,7 @@ public class MapPickRecordManager
         // 重置
         _currentMapRecord = new();
         _currentMapPickData = [];
-        IsInNetherrealmMap = false;
+        IsInMap = false;
     }
 
     /// <summary>
@@ -149,7 +146,7 @@ public class MapPickRecordManager
     /// </summary>
     public MapPickResult RecordPickedItem(int configBaseId, int slotId, int quantityChange)
     {
-        if (!IsInNetherrealmMap)
+        if (!IsInMap)
         {
             return null;
         }
@@ -216,9 +213,9 @@ public class MapPickRecordManager
     /// <summary>
     /// 獲取當前地圖記錄（包含完整資訊）
     /// </summary>
-    public MapRecordModel? GetCurrentMapRecord()
+    public MapRecordModel GetCurrentMapRecord()
     {
-        if (!IsInNetherrealmMap || _currentMapRecord == null)
+        if (!IsInMap || _currentMapRecord == null)
             return null;
 
         // 創建一個包含當前拾取記錄的副本
@@ -251,7 +248,7 @@ public class MapPickRecordManager
         _mapRecords.Clear();
         _currentMapRecord = new();
         _currentMapPickData = [];
-        IsInNetherrealmMap = false;
+        IsInMap = false;
         CurrentMapName = string.Empty;
 
         ClearPendingMaterials();
@@ -272,7 +269,7 @@ public class MapPickRecordManager
     /// <summary>
     /// 顯示當前地圖的拾取記錄
     /// </summary>
-    private void PrintCurrentMapRecord(MapRecordModel record)
+    private static void PrintCurrentMapRecord(MapRecordModel record)
     {
         if (record.PickRecord == null || record.PickRecord.Count == 0)
         {

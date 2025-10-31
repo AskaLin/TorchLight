@@ -1,10 +1,8 @@
 ﻿using Serilog;
-using System.Text.RegularExpressions;
 using TorchLight.Statistics.Enums;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace TorchLight.Statistics;
 
@@ -17,36 +15,34 @@ public class GameLogProcessor
     private readonly ItemChangeBlockProcessor _itemChangeProcessor;
     private readonly BagInventoryManager _bagInventoryManager;
     private readonly MapPickRecordManager _mapPickRecordManager;
-    private readonly MapTransitionHandler _mapTransitionHandler;
     private readonly ConsoleLogger _logger;
     private readonly Dictionary<int, ItemModel> _itemTable;
-    private WebViewHub? _webViewHub;
+    private WebViewHub _webViewHub;
 
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
     /// </summary>
-#nullable enable
-    public event Action? OnLogOpenedDetected;
+
+    public event Action OnLogOpenedDetected;
 
     /// <summary>
     /// 當背包同步完成時觸發
     /// </summary>
-    public event Action? OnBagSyncCompleted;
-#nullable disable
+    public event Action OnBagSyncCompleted;
+
 
     public GameLogProcessor(
        Dictionary<int, ItemModel> itemTable,
-    LineParser lineParser,
-           ItemChangeBlockProcessor itemChangeProcessor,
-           WebViewHub? webViewHub = null)
+       LineParser lineParser,
+       ItemChangeBlockProcessor itemChangeProcessor,
+       WebViewHub webViewHub = null)
     {
         _lineParser = lineParser ?? throw new ArgumentNullException(nameof(lineParser));
         _itemChangeProcessor = itemChangeProcessor ?? throw new ArgumentNullException(nameof(itemChangeProcessor));
         _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
         _webViewHub = webViewHub;
         _bagInventoryManager = new BagInventoryManager(itemTable);
-        _mapPickRecordManager = new MapPickRecordManager(itemTable);
-        _mapTransitionHandler = new MapTransitionHandler(_mapPickRecordManager);
+        _mapPickRecordManager = new MapPickRecordManager(itemTable); ;
         _logger = new ConsoleLogger();
 
         // 註冊事件處理
@@ -59,12 +55,9 @@ public class GameLogProcessor
     public void SetWebViewHub(WebViewHub webViewHub)
     {
         _webViewHub = webViewHub;
-
-        // 同時設定給 MapTransitionHandler
-        _mapTransitionHandler.SetWebViewHub(webViewHub);
     }
 
-    private bool SPV3OPENStart = false;
+    private bool _openMapFlag = false;
     /// <summary>
     /// 處理遊戲日誌
     /// </summary>
@@ -75,36 +68,28 @@ public class GameLogProcessor
 
         try
         {
-            // 開始開新圖, 結算舊圖
-            if (line.Contains("----Socket RecvMessage STT----Spv3Open----"))
-            {
-                Log.Debug("開始開新圖, 結算舊圖");
-                var match = Regex.Match(line, @"\[(\d{4}\.\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{2}:\d{3})\]");
-                if (match.Success)
-                {
-                    SPV3OPENStart = true;
-                    _mapPickRecordManager.EndMapRecord(LineParser.ParseUnrealDateTime(match.Groups[1].Value));
-                }
 
+            // 開始開新圖, 結算舊圖
+            if (LineParser.OpenMap(line, out var datetime))
+            {
+                _openMapFlag = true;
+                _mapPickRecordManager.EndMapRecord(datetime);
+                // 通知前端：地圖結算完成，新記錄已產生
+                NotifyNewMapRecord();
                 return;
             }
 
-            if (line.Contains("TokenKey"))
+            // 搭配開圖, 取得地圖 Token
+            if (LineParser.IsTokenLine(line, out string mapToken, _openMapFlag))
             {
-                var match = Regex.Match(line, @"\[(\d+)\]");
-
-                if (match.Success)
-                {
-                    string token = match.Groups[1].Value;
-                    _mapPickRecordManager.SetMapToken(token);                    
-                    SPV3OPENStart = false;
-                }
+                _mapPickRecordManager.SetMapToken(mapToken);
+                _openMapFlag = false;
+                return;
             }
 
 
-
             // 0. 檢查 "已開啟日誌" 訊息
-            if (_lineParser.IsLogOpenedMessage(line))
+            if (LineParser.IsLogOpenedMessage(line))
             {
                 Log.Information("檢測到 '已開啟日誌' 訊息");
                 OnLogOpenedDetected?.Invoke();
@@ -140,7 +125,7 @@ public class GameLogProcessor
             }
 
             // 2. 登入開始 - 重置所有資料
-            if (_lineParser.IsLoginStart(line))
+            if (LineParser.IsLoginStart(line))
             {
                 Log.Information("偵測到重新登入，重置所有資料");
                 _bagInventoryManager.Reset();
@@ -150,21 +135,30 @@ public class GameLogProcessor
             }
 
             // 3. 地圖切換
-            if (_lineParser.IsMoveMap(line))
+            if (LineParser.IsMoveMap(line))
             {
-                var (time, fromPath, toPath, success) = _lineParser.GetMapPathData(line);
+                var (time, fromPath, toPath, success) = LineParser.GetMapPathData(line);
                 if (success)
                 {
+                    var fromMapInfo = MapInfoMapper.GetMapInfo(fromPath);
+                    var toMapInfo = MapInfoMapper.GetMapInfo(toPath);
+
                     Log.Debug("地圖切換: {From} -> {To}", fromPath, toPath);
-                    _mapTransitionHandler.HandleMapTransition(time, fromPath, toPath);
+                    Log.Information($"{time:yyyy/MM/dd HH:mm:ss}\t從地圖 {fromMapInfo.Name} 進入地圖 {toMapInfo.Name}");
+
+                    // 從藏身處進入異界地圖, 開啟地圖拾取紀錄
+                    if (fromMapInfo.Type == MapType.Hideout && toMapInfo.Type != MapType.Hideout)
+                    {
+                        _mapPickRecordManager.StartMapRecord(toMapInfo.Id, toMapInfo.Name, time);
+                    }
 
                     // 通知前端地圖切換
                     if (_webViewHub != null)
                     {
                         _ = Task.Run(async () =>
-                     {
-                         await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-                     });
+                        {
+                            await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+                        });
                     }
                 }
                 return;
@@ -172,10 +166,30 @@ public class GameLogProcessor
 
             // 4. 處理物品變更（區塊處理）
             _itemChangeProcessor.HandleLine(line);
+
+            // 0. 遊戲關閉
+            if (LineParser.CloseGame(line))
+            {
+                Log.Information("偵測到遊戲關閉, 結算關卡資料");
+                NotifyNewMapRecord();
+                return;
+            }
         }
         catch (Exception ex)
         {
             Log.Error(ex, "處理日誌行時發生錯誤，日誌內容: {Line}", line);
+        }
+
+        void NotifyNewMapRecord()
+        {
+            if (_webViewHub != null)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _webViewHub.NotifyNewMapRecordAsync();
+                    await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+                });
+            }
         }
     }
 
@@ -241,65 +255,44 @@ public class GameLogProcessor
     /// <summary>
     /// 獲取當前地圖資料（用於通知前端）
     /// </summary>
-    private object? GetCurrentMapData()
+    public MapRecordViewModel GetCurrentMapData()
     {
         try
         {
             var currentRecord = _mapPickRecordManager.GetCurrentMapRecord();
 
-            if (!_mapPickRecordManager.IsInNetherrealmMap)
+            if (!_mapPickRecordManager.IsInMap)
             {
                 // 避難所地圖
-                return new
-                {
-                    IsInMap = false,
-                    MapType = "Hideout",
-                    MapName = _mapPickRecordManager.CurrentMapName,
-                    RecordId = (Guid?)null,
-                    MapTicket = "",
-                    Compass = Array.Empty<string>(),
-                    Probe = "",
-                    StartTime = (DateTime?)null,
-                    Items = Array.Empty<object>()
-                };
+                return new MapRecordViewModel(false, MapType.Hideout, _mapPickRecordManager.CurrentMapName);
             }
             else if (currentRecord != null)
             {
                 // 異界地圖 - 即時從 MapInfoMapper 獲取最新名稱
-                return new
+                return new MapRecordViewModel
                 {
                     IsInMap = true,
-                    MapType = "Netherrealm",
-                    MapName = MapInfoMapper.GetMapName(currentRecord.Id),  // ✅ 即時獲取最新名稱
+                    MapType = MapType.Netherrealm.ToString(),
+                    MapName = MapInfoMapper.GetMapName(currentRecord.Id),  // ✅ 即時獲取最新名稱                    
                     RecordId = currentRecord.RecordId,
                     MapTicket = currentRecord.MapTicket,
-                    Compass = currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c)).ToArray(),
+                    Compass = [.. currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c))],
                     Probe = currentRecord.Probe,
                     StartTime = currentRecord.StartTime,
-                    Items = currentRecord.PickRecord?.Select(p => new
+                    Items = currentRecord.PickRecord?.Select(p => new PickedItemViewModel
                     {
-                        p.Value.BaseId,
-                        p.Value.Name,
-                        p.Value.Total,
+                        BaseId = p.Value.BaseId,
+                        Name = p.Value.Name,
+                        Total = p.Value.Total,
                         Slots = p.Value.Slots
-                    }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
+                    }).OrderByDescending(i => i.Total).ToArray() ?? []
                 };
             }
             else
             {
                 // 在異界地圖但沒有記錄
-                return new
-                {
-                    IsInMap = true,
-                    MapType = "Netherrealm",
-                    MapName = _mapPickRecordManager.CurrentMapName,
-                    RecordId = (Guid?)null,
-                    MapTicket = "",
-                    Compass = Array.Empty<string>(),
-                    Probe = "",
-                    StartTime = (DateTime?)null,
-                    Items = Array.Empty<object>()
-                };
+                Log.Warning(" 在異界地圖但沒有記錄");
+                return new MapRecordViewModel(true, MapType.Netherrealm, _mapPickRecordManager.CurrentMapName);
             }
         }
         catch (Exception ex)

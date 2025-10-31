@@ -1,15 +1,16 @@
-﻿using TorchLight.Statistics.Configuration;
+﻿using Serilog;
+using System.Text.RegularExpressions;
+using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.Models;
-using Serilog;
 
 namespace TorchLight.Statistics;
 
 /// <summary>
 /// 日誌行解析器 - 負責解析遊戲日誌的各種格式
 /// </summary>
-public partial class LineParser
+public partial class LineParser(Dictionary<int, ItemModel> itemTable)
 {
-    private readonly Dictionary<int, ItemModel> _itemTable;
+    private readonly Dictionary<int, ItemModel> _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
 
     /// <summary>
     /// 需要忽略的頁面ID（裝備欄與技能欄）
@@ -21,22 +22,69 @@ public partial class LineParser
     /// </summary>
     private bool _isInitializingBag = false;
 
-    public LineParser(Dictionary<int, ItemModel> itemTable)
-    {
-        _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
-    }
-
     #region 日誌行類型判斷
 
     /// <summary>
     /// 是否為登入開始的日誌
     /// </summary>
-    public bool IsLoginStart(string line) => line.Contains("LuaLoading@ LoadUILogic STT!");
+    public static bool IsLoginStart(string line) => line.Contains("LuaLoading@ LoadUILogic STT!");
 
     /// <summary>
     /// 是否為已開啟日誌的訊息
     /// </summary>
-    public bool IsLogOpenedMessage(string line) => line.Contains("MsgMgr@:Show MsgValue = 已開啟日誌");
+    public static bool IsLogOpenedMessage(string line) => line.Contains("MsgMgr@:Show MsgValue = 已開啟日誌");
+
+    /// <summary>
+    /// 是否為關閉遊戲的Log
+    /// </summary>
+    /// <param name="line"></param>
+    /// <returns></returns>
+    public static bool CloseGame(string line) => line.Contains("LifeCycle@:TorchLight-GameDestroy");
+
+    /// <summary>
+    /// 是不是開啟新地圖的Log
+    /// </summary>
+    /// <param name="line"></param>
+    /// <param name="datetime"></param>
+    /// <returns></returns>
+    public static bool OpenMap(string line, out DateTime datetime)
+    {
+        if (line.Contains("----Socket RecvMessage STT----Spv3Open----"))
+        {
+            var match = LineRegex.GetDateTimeValue().Match(line);
+            if (match.Success)
+            {
+                Log.Debug("開始開新圖");
+                datetime = ParseUnrealDateTime(match.Groups[1].Value);
+                return true;
+            }
+        }
+
+        datetime = DateTime.MinValue;
+        return false;
+    }
+
+    /// <summary>
+    /// 檢查是否為地圖 Token 行
+    /// </summary>
+    /// <param name="line"></param>
+    /// <param name="openMapFlag"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
+    public static bool IsTokenLine(string line, out string token, bool openMapFlag = false)
+    {
+        if (openMapFlag && line.Contains("TokenKey"))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                token = match.Groups[1].Value;
+                return true;
+            }
+        }
+        token = string.Empty;
+        return false;
+    }
 
     /// <summary>
     /// 是否為初始化完成的日誌（已廢棄，改用 CheckBagInitializationState）
@@ -106,7 +154,7 @@ public partial class LineParser
     /// <summary>
     /// 是否為地圖切換的日誌
     /// </summary>
-    public bool IsMoveMap(string line) => line.Contains("PageApplyBase@ _UpdateGameEnd: LastSceneName = World'/Game/Art/Maps/");
+    public static bool IsMoveMap(string line) => line.Contains("PageApplyBase@ _UpdateGameEnd: LastSceneName = World'/Game/Art/Maps/");
 
     /// <summary>
     /// 重置初始化狀態（登入時使用）
@@ -124,7 +172,7 @@ public partial class LineParser
     /// 解析地圖切換資料
     /// </summary>
     /// <returns>時間、來源地圖、目標地圖、是否成功</returns>
-    public (DateTime time, string fromPath, string toPath, bool success) GetMapPathData(string line)
+    public static (DateTime time, string fromPath, string toPath, bool success) GetMapPathData(string line)
     {
         var match = LineRegex.MapLine().Match(line);
         if (!match.Success)
@@ -164,7 +212,7 @@ public partial class LineParser
             Name = itemName
         };
     }
-    
+
     #endregion
 
     #region 輔助方法
@@ -199,7 +247,7 @@ public partial class LineParser
         var valueEnd = line.IndexOf(' ', valueStart);
         if (valueEnd == -1) valueEnd = line.Length;
 
-        var pageIdStr = line.Substring(valueStart, valueEnd - valueStart);
+        var pageIdStr = line[valueStart..valueEnd];
         if (int.TryParse(pageIdStr, out var pageId))
         {
             return _ignorePageIds.Contains(pageId);

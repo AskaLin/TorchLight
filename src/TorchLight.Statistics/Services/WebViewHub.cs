@@ -1,6 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using System.Text.Json;
 using Serilog;
+using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
 
@@ -9,8 +10,8 @@ namespace TorchLight.Statistics.Services;
 /// </summary>
 public class WebViewHub
 {
-    private CoreWebView2? _coreWebView2;
-    private Control? _control;
+    private CoreWebView2 _coreWebView2;
+    private Control _control;
     private bool _isInitialized = false;
     private readonly JsonSerializerOptions _jsonOpt = new()
     {
@@ -32,7 +33,7 @@ public class WebViewHub
     /// <summary>
     /// 發送訊息到前端
     /// </summary>
-    public async Task SendMessageAsync(string eventName, object? data = null)
+    public async Task SendMessageAsync(string eventName, object data = null)
     {
         if (!_isInitialized || _coreWebView2 == null || _control == null)
         {
@@ -120,7 +121,7 @@ public class WebViewHub
     /// <summary>
     /// 通知前端：當前地圖資訊更新
     /// </summary>
-    public Task NotifyCurrentMapUpdateAsync(object? mapData)
+    public Task NotifyCurrentMapUpdateAsync(MapRecordViewModel mapData)
     {
         return SendMessageAsync("currentMapUpdate", mapData);
     }

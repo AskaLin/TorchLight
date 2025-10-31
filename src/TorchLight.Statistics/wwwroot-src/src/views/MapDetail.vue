@@ -12,25 +12,21 @@
 
                 <div class="detail-section">
                     <h3>基本資訊</h3>
-                    <div class="info-grid">
+                    <div class="info-grid">                        
                         <div class="info-item">
-                            <span class="label">地圖ID:</span>
+                            <span class="label">地圖ID：</span>
                             <span class="value">{{ detail.id }}</span>
                         </div>
                         <div class="info-item">
-                            <span class="label">Token:</span>
-                            <span class="value">{{ detail.token }}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="label">開始時間:</span>
+                            <span class="label">開始時間：</span>
                             <span class="value">{{ formatDateTime(detail.startTime) }}</span>
                         </div>
                         <div class="info-item">
-                            <span class="label">結束時間:</span>
+                            <span class="label">結束時間：</span>
                             <span class="value">{{ formatDateTime(detail.endTime) }}</span>
                         </div>
                         <div class="info-item">
-                            <span class="label">用時:</span>
+                            <span class="label">用時：</span>
                             <span class="value">{{ detail.useTime }}</span>
                         </div>
                     </div>
@@ -103,7 +99,8 @@
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
-            second: '2-digit'
+            second: '2-digit',
+            hour12: false, // 👈 關鍵：使用 24 小時制
         })
     }
 </script>
