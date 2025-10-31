@@ -66,7 +66,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     }
 
     private static MapRecordDetail GetMapRecord(MapRecordModel model)
-    {        
+    {
         return new MapRecordDetail
         {
             RecordId = model.RecordId,
@@ -86,7 +86,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 p.Value.Name,
                 p.Value.Total,
                 p.Value.Slots
-            }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()          
+            }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
         };
     }
 
@@ -590,6 +590,55 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         {
             Log.Error(ex, "刪除拾取統計項目失敗");
             return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 手動結算當前地圖（立即結束當前地圖記錄）
+    /// </summary>
+    public string SettleCurrentMap()
+    {
+        try
+        {
+            if (!_mapPickRecordManager.IsInMap)
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    success = false,
+                    message = "當前未在異界地圖中"
+                }, _ops);
+            }
+
+            var currentMapName = _mapPickRecordManager.CurrentMapName;
+            var endTime = DateTime.Now;
+
+            // 結束當前地圖記錄
+            _mapPickRecordManager.EndMapRecord(endTime);
+
+            Log.Information("手動結算地圖: {MapName} 於 {Time}", currentMapName, endTime.ToString("yyyy/MM/dd HH:mm:ss"));
+
+            // 通知前端更新當前地圖資訊
+            _mainWindow.Invoke(async () =>
+            {
+                await _mainWindow.NotifyBagSyncAsync();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = $"地圖「{currentMapName}」已結算完成",
+                mapName = currentMapName,
+                endTime
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "手動結算地圖失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"結算失敗: {ex.Message}"
+            }, _ops);
         }
     }
 
