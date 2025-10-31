@@ -1,0 +1,40 @@
+    /// <summary>
+    /// ?? 更新物品的 Like 值 (0-6 循環)
+    /// </summary>
+    public string UpdateItemLike(int itemId)
+    {
+      try
+        {
+         var allItems = ItemInfoMapper.GetAllItemConfigs();
+  var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
+
+        if (existingItem != null)
+ {
+        // Like 值循環：0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 0
+          existingItem.Like = (existingItem.Like + 1) % 7;
+
+    // 儲存回 ItemInfo.json
+         var success = ItemInfoMapper.SaveToJson();
+
+                return JsonSerializer.Serialize(new
+    {
+    success,
+          like = existingItem.Like,
+       message = success ? $"已更新為 {existingItem.Like} 星" : "更新失敗"
+      }, _ops);
+            }
+            else
+    {
+    return JsonSerializer.Serialize(new
+ {
+           success = false,
+           message = "找不到指定的物品ID"
+         }, _ops);
+            }
+        }
+        catch (Exception ex)
+    {
+       Log.Error(ex, "更新物品 Like 失敗");
+            return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
+      }
+    }

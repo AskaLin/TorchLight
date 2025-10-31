@@ -2,13 +2,13 @@
   <div class="current-map-info" v-if="mapStore.currentMapInfo.isInMap || mapStore.currentMapInfo.mapName">
     <h3 class="section-title">
       <span class="title-icon">🗺️</span>
- 當前地圖資訊
+      當前地圖資訊
     </h3>
 
     <!-- 避難所地圖 - 只顯示地圖名稱 -->
     <div v-if="mapStore.currentMapInfo.mapType === 'Hideout'" class="hideout-info">
       <div class="map-name-card">
-      <span class="map-label">地圖名稱</span>
+        <span class="map-label">地圖名稱</span>
         <span class="map-value">{{ mapStore.currentMapInfo.mapName || '避難所' }}</span>
       </div>
     </div>
@@ -28,48 +28,48 @@
       <div class="map-materials">
         <!-- 門票 -->
         <div class="material-item" v-if="mapStore.currentMapInfo.mapTicket">
-    <div class="material-content">
-   <div class="material-header">
-        <span class="material-icon">🎟️</span>
-       <span class="material-label">門票</span>
-       </div>
-          <span class="material-value">{{ mapStore.currentMapInfo.mapTicket }}</span>
+          <div class="material-content">
+            <div class="material-header">
+              <span class="material-icon">🎟️</span>
+              <span class="material-label">門票</span>
+            </div>
+            <span class="material-value">{{ mapStore.currentMapInfo.mapTicket }}</span>
           </div>
-   </div>
+        </div>
 
         <!-- 羅盤 -->
         <div class="material-item" v-if="compassList.length > 0">
-   <div class="material-content">
-     <div class="material-header">
-              <span class="material-icon">🧭</span>
-      <span class="material-label">羅盤</span>
-          </div>
-     <div class="compass-list">
-   <span v-for="(compass, index) in compassList" :key="index" class="compass-item">
-   {{ removeLastTwoChars(compass) }}
-   </span>
-  </div>
-     </div>
-        </div>
-
-    <!-- 探針 -->
-        <div class="material-item" v-if="mapStore.currentMapInfo.probe">
-       <div class="material-content">
+          <div class="material-content">
             <div class="material-header">
-       <span class="material-icon">📍</span>
-       <span class="material-label">探針</span>
-      </div>
+              <span class="material-icon">🧭</span>
+              <span class="material-label">羅盤</span>
+            </div>
+            <div class="compass-list">
+              <span v-for="(compass, index) in compassList" :key="index" class="compass-item">
+                {{ removeLastTwoChars(compass) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 探針 -->
+        <div class="material-item" v-if="mapStore.currentMapInfo.probe">
+          <div class="material-content">
+            <div class="material-header">
+              <span class="material-icon">📍</span>
+              <span class="material-label">探針</span>
+            </div>
             <span class="material-value">{{ mapStore.currentMapInfo.probe }}</span>
-   </div>
+          </div>
         </div>
       </div>
 
- <!-- 拾取物品資訊 -->
+      <!-- 拾取物品資訊 -->
       <div class="picked-items" v-if="items.length > 0">
-   <h4 class="items-title">拾取物品</h4>
-     <div class="items-grid">
+        <h4 class="items-title">拾取物品</h4>
+        <div class="items-grid">
           <div v-for="item in items" :key="item.baseId" class="item-card">
-       <div class="item-name">{{ item.name }}</div>
+            <div class="item-name">{{ item.name }}</div>
             <div class="item-quantity">x{{ item.total }}</div>
           </div>
         </div>
@@ -78,9 +78,9 @@
       <!-- 無拾取物品提示 -->
       <div v-else class="no-items">
         <span class="no-items-icon">📦</span>
-<span>尚未拾取任何物品</span>
+        <span>尚未拾取任何物品</span>
       </div>
- </div>
+    </div>
   </div>
 
   <!-- 未在地圖中 -->
@@ -106,9 +106,9 @@
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-   minute: '2-digit',
-   second: '2-digit',
- hour12: false,
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
     })
   })
 
@@ -134,7 +134,7 @@
   .current-map-info {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
- border-radius: 12px;
+    border-radius: 12px;
     padding: 25px;
     margin-bottom: 20px;
   }
@@ -144,7 +144,7 @@
     align-items: center;
     gap: 10px;
     margin: 0 0 20px 0;
-  color: white;
+    color: white;
     font-size: 1.5rem;
   }
 
@@ -154,7 +154,7 @@
 
   /* 避難所地圖樣式 */
   .hideout-info {
-padding: 10px 0;
+    padding: 10px 0;
   }
 
   .map-name-card {
@@ -279,7 +279,7 @@ padding: 10px 0;
   /* 羅盤列表 - 改為橫向並列，最多 4 個 */
   .compass-list {
     display: flex;
-  flex-wrap: wrap;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 6px;
     width: 100%;
@@ -290,7 +290,7 @@ padding: 10px 0;
     padding: 6px 12px;
     background: rgba(33, 150, 243, 0.3);
     border: 1px solid rgba(33, 150, 243, 0.5);
-  border-radius: 6px;
+    border-radius: 6px;
     color: white;
     font-size: 0.9rem;
     text-align: center;
@@ -314,12 +314,12 @@ padding: 10px 0;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
-}
+  }
 
   .item-card {
     display: flex;
     flex-direction: column;
-  align-items: center;
+    align-items: center;
     gap: 8px;
     padding: 15px 10px;
     background: rgba(76, 175, 80, 0.15);
@@ -353,7 +353,7 @@ padding: 10px 0;
     gap: 10px;
     padding: 30px;
     color: rgba(255, 255, 255, 0.4);
-font-size: 1rem;
+    font-size: 1rem;
   }
 
   .no-items-icon {
@@ -380,7 +380,7 @@ font-size: 1rem;
 
   /* 響應式設計 */
   @media (max-width: 1200px) {
-  .items-grid {
+    .items-grid {
       grid-template-columns: repeat(3, 1fr);
     }
   }
@@ -399,10 +399,10 @@ font-size: 1rem;
   @media (max-width: 600px) {
     .items-grid {
       grid-template-columns: 1fr;
- }
+    }
 
     /* 材料區塊在小螢幕改為單列 */
-  .map-materials {
+    .map-materials {
       grid-template-columns: 1fr;
     }
 

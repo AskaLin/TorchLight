@@ -167,7 +167,7 @@ public class GameLogProcessor
                     // 從藏身處進入異界地圖, 開啟地圖拾取紀錄
                     if (fromMapInfo.Type == MapType.Hideout && toMapInfo.Type != MapType.Hideout)
                     {
-                        _mapPickRecordManager.StartMapRecord(toMapInfo.Id, toMapInfo.Name, time);
+                        _mapPickRecordManager.StartMapRecord(toMapInfo, time);
                     }
 
                     // 通知前端地圖切換
@@ -286,15 +286,23 @@ public class GameLogProcessor
             }
             else if (currentRecord != null)
             {
-                // 異界地圖 - 即時從 MapInfoMapper 獲取最新名稱
+                // ✅ 即時從 MapInfoMapper 獲取最新的地圖名稱
+                var latestMapName = MapInfoMapper.GetMapName(currentRecord.Id);
+                var mapInfo = new MapInfo()
+                {
+                    Id = currentRecord.Id,
+                    Name = latestMapName,
+                    Type = currentRecord.Type
+                };
+
                 return new MapRecordViewModel
                 {
                     IsInMap = true,
                     MapType = MapType.Netherrealm.ToString(),
-                    MapName = MapInfoMapper.GetMapName(currentRecord.Id),  // ✅ 即時獲取最新名稱                    
+                    MapName = mapInfo.RealName(currentRecord.MapTicketId),
                     RecordId = currentRecord.RecordId,
                     MapTicket = currentRecord.MapTicket,
-                    Compass = [.. currentRecord.Compass.Where(c => !string.IsNullOrEmpty(c))],
+                    Compass = currentRecord.Compass,
                     Probe = currentRecord.Probe,
                     StartTime = currentRecord.StartTime,
                     Items = currentRecord.PickRecord?.Select(p => new PickedItemViewModel
@@ -309,7 +317,7 @@ public class GameLogProcessor
             else
             {
                 // 在異界地圖但沒有記錄
-                Log.Warning(" 在異界地圖但沒有記錄");
+                Log.Warning("在異界地圖但沒有記錄");
                 return new MapRecordViewModel(true, MapType.Netherrealm, _mapPickRecordManager.CurrentMapName);
             }
         }

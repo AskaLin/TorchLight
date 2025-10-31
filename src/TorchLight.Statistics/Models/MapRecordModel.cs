@@ -5,17 +5,12 @@ namespace TorchLight.Statistics.Models
     public class MapRecordModel
     {
         /// <summary>
-        /// 唯一識別碼
-        /// </summary>
-        // public Guid RecordId { get; set; } = Guid.NewGuid();
-
-        /// <summary>
-        /// 地圖ID
+        /// 地圖ID(GeBuLinCunLuo01)
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// 地圖Token
+        /// 地圖Token(1465431321654)
         /// </summary>
         public string RecordId { get; set; }
 
@@ -29,12 +24,12 @@ namespace TorchLight.Statistics.Models
         /// 使用門票
         /// </summary>
         public string MapTicket { get; set; }
-        
-        private readonly string[] _compass = new string[4];
+        public int MapTicketId { get; set; }
+
         /// <summary>
         /// 使用羅盤
         /// </summary>
-        public string[] Compass => _compass;
+        public string[] Compass { get; set; }
 
         /// <summary>
         /// 使用探針
@@ -45,7 +40,7 @@ namespace TorchLight.Statistics.Models
         /// 主要是紀錄 BaseId 與數量, PickedItemDataModel 後續看要不要拿來取得價格
         /// </summary>
         public Dictionary<int, PickedItemDataModel> PickRecord { get; set; }
-        
+
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
 

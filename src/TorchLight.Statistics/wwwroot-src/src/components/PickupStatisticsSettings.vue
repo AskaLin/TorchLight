@@ -7,24 +7,42 @@
       </button>
     </div>
 
-    <!-- 通知訊息 -->
-    <div v-if="notification.show" :class="['notification', notification.type]">
-      {{ notification.message }}
-    </div>
+    <!-- ✅ 通知訊息 - 改為浮動式 -->
+    <Transition name="notification-slide">
+      <div v-if="notification.show"
+           :class="['notification-float', notification.type]">
+        {{ notification.message }}
+      </div>
+    </Transition>
 
-    <!-- 載入中 -->
-    <div v-if="loading" class="loading">載入中...</div>
+    <!-- ✅ 載入中 - 改為全螢幕 Overlay -->
+    <Transition name="fade">
+      <div v-if="loading" class="loading-overlay">
+        <div class="loading-spinner">
+     <div class="spinner"></div>
+          <p>載入中...</p>
+        </div>
+      </div>
+    </Transition>
 
     <!-- 統計設定列表 -->
-    <CollapsibleList v-else :sections="formattedSections">
+    <CollapsibleList :sections="formattedSections"
+                     :key="'collapsible-list'">
       <!-- 項目卡片 slot -->
       <template #item="{ items }">
         <div v-for="item in items"
              :key="item.itemId"
-             :class="['statistics-card', { disabled: !item.enabled }]"
-             @click="toggleItemEnabled(item)">
+             :class="['statistics-card', { disabled: !item.enabled }]" @click="toggleItemEnabled(item)">
           <div class="card-header">
-            <div class="item-name">{{ item.itemName }}</div>
+            <div class="item-info">
+              <!-- ✅ 星星圖示 - 使用 computed 方法計算路徑 -->
+              <img :src="getStarIcon(item)"
+                   alt="star"
+                   class="item-star-icon"
+                   @click.stop="updateItemLike(item)"
+                   :style="{ opacity: item.enabled ? 1 : 0.3, cursor: 'pointer' }" />
+              <div class="item-name">{{ item.itemName }}</div>
+            </div>
             <div class="item-status-icon">
               {{ item.enabled ? '✓' : '✗' }}
             </div>
@@ -167,6 +185,14 @@
     return type ? type.name : itemType
   }
 
+  // ✅ 新增：計算星星圖示路徑
+  const getStarIcon = (item) => {
+    const like = item.like ?? 0
+    // 確保 like 值在 0-6 範圍內
+    const safelike = Math.max(0, Math.min(6, like))
+    return `/assets/icons/star-${safelike}.svg`
+  }
+
   // 根據選擇的 PageId 過濾可用的 ItemType
   const filteredItemTypes = computed(() => {
     const pageId = editingItem.value.pageId
@@ -198,22 +224,48 @@
 
     try {
       const result = await apiCall(
-        'SavePickupStatisticsItem',
-        item.itemId,
+ 'SavePickupStatisticsItem',
+     item.itemId,
         item.itemName,
-        item.pageId,
+ item.pageId,
         newEnabled,
-        item.itemType
+    item.itemType
       )
 
       if (result.success) {
         item.enabled = newEnabled
-        showNotification('success', newEnabled ? '已啟用' : '已停用')
+        // ✅ 移除通知，直接更新狀態
       } else {
-        showNotification('error', result.message)
+ // ❌ 只在失敗時顯示錯誤
+     showNotification('error', result.message)
       }
     } catch (err) {
       showNotification('error', '更新狀態失敗: ' + err.message)
+    }
+  }
+
+  // ✅ 新增：更新物品的 Like 值
+  const updateItemLike = async (item) => {
+    try {
+  const result = await apiCall('UpdateItemLike', item.itemId)
+
+      if (result.success) {
+  // ✅ 直接更新物件的屬性，避免替換整個物件
+        // 使用 Vue 3 的響應式更新，不會觸發整個列表重新渲染
+    item.like = result.like
+
+        // ✅ 如果後端也返回 enabled 狀態，同時更新
+   if (result.hasOwnProperty('enabled')) {
+   item.enabled = result.enabled
+        }
+
+        // ✅ 移除通知，直接更新星星
+ } else {
+        // ❌ 只在失敗時顯示錯誤
+    showNotification('error', result.message)
+      }
+    } catch (err) {
+      showNotification('error', '更新星星失敗: ' + err.message)
     }
   }
 
@@ -327,7 +379,7 @@
     }
   }
 
-  // 關閉對話框
+  // 閉對話框
   const closeDialog = () => {
     showAddDialog.value = false
     isEditing.value = false
@@ -408,44 +460,118 @@
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 
-  /* 通知 */
-  .notification {
-    padding: 15px 20px;
+  /* 通知訊息 */
+  /* ✅ 浮動通知 - 固定在頂部中央 */
+  .notification-float {
+  position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 15px 30px;
     border-radius: 8px;
-    margin-bottom: 20px;
-    font-weight: 500;
-    animation: slideIn 0.3s ease-out;
+  font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    min-width: 300px;
+    max-width: 500px;
+    text-align: center;
   }
 
-  @keyframes slideIn {
+  .notification-float.success {
+    background: rgba(76, 175, 80, 0.95);
+    border: 1px solid #4caf50;
+    color: white;
+  }
+
+  .notification-float.error {
+    background: rgba(244, 67, 54, 0.95);
+    border: 1px solid #f44336;
+    color: white;
+  }
+
+  /* ✅ 通知動畫 - 從上方滑入 */
+  .notification-slide-enter-active {
+    animation: slideInDown 0.3s ease-out;
+  }
+
+  .notification-slide-leave-active {
+    animation: slideOutUp 0.3s ease-in;
+  }
+
+  @keyframes slideInDown {
     from {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateX(-50%) translateY(-20px);
     }
-
-    to {
+ to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0);
     }
   }
 
-  .notification.success {
-    background: rgba(76, 175, 80, 0.2);
-    border: 1px solid #4caf50;
-    color: #4caf50;
-  }
-
-  .notification.error {
-    background: rgba(244, 67, 54, 0.2);
-    border: 1px solid #f44336;
-    color: #f44336;
+  @keyframes slideOutUp {
+    from {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px);
+    }
   }
 
   /* 載入中 */
-  .loading {
+  /* ✅ 載入中 - 全螢幕 Overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+  }
+
+  .loading-spinner {
     text-align: center;
-    padding: 60px;
-    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .spinner {
+    width: 50px;
+ height: 50px;
+    margin: 0 auto 20px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loading-spinner p {
+    color: white;
+ font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  /* ✅ Fade 動畫 */
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.3s ease;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
   }
 
   /* 統計卡片 */
@@ -461,7 +587,7 @@
     flex-direction: column;
     gap: 12px;
   }
-
+  
     .statistics-card:hover {
       border-color: rgba(255, 255, 255, 0.3);
       transform: translateY(-5px);
@@ -485,6 +611,41 @@
     gap: 10px;
     padding-bottom: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* ✅ 新增：項目資訊容器 */
+  .item-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  /* ✅ 新增：星星圖示樣式 */
+  .item-star-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .statistics-card:not(.disabled) .item-star-icon {
+    color: #ffd700;
+  }
+
+  .statistics-card.disabled .item-star-icon {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .item-star-icon:hover {
+    transform: scale(1.2) rotate(20deg);
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  }
+
+  .item-star-icon:active {
+    transform: scale(1.1) rotate(10deg);
   }
 
   .item-name {

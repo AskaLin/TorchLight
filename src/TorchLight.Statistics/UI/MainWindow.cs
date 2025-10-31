@@ -319,7 +319,16 @@ public class MainWindow : Form
         if (_isInitialized)
         {
             await _webViewHub.NotifyMapConfigUpdatedAsync(success, message);
-            Log.Information("地圖設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
+     
+            // ✅ 如果玩家正在地圖中，立即更新當前地圖資訊
+            if (success && _mapPickRecordManager.IsInMap)
+            {
+                var currentMapData = _gameLogProcessor.GetCurrentMapData();
+          await _webViewHub.NotifyCurrentMapUpdateAsync(currentMapData);
+    Log.Information("當前地圖資訊已更新");
+}
+            
+      Log.Information("地圖設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
         }
     }
 

@@ -25,27 +25,5 @@ public class MapConfigItem
     /// </summary>
     [JsonPropertyName("type")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public MapType Type { get; set; }
-
-    //// 向後兼容的屬性
-    //[JsonIgnore]
-    //public string MapId
-    //{
-    //    get => Id;
-    //    set => Id = value;
-    //}
-
-    //[JsonIgnore]
-    //public string MapName
-    //{
-    //    get => Name;
-    //    set => Name = value;
-    //}
-
-    //[JsonIgnore]
-    //public string MapType
-    //{
-    //    get => Type;
-    //    set => Type = value;
-    //}
+    public MapType Type { get; set; }   
 }

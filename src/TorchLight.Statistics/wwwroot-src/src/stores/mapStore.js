@@ -42,7 +42,7 @@ export const useMapStore = defineStore('map', () => {
 
   // 處理來自後端的訊息
   const handleBackendMessage = (message) => {
-    console.log('Received message from backend:', message)
+    // console.log('Received message from backend:', message)
 
     switch (message.type) {
       case 'bagSyncStatus':
@@ -57,7 +57,7 @@ export const useMapStore = defineStore('map', () => {
         if (message.data) {
           logFileSizeBytes.value = message.data.fileSizeBytes || 0
           logFileSize.value = message.data.formattedSize || '待機中'
-          console.log('Log file size updated:', logFileSize.value)
+          // console.log('Log file size updated:', logFileSize.value)
         }
         break
 
@@ -98,6 +98,7 @@ export const useMapStore = defineStore('map', () => {
     error.value = null
     try {
       const data = await apiCall('GetMapRecords')
+      console.log("refreshRecords", data)
       mapRecords.value = data
     } catch (err) {
       error.value = err.message

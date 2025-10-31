@@ -9,6 +9,7 @@
         <router-link to="/" class="nav-link">首頁</router-link>
         <router-link to="/maps" class="nav-link">地圖記錄</router-link>
         <router-link to="/statistics" class="nav-link">統計</router-link>
+        <router-link to="/history" class="nav-link">📚 歷史紀錄</router-link>
         <router-link to="/settings" class="nav-link">⚙️ 設定</router-link>
       </nav>
 

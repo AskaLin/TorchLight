@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, watch, onMounted } from 'vue'
 
   /**
    * Props 定義
@@ -74,7 +74,7 @@
    *   - key: 唯一識別碼
    *   - name: 顯示名稱（包含 emoji）
    *   - totalCount: 總項目數
-   *   - items: 項目陣列（如果沒有子分類）
+   * - items: 項目陣列（如果沒有子分類）
    *   - subcategories: 子分類陣列（可選）
    *     - key: 子分類唯一識別碼
    *     - name: 子分類顯示名稱
@@ -82,17 +82,45 @@
    */
   const props = defineProps({
     sections: {
-      type: Array,
+   type: Array,
       required: true,
       default: () => []
     }
   })
 
-  // 大分類折疊狀態
-  const collapsedSections = ref({})
+  // ✅ 從 localStorage 載入狀態
+  const loadState = (key, defaultValue = {}) => {
+    try {
+      const saved = localStorage.getItem(key)
+      return saved ? JSON.parse(saved) : defaultValue
+    } catch {
+      return defaultValue
+    }
+  }
 
-  // 小分類折疊狀態
-  const collapsedSubcategories = ref({})
+  // ✅ 儲存狀態到 localStorage
+  const saveState = (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+  } catch (e) {
+      console.warn('無法儲存展開狀態:', e)
+    }
+  }
+
+  // 大分類折疊狀態（從 localStorage 載入）
+  const collapsedSections = ref(loadState('collapsedSections', {}))
+
+  // 小分類折疊狀態（從 localStorage 載入）
+  const collapsedSubcategories = ref(loadState('collapsedSubcategories', {}))
+
+  // ✅ 監聽狀態變化並自動儲存
+  watch(collapsedSections, (newValue) => {
+    saveState('collapsedSections', newValue)
+  }, { deep: true })
+
+  watch(collapsedSubcategories, (newValue) => {
+    saveState('collapsedSubcategories', newValue)
+  }, { deep: true })
 
   // 切換大分類折疊狀態
   const toggleCollapse = (key) => {

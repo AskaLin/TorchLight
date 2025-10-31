@@ -67,11 +67,20 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
 
     private static MapRecordDetail GetMapRecord(MapRecordModel model)
     {
+        // ✅ 即時從 MapInfoMapper 獲取最新的地圖名稱
+        var latestMapName = MapInfoMapper.GetMapName(model.Id);
+        var mapInfo = new MapInfo()
+        {
+            Id = model.Id,
+            Name = latestMapName,
+            Type = model.Type
+        };
+
         return new MapRecordDetail
         {
             RecordId = model.RecordId,
             Id = model.Id,
-            Name = MapInfoMapper.GetMapName(model.Id), // 即時從 MapMapper 取得最新名稱
+            Name = mapInfo.RealName(model.MapTicketId),  // ✅ 使用最新的地圖名稱
             MapTicket = model.MapTicket,
             Compass = [.. model.Compass.Where(c => !string.IsNullOrEmpty(c))],
             Probe = model.Probe,
@@ -133,6 +142,48 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             return JsonSerializer.Serialize(new { error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// 更新物品的 Like 值 (0-6 循環)
+    /// </summary>
+    public string UpdateItemLike(int itemId)
+    {
+        try
+        {
+            var allItems = ItemInfoMapper.GetAllItemConfigs();
+            var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
+
+            if (existingItem != null)
+            {
+                // Like 值循環：0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 0
+                existingItem.Like = (existingItem.Like + 1) % 7;
+
+                // 儲存回 ItemInfo.json
+                var success = ItemInfoMapper.SaveToJson();
+
+                return JsonSerializer.Serialize(new
+                {
+                    success,
+                    like = existingItem.Like,
+                    message = success ? $"已更新為 {existingItem.Like} 星" : "更新失敗"
+                }, _ops);
+            }
+            else
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    success = false,
+                    message = "找不到指定的物品ID"
+                }, _ops);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "更新物品 Like 失敗");
+            return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
+        }
+    }
+
 
     /// <summary>
     /// 清除所有記錄
@@ -462,45 +513,46 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            var allItems = ItemInfoMapper.GetAllItemConfigs();
+     var allItems = ItemInfoMapper.GetAllItemConfigs();
 
             // 按 PageIdType 和 ItemType 雙層分組
-            var configsByPageId = new Dictionary<int, Dictionary<string, List<object>>>();
+    var configsByPageId = new Dictionary<int, Dictionary<string, List<object>>>();
 
-            foreach (var item in allItems)
-            {
+          foreach (var item in allItems)
+          {
                 var pageId = (int)item.PageIdType;
-                var itemType = item.Type.ToString();
+var itemType = item.Type.ToString();
 
-                if (!configsByPageId.TryGetValue(pageId, out Dictionary<string, List<object>> value))
-                {
-                    value = [];
-                    configsByPageId[pageId] = value;
-                }
+         if (!configsByPageId.TryGetValue(pageId, out Dictionary<string, List<object>> value))
+   {
+     value = [];
+             configsByPageId[pageId] = value;
+    }
 
-                if (!value.TryGetValue(itemType, out List<object> value1))
-                {
-                    value1 = [];
-                    value[itemType] = value1;
-                }
+             if (!value.TryGetValue(itemType, out List<object> value1))
+    {
+      value1 = [];
+          value[itemType] = value1;
+       }
 
-                value1.Add(new
-                {
-                    ItemId = item.Id,
-                    ItemName = item.Name,
-                    PageId = pageId,
-                    ItemType = itemType,
-                    Enabled = item.Enable
-                });
-            }
+      value1.Add(new
+  {
+           ItemId = item.Id,
+      ItemName = item.Name,
+    PageId = pageId,
+          ItemType = itemType,
+        Enabled = item.Enable,
+      Like = item.Like  // ✅ 新增 Like 屬性
+    });
+       }
 
             return JsonSerializer.Serialize(configsByPageId, _ops);
         }
         catch (Exception ex)
-        {
-            Log.Error(ex, "獲取拾取統計設定失敗");
-            return JsonSerializer.Serialize(new { error = ex.Message });
-        }
+ {
+      Log.Error(ex, "獲取拾取統計設定失敗");
+         return JsonSerializer.Serialize(new { error = ex.Message });
+}
     }
 
     /// <summary>
@@ -728,6 +780,89 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 success = false,
                 message = $"切換失敗: {ex.Message}"
             }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 獲取所有歷史記錄檔案列表
+    /// </summary>
+    public string GetHistoryRecords()
+    {
+        try
+        {
+            var files = MapPickRecordManager.GetSavedRecordFiles();
+            var records = new List<object>();
+
+            foreach (var file in files)
+            {
+                var savedRecord = MapPickRecordManager.LoadSavedRecord(file);
+                if (savedRecord == null || savedRecord.Summary == null)
+                    continue;
+
+                var fileName = Path.GetFileName(file);
+                records.Add(new
+                {
+                    fileName,
+                    filePath = file,
+                    recordTime = savedRecord.Summary.TotalMaps > 0 && savedRecord.Records.Count > 0
+              ? savedRecord.Records[0].StartTime.ToString("MM/dd HH:mm")
+                  : "未知",
+                    totalMaps = savedRecord.Summary.TotalMaps,
+                    totalItems = savedRecord.Summary.TotalItems,
+                    totalQuantity = savedRecord.Summary.TotalQuantity,
+                    totalPlayTime = savedRecord.Summary.TotalPlayTime,
+                    topItems = savedRecord.Summary.MostPickedItems.Take(10).ToArray(),
+                    savedTime = savedRecord.SavedTime
+                });
+            }
+
+            return JsonSerializer.Serialize(records, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取歷史記錄失敗");
+            return JsonSerializer.Serialize(new { error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// 🆕 獲取指定歷史記錄的詳細資料
+    /// </summary>
+    public string GetHistoryRecordDetail(string fileName)
+    {
+        try
+        {
+            Log.Information("📂 開始載入歷史記錄: {FileName}", fileName);
+
+            var savedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
+            Log.Debug("  - 存檔目錄: {Directory}", savedDirectory);
+
+            var filePath = Path.Combine(savedDirectory, fileName);
+            Log.Debug("  - 完整路徑: {FilePath}", filePath);
+
+            if (!File.Exists(filePath))
+            {
+                Log.Warning("❌ 檔案不存在: {FilePath}", filePath);
+                return JsonSerializer.Serialize(new { error = $"找不到檔案: {fileName}" }, _ops);
+            }
+
+            var savedRecord = MapPickRecordManager.LoadSavedRecord(filePath);
+            if (savedRecord == null)
+            {
+                Log.Warning("❌ 無法載入記錄: {FilePath}", filePath);
+                return JsonSerializer.Serialize(new { error = "無法讀取記錄檔案，可能檔案格式錯誤" }, _ops);
+            }
+
+            Log.Information("✅ 成功載入歷史記錄");
+            Log.Debug("  - 總地圖數: {TotalMaps}", savedRecord.Summary?.TotalMaps);
+            Log.Debug("  - 記錄數量: {RecordsCount}", savedRecord.Records?.Count);
+
+            return JsonSerializer.Serialize(savedRecord, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "💥 獲取歷史記錄詳情失敗: {FileName}", fileName);
+            return JsonSerializer.Serialize(new { error = $"載入失敗: {ex.Message}" }, _ops);
         }
     }
 

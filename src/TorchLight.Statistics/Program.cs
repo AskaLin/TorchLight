@@ -85,7 +85,7 @@ namespace TorchLight.Statistics
                 tail.Start();
 
                 //測試用, 讀取現有日誌內容 進行處理
-                //using FileStream fs = new("E:\\SideProjects\\UE_game-疊界4.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                //using FileStream fs = new("D:\\SideProjects\\UE_game-疊界4.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 //using StreamReader sr = new(fs, Encoding.UTF8);
                 //string line;
                 //while ((line = sr.ReadLine()) != null)
