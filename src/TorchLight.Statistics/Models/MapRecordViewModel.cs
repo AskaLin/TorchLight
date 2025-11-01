@@ -47,7 +47,7 @@ public class MapRecordViewModel
     /// <summary>
     /// 使用羅盤列表
     /// </summary>
-    public string[] Compass { get; set; } = [];
+    public List<string> Compass { get; set; } = [];
 
     /// <summary>
     /// 使用探針

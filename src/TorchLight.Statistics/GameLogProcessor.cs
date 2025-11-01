@@ -67,7 +67,7 @@ public class GameLogProcessor
         _fileTailWatcher = fileTailWatcher;
     }
 
-    private bool _openMapFlag = false;
+
     /// <summary>
     /// 處理遊戲日誌
     /// </summary>
@@ -82,7 +82,6 @@ public class GameLogProcessor
             // 開始開新圖, 結算舊圖
             if (LineParser.OpenMap(line, out var datetime))
             {
-                _openMapFlag = true;
                 _mapPickRecordManager.EndMapRecord(datetime);
                 // 通知前端：地圖結算完成，新記錄已產生
                 NotifyNewMapRecord();
@@ -90,13 +89,23 @@ public class GameLogProcessor
             }
 
             // 搭配開圖, 取得地圖 Token
-            if (LineParser.IsTokenLine(line, out string mapToken, _openMapFlag))
+            if (LineParser.IsTokenLine(line, out string mapToken, !_mapPickRecordManager.CurrentMapRecordInfoComplete()))
             {
                 _mapPickRecordManager.SetMapToken(mapToken);
-                _openMapFlag = false;
                 return;
             }
 
+            if (LineParser.IsCurrentLevelLine(line, out int mapLevel, _mapPickRecordManager.CurrentMapRecordInfoComplete()))
+            {
+                _mapPickRecordManager.SetMapLevel(mapLevel);
+                return;
+            }
+
+            if (LineParser.IsCurrentOpenMapIDLine(line, out int mapId, _mapPickRecordManager.CurrentMapRecordInfoComplete()))
+            {
+                _mapPickRecordManager.SetMapId(mapId);
+                return;
+            }
 
             // 0. 檢查 "已開啟日誌" 訊息
             if (LineParser.IsLogOpenedMessage(line))

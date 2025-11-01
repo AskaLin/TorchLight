@@ -16,25 +16,37 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
     private readonly Dictionary<int, ItemModel> _itemTable = itemTable;
 
-    // 暫存開圖材料
-    private ItemModel _pendingMapTicket = null;
-    private readonly List<string> _pendingCompasses = [];
-    private string _pendingProbe = string.Empty;
-    private int _pendingResonance = 0;
-
     // 🆕 存檔目錄
     private static readonly string SavedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
 
     public bool IsInMap { get; private set; }
     public string CurrentMapName { get; private set; } = string.Empty;
-    public string Token { get; private set; } = string.Empty;
+
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
 
     public void SetMapToken(string token)
     {
         Log.Debug("設定 Map Token {tok}", token);
-        Token = token;
+        _currentMapRecord.RecordId = token;
     }
+    public void SetMapId(int mapId)
+    {
+        Log.Debug("設定 Map ID {id}", mapId);
+        _currentMapRecord.MapId = mapId;
+
+        // 知道ID 就知道Name
+        // _currentMapRecord.Name = MapInfoMapper.GetMapNameById(mapId);
+    }
+    public void SetMapLevel(int mapLevel)
+    {
+        Log.Debug("設定 Map Level {level}", mapLevel);
+        _currentMapRecord.Level = mapLevel;
+    }
+    public bool CurrentMapRecordInfoComplete()
+    {
+        return _currentMapRecord.MapInfoComplete();
+    }
+
     /// <summary>
     /// 記錄開圖材料（從 Spv3Open 事件）
     /// </summary>
@@ -48,22 +60,23 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
             case ItemType.MapTicket:
             case ItemType.BossTicket:
             case ItemType.GameplayTicket:
-                _pendingMapTicket = item;
+                _currentMapRecord.MapTicket = item.Name;
+                _currentMapRecord.MapTicketId = item.ConfigBaseId;
                 Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
                 break;
 
             case ItemType.Compass:
-                _pendingCompasses.Add(item.Name);
-                Log.Debug("[開圖材料] 羅盤 #{Index}: {CompassName}", _pendingCompasses.Count, item.Name);
+                _currentMapRecord.Compass.Add(item.Name);
+                Log.Debug("[開圖材料] 羅盤 #{Index}: {CompassName}", _currentMapRecord.Compass.Count, item.Name);
                 break;
 
             case ItemType.Probe:
-                _pendingProbe = item.Name;
+                _currentMapRecord.Probe = item.Name;
                 Log.Debug("[開圖材料] 探針: {ProbeName}", item.Name);
                 break;
 
             case ItemType.Currency:
-                _pendingResonance = item.Num;
+                _currentMapRecord.Resonance = item.Num;
                 Log.Debug("[開圖材料] 迴響: {count}", item.Num);
                 break;
         }
@@ -73,22 +86,13 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// 開始記錄新地圖
     /// </summary>
     public void StartMapRecord(MapInfo map, DateTime startTime)
-    {        
-        var mapRealName = map.Type == MapType.Netherrealm ? map.RealName(_pendingMapTicket.ConfigBaseId) : map.Name;
+    {
+        var mapRealName = map.Type == MapType.Netherrealm ? map.RealName(_currentMapRecord.MapTicketId) : map.Name;
 
-        _currentMapRecord = new MapRecordModel
-        {
-            Id = map.Id,
-            Name = mapRealName,
-            StartTime = startTime,
-            MapTicket = _pendingMapTicket?.Name ?? string.Empty,
-            MapTicketId = _pendingMapTicket?.ConfigBaseId ?? 0,
-            Probe = _pendingProbe,
-            RecordId = Token,
-            Type = map.Type,
-            // 複製羅盤資料到陣列
-            Compass = [.. _pendingCompasses]
-        };
+        _currentMapRecord.Id = map.Id;
+        _currentMapRecord.Name = mapRealName;
+        _currentMapRecord.StartTime = startTime;
+        _currentMapRecord.Type = map.Type;
 
         _currentMapPickData = [];
         IsInMap = true;
@@ -96,21 +100,22 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
 
         Log.Information("{Time} 進入異界地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
 
-        if (_pendingMapTicket != null)
+        if (!string.IsNullOrEmpty(_currentMapRecord.MapTicket))
         {
-            Log.Information("  使用門票: {Ticket}", _pendingMapTicket.Name);
+            Log.Information("  使用門票: {Ticket}", _currentMapRecord.MapTicket);
         }
-        if (_pendingCompasses.Count > 0)
+        if (_currentMapRecord.Compass.Any())
         {
-            Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _pendingCompasses));
+            Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _currentMapRecord.Compass));
         }
-        if (!string.IsNullOrEmpty(_pendingProbe))
+        if (!string.IsNullOrEmpty(_currentMapRecord.Probe))
         {
-            Log.Information("  使用探針: {Probe}", _pendingProbe);
+            Log.Information("  使用探針: {Probe}", _currentMapRecord.Probe);
         }
-
-        // 清空暫存資料
-        ClearPendingMaterials();
+        if (_currentMapRecord.Resonance > 0)
+        {
+            Log.Information("  使用迴響: {Resonance}", _currentMapRecord.Resonance);
+        }        
     }
 
     /// <summary>
@@ -246,22 +251,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         _currentMapRecord = new();
         _currentMapPickData = [];
         IsInMap = false;
-        CurrentMapName = string.Empty;
-
-        ClearPendingMaterials();
-    }
-
-    /// <summary>
-    /// 清空暫存的開圖材料
-    /// </summary>
-    private void ClearPendingMaterials()
-    {
-        _pendingMapTicket = null;
-        _pendingCompasses.Clear();
-        _pendingProbe = string.Empty;
-        Token = string.Empty;
-        _pendingResonance = 0;
-    }
+        CurrentMapName = string.Empty;        
+    }  
 
     /// <summary>
     /// 顯示當前地圖的拾取記錄

@@ -49,6 +49,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// <returns></returns>
     public static bool OpenMap(string line, out DateTime datetime)
     {
+        datetime = DateTime.MinValue;
         if (line.Contains("----Socket RecvMessage STT----Spv3Open----"))
         {
             var match = LineRegex.GetDateTimeValue().Match(line);
@@ -58,9 +59,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 datetime = ParseUnrealDateTime(match.Groups[1].Value);
                 return true;
             }
-        }
-
-        datetime = DateTime.MinValue;
+        }        
         return false;
     }
 
@@ -73,7 +72,8 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// <returns></returns>
     public static bool IsTokenLine(string line, out string token, bool openMapFlag = false)
     {
-        if (openMapFlag && line.Contains("TokenKey"))
+        token = string.Empty;
+        if (openMapFlag && line.Contains("+TokenKey ["))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -81,8 +81,37 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 token = match.Groups[1].Value;
                 return true;
             }
-        }
-        token = string.Empty;
+        }        
+        return false;
+    }
+
+    public static bool IsCurrentLevelLine(string line, out int level, bool openMapFlag = false)
+    {
+        level = 0;
+        if (openMapFlag && line.Contains("+CurrentLevel ["))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                level = int.Parse(match.Groups[1].Value);
+                return true;
+            }
+        }        
+        return false;
+    }
+
+    public static bool IsCurrentOpenMapIDLine(string line, out int mapId, bool openMapFlag = false)
+    {
+        mapId = 0;
+        if (openMapFlag && line.Contains("+CurrentOpenMapID ["))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                mapId = int.Parse(match.Groups[1].Value);
+                return true;
+            }
+        }        
         return false;
     }
 

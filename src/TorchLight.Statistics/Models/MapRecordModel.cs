@@ -8,7 +8,7 @@ namespace TorchLight.Statistics.Models
         /// 地圖ID(GeBuLinCunLuo01)
         /// </summary>
         public string Id { get; set; }
-
+        
         /// <summary>
         /// 地圖Token(1465431321654)
         /// </summary>
@@ -19,7 +19,8 @@ namespace TorchLight.Statistics.Models
         /// 地圖名稱
         /// </summary>
         public string Name { get; set; }
-
+        public int Level { get; set; }
+        public int MapId { get; set; }
         /// <summary>
         /// 使用門票
         /// </summary>
@@ -29,12 +30,15 @@ namespace TorchLight.Statistics.Models
         /// <summary>
         /// 使用羅盤
         /// </summary>
-        public string[] Compass { get; set; }
+        public List<string> Compass { get; set; } = [];
 
         /// <summary>
         /// 使用探針
         /// </summary>
         public string Probe { get; set; }
+
+        public int Resonance { get; set; }
+
 
         /// <summary>
         /// 主要是紀錄 BaseId 與數量, PickedItemDataModel 後續看要不要拿來取得價格
@@ -45,5 +49,13 @@ namespace TorchLight.Statistics.Models
         public DateTime EndTime { get; set; }
 
         public string UseTime => (EndTime - StartTime).ToString(@"hh\:mm\:ss");
+
+        public bool MapInfoComplete()
+        {
+            return !string.IsNullOrEmpty(RecordId)
+                && Level != 0
+                && MapId != 0;
+
+        }
     }
 }
