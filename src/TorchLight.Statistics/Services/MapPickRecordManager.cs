@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System.Text.Json;
 using TorchLight.Statistics.Enums;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
@@ -8,26 +9,43 @@ namespace TorchLight.Statistics.Services;
 /// <summary>
 /// 管理異界地圖的拾取記錄
 /// </summary>
-public class MapPickRecordManager
+public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
 {
     private readonly List<MapRecordModel> _mapRecords = [];
     private MapRecordModel _currentMapRecord = new();
     private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
-    private readonly Dictionary<int, ItemModel> _itemTable;
+    private readonly Dictionary<int, ItemModel> _itemTable = itemTable;
 
-    // 暫存開圖材料
-    private string _pendingMapTicket = string.Empty;
-    private readonly List<string> _pendingCompasses = [];
-    private string _pendingProbe = string.Empty;
+    // 🆕 存檔目錄
+    private static readonly string SavedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
 
-    public MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
-    {
-        _itemTable = itemTable;
-    }
-
-    public bool IsInNetherrealmMap { get; private set; }
+    public bool IsInMap { get; private set; }
     public string CurrentMapName { get; private set; } = string.Empty;
+
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
+
+    public void SetMapToken(string token)
+    {
+        Log.Debug("設定 Map Token {tok}", token);
+        _currentMapRecord.RecordId = token;
+    }
+    public void SetMapId(int mapId)
+    {
+        Log.Debug("設定 Map ID {id}", mapId);
+        _currentMapRecord.MapId = mapId;
+
+        // 知道ID 就知道Name
+        // _currentMapRecord.Name = MapInfoMapper.GetMapNameById(mapId);
+    }
+    public void SetMapLevel(int mapLevel)
+    {
+        Log.Debug("設定 Map Level {level}", mapLevel);
+        _currentMapRecord.Level = mapLevel;
+    }
+    public bool CurrentMapRecordInfoComplete()
+    {
+        return _currentMapRecord.MapInfoComplete();
+    }
 
     /// <summary>
     /// 記錄開圖材料（從 Spv3Open 事件）
@@ -42,21 +60,24 @@ public class MapPickRecordManager
             case ItemType.MapTicket:
             case ItemType.BossTicket:
             case ItemType.GameplayTicket:
-                _pendingMapTicket = item.Name;
+                _currentMapRecord.MapTicket = item.Name;
+                _currentMapRecord.MapTicketId = item.ConfigBaseId;
                 Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
                 break;
 
             case ItemType.Compass:
-                if (_pendingCompasses.Count < 4)
-                {
-                    _pendingCompasses.Add(item.Name);
-                    Log.Debug("[開圖材料] 羅盤 #{Index}: {CompassName}", _pendingCompasses.Count, item.Name);
-                }
+                _currentMapRecord.Compass.Add(item.Name);
+                Log.Debug("[開圖材料] 羅盤 #{Index}: {CompassName}", _currentMapRecord.Compass.Count, item.Name);
                 break;
 
             case ItemType.Probe:
-                _pendingProbe = item.Name;
+                _currentMapRecord.Probe = item.Name;
                 Log.Debug("[開圖材料] 探針: {ProbeName}", item.Name);
+                break;
+
+            case ItemType.Currency:
+                _currentMapRecord.Resonance = item.Num;
+                Log.Debug("[開圖材料] 迴響: {count}", item.Num);
                 break;
         }
     }
@@ -64,72 +85,66 @@ public class MapPickRecordManager
     /// <summary>
     /// 開始記錄新地圖
     /// </summary>
-    public void StartMapRecord(string mapId, string mapName, DateTime startTime)
+    public void StartMapRecord(MapInfo map, DateTime startTime)
     {
-        _currentMapRecord = new MapRecordModel
-        {
-            Id = MapInfoMapper.ExtractMapId(mapId),
-            Name = mapName,
-            StartTime = startTime,
-            MapTicket = _pendingMapTicket,
-            Probe = _pendingProbe
-        };
+        var mapRealName = map.Type == MapType.Netherrealm ? map.RealName(_currentMapRecord.MapTicketId) : map.Name;
 
-        // 複製羅盤資料到陣列
-        for (int i = 0; i < _pendingCompasses.Count && i < 4; i++)
-        {
-            _currentMapRecord.Compass[i] = _pendingCompasses[i];
-        }
+        _currentMapRecord.Id = map.Id;
+        _currentMapRecord.Name = mapRealName;
+        _currentMapRecord.StartTime = startTime;
+        _currentMapRecord.Type = map.Type;
 
         _currentMapPickData = [];
-        IsInNetherrealmMap = true;
-        CurrentMapName = mapName;
+        IsInMap = true;
+        CurrentMapName = mapRealName;
 
-        Log.Information("{Time} 進入異界地圖: {MapName}", startTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName);
+        Log.Information("{Time} 進入異界地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
 
-        if (!string.IsNullOrEmpty(_pendingMapTicket))
+        if (!string.IsNullOrEmpty(_currentMapRecord.MapTicket))
         {
-            Log.Information("  使用門票: {Ticket}", _pendingMapTicket);
+            Log.Information("  使用門票: {Ticket}", _currentMapRecord.MapTicket);
         }
-        if (_pendingCompasses.Count > 0)
+        if (_currentMapRecord.Compass.Any())
         {
-            Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _pendingCompasses));
+            Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _currentMapRecord.Compass));
         }
-        if (!string.IsNullOrEmpty(_pendingProbe))
+        if (!string.IsNullOrEmpty(_currentMapRecord.Probe))
         {
-            Log.Information("  使用探針: {Probe}", _pendingProbe);
+            Log.Information("  使用探針: {Probe}", _currentMapRecord.Probe);
         }
-
-        // 清空暫存資料
-        ClearPendingMaterials();
+        if (_currentMapRecord.Resonance > 0)
+        {
+            Log.Information("  使用迴響: {Resonance}", _currentMapRecord.Resonance);
+        }
     }
 
     /// <summary>
     /// 結束當前地圖記錄
     /// </summary>
-    public void EndMapRecord(string mapName, DateTime endTime)
+    public void EndMapRecord(DateTime endTime)
     {
+        if (_currentMapRecord.StartTime == DateTime.MinValue)
+        {
+            Log.Warning("嘗試結束地圖記錄，但當前沒有有效的地圖記錄");
+            return;
+        }
+
         _currentMapRecord.EndTime = endTime;
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
-        Log.Information("{Time} 離開異界地圖: {MapName} (用時: {Duration})", endTime.ToString("yyyy/MM/dd HH:mm:ss"), mapName, _currentMapRecord.UseTime);
+        Log.Information("{Time} 離開異界地圖: {MapName}({Token}) - 用時: {Duration}", endTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId, _currentMapRecord.UseTime);
 
         // 顯示當前地圖的拾取記錄
         PrintCurrentMapRecord(_currentMapRecord);
 
+        // 🆕 自動存檔
+        SaveRecordsToFile();
+
         // 重置
         _currentMapRecord = new();
         _currentMapPickData = [];
-        IsInNetherrealmMap = false;
-    }
-
-    /// <summary>
-    /// 更新當前地圖名稱
-    /// </summary>
-    public void UpdateCurrentMapName(string mapName)
-    {
-        CurrentMapName = mapName;
+        IsInMap = false;
     }
 
     /// <summary>
@@ -137,7 +152,7 @@ public class MapPickRecordManager
     /// </summary>
     public MapPickResult RecordPickedItem(int configBaseId, int slotId, int quantityChange)
     {
-        if (!IsInNetherrealmMap)
+        if (!IsInMap)
         {
             return null;
         }
@@ -151,7 +166,7 @@ public class MapPickRecordManager
 
         var result = new MapPickResult
         {
-            ItemName = GetItemName(configBaseId),
+            ItemName = _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})",
             ConfigBaseId = configBaseId,
             SlotId = slotId,
             QuantityChange = quantityChange
@@ -204,9 +219,9 @@ public class MapPickRecordManager
     /// <summary>
     /// 獲取當前地圖記錄（包含完整資訊）
     /// </summary>
-    public MapRecordModel? GetCurrentMapRecord()
+    public MapRecordModel GetCurrentMapRecord()
     {
-        if (!IsInNetherrealmMap || _currentMapRecord == null)
+        if (!IsInMap || _currentMapRecord == null)
             return null;
 
         // 創建一個包含當前拾取記錄的副本
@@ -216,17 +231,13 @@ public class MapPickRecordManager
             Id = _currentMapRecord.Id,
             Name = _currentMapRecord.Name,
             MapTicket = _currentMapRecord.MapTicket,
+            MapTicketId = _currentMapRecord.MapTicketId,
+            Compass = _currentMapRecord.Compass,
             Probe = _currentMapRecord.Probe,
             StartTime = _currentMapRecord.StartTime,
             EndTime = DateTime.Now, // 當前時間作為臨時結束時間
             PickRecord = _currentMapPickData
         };
-
-        // 複製羅盤資料
-        for (int i = 0; i < 4; i++)
-        {
-            recordCopy.Compass[i] = _currentMapRecord.Compass[i];
-        }
 
         return recordCopy;
     }
@@ -239,26 +250,14 @@ public class MapPickRecordManager
         _mapRecords.Clear();
         _currentMapRecord = new();
         _currentMapPickData = [];
-        IsInNetherrealmMap = false;
+        IsInMap = false;
         CurrentMapName = string.Empty;
-
-        ClearPendingMaterials();
-    }
-
-    /// <summary>
-    /// 清空暫存的開圖材料
-    /// </summary>
-    private void ClearPendingMaterials()
-    {
-        _pendingMapTicket = string.Empty;
-        _pendingCompasses.Clear();
-        _pendingProbe = string.Empty;
     }
 
     /// <summary>
     /// 顯示當前地圖的拾取記錄
     /// </summary>
-    private void PrintCurrentMapRecord(MapRecordModel record)
+    private static void PrintCurrentMapRecord(MapRecordModel record)
     {
         if (record.PickRecord == null || record.PickRecord.Count == 0)
         {
@@ -285,14 +284,132 @@ public class MapPickRecordManager
         Log.Debug("所有地圖記錄統計 (共 {Count} 筆):", _mapRecords.Count);
         foreach (var record in _mapRecords)
         {
-            Log.Debug("  [{RecordId}] {MapName} (用時: {Duration})",
-   record.RecordId, record.Name, record.UseTime);
+            Log.Debug("  [{RecordId}] {MapName} (用時: {Duration})", record.RecordId, record.Name, record.UseTime);
         }
     }
 
-    private string GetItemName(int configBaseId)
+    // 🆕 自動存檔功能
+    private void SaveRecordsToFile()
     {
-        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})";
+        try
+        {
+            if (_mapRecords.Count == 0)
+                return;
+
+            // 確保目錄存在
+            if (!Directory.Exists(SavedDirectory))
+            {
+                Directory.CreateDirectory(SavedDirectory);
+            }
+
+            // 生成檔案名稱：TorchPickRecord_MMdd_HHmm.json
+            var firstRecord = _mapRecords[0];
+            var fileName = $"TorchPickRecord_{firstRecord.StartTime:MMdd_HHmm}.json";
+            var filePath = Path.Combine(SavedDirectory, fileName);
+
+            // 準備保存的資料
+            var savedRecord = new SavedRecordModel
+            {
+                Summary = GenerateSummary(),
+                Records = [.. _mapRecords],
+                SavedTime = DateTime.Now
+            };
+
+            // 序列化並寫入檔案
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            var json = JsonSerializer.Serialize(savedRecord, options);
+            File.WriteAllText(filePath, json);
+
+            Log.Information("記錄已自動保存至: {FilePath}", filePath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "自動保存記錄失敗");
+        }
+    }
+
+    // 🆕 生成統計摘要
+    private RecordSummary GenerateSummary()
+    {
+        var totalPlayTime = TimeSpan.FromSeconds(_mapRecords.Sum(r => (r.EndTime - r.StartTime).TotalSeconds));
+
+        // 收集所有拾取的物品
+        var allItems = _mapRecords
+            .SelectMany(r => r.PickRecord?.Values ?? Enumerable.Empty<PickedItemDataModel>())
+            .GroupBy(p => p.BaseId)
+            .Select(g => new
+            {
+                BaseId = g.Key,
+                g.First().Name,
+                TotalQuantity = g.Sum(p => p.Total),
+                // 🔧 修正：從 ItemInfoMapper 獲取 Like 值
+                Like = ItemInfoMapper.GetAllItemConfigs().FirstOrDefault(item => item.Id == g.Key)?.Like ?? 0
+            })
+            .Where(x => x.TotalQuantity > 0) // 排除數量為 0 的物品
+            .OrderByDescending(x => x.Like) // 先按 Like 排序
+            .ThenByDescending(x => x.TotalQuantity) // Like 相同時按數量排序
+            .Take(10).ToList();
+
+        return new RecordSummary
+        {
+            TotalMaps = _mapRecords.Count,
+            TotalItems = _mapRecords.Sum(r => r.PickRecord?.Count ?? 0),
+            TotalQuantity = _mapRecords.Sum(r => r.PickRecord?.Select(p => p.Value.Total).Sum() ?? 0),
+            TotalPlayTime = totalPlayTime.ToString(@"hh\:mm\:ss"),
+            MostPickedItems = [.. allItems.Select(x => new TopPickedItem
+            {
+                BaseId = x.BaseId,
+                Name = x.Name,
+                TotalQuantity = x.TotalQuantity,
+                Like = x.Like
+            })]
+        };
+    }
+
+    // 🆕 獲取所有歷史記錄檔案
+    public static List<string> GetSavedRecordFiles()
+    {
+        try
+        {
+            if (!Directory.Exists(SavedDirectory))
+                return [];
+
+            return [.. Directory.GetFiles(SavedDirectory, "TorchPickRecord_*.json").OrderByDescending(f => f)];
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取歷史記錄檔案失敗");
+            return [];
+        }
+    }
+
+    // 🆕 讀取歷史記錄檔案
+    public static SavedRecordModel LoadSavedRecord(string filePath)
+    {
+        try
+        {
+            if (!File.Exists(filePath))
+                return null;
+
+            var json = File.ReadAllText(filePath);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            return JsonSerializer.Deserialize<SavedRecordModel>(json, options);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "讀取歷史記錄檔案失敗: {FilePath}", filePath);
+            return null;
+        }
     }
 }
 
@@ -311,4 +428,37 @@ public class MapPickResult
     public bool IsFirstTimeInMap { get; set; }
     public bool IsNewSlot { get; set; }
     public bool IsExistingSlot { get; set; }
+}
+
+/// <summary>
+/// 自動存檔的資料模型
+/// </summary>
+public class SavedRecordModel
+{
+    public RecordSummary Summary { get; set; }
+    public List<MapRecordModel> Records { get; set; }
+    public DateTime SavedTime { get; set; }
+}
+
+/// <summary>
+/// 統計摘要
+/// </summary>
+public class RecordSummary
+{
+    public int TotalMaps { get; set; }
+    public int TotalItems { get; set; }
+    public int TotalQuantity { get; set; }
+    public string TotalPlayTime { get; set; }
+    public List<TopPickedItem> MostPickedItems { get; set; }
+}
+
+/// <summary>
+/// 最受歡迎的拾取物品
+/// </summary>
+public class TopPickedItem
+{
+    public int BaseId { get; set; }
+    public string Name { get; set; }
+    public int TotalQuantity { get; set; }
+    public int Like { get; set; }
 }

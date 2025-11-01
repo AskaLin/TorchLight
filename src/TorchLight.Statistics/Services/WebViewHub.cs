@@ -1,6 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using System.Text.Json;
 using Serilog;
+using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
 
@@ -9,13 +10,24 @@ namespace TorchLight.Statistics.Services;
 /// </summary>
 public class WebViewHub
 {
-    private CoreWebView2? _coreWebView2;
-    private Control? _control;
+    private CoreWebView2 _coreWebView2;
+    private Control _control;
     private bool _isInitialized = false;
     private readonly JsonSerializerOptions _jsonOpt = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = false
+    };
+
+    private static readonly List<string> _denyEventNames = new()
+    {
+        // "bagSyncStatus",
+        // "newMapRecord",
+        // "itemPicked",
+        // "currentMapUpdate",
+        // "mapConfigUpdated",
+        // "pickupStatisticsConfigUpdated",
+        "logFileSize"
     };
 
     /// <summary>
@@ -32,7 +44,7 @@ public class WebViewHub
     /// <summary>
     /// 發送訊息到前端
     /// </summary>
-    public async Task SendMessageAsync(string eventName, object? data = null)
+    public async Task SendMessageAsync(string eventName, object data = null)
     {
         if (!_isInitialized || _coreWebView2 == null || _control == null)
         {
@@ -65,25 +77,13 @@ public class WebViewHub
                 var script = $"window.postMessage({json}, '*')";
                 await _coreWebView2.ExecuteScriptAsync(script);
             }
-
-            Log.Debug("發送訊息到前端: {EventName}", eventName);
+            if(!_denyEventNames.Contains(eventName))
+                Log.Debug("發送訊息到前端: {EventName}", eventName);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "發送訊息到前端失敗: {EventName}", eventName);
         }
-    }
-
-    /// <summary>
-    /// 通知前端：日誌監控狀態變更
-    /// </summary>
-    public Task NotifyLogMonitoringStatusAsync(string status, DateTime? syncTime = null)
-    {
-        return SendMessageAsync("logMonitoringStatus", new
-        {
-            status,
-            syncTime = syncTime ?? DateTime.Now
-        });
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public class WebViewHub
     /// <summary>
     /// 通知前端：當前地圖資訊更新
     /// </summary>
-    public Task NotifyCurrentMapUpdateAsync(object? mapData)
+    public Task NotifyCurrentMapUpdateAsync(MapRecordViewModel mapData)
     {
         return SendMessageAsync("currentMapUpdate", mapData);
     }
@@ -146,6 +146,29 @@ public class WebViewHub
         {
             success,
             message
+        });
+    }
+
+    /// <summary>
+    /// 🆕 通知前端：log 檔案大小變更
+    /// </summary>
+    public Task NotifyLogFileSizeAsync(long fileSizeBytes)
+    {
+        // 格式化檔案大小
+        string formattedSize;
+        if (fileSizeBytes >= 1024 * 1024 * 1024) // >= 1GB
+        {
+            formattedSize = $"{fileSizeBytes / (1024.0 * 1024.0 * 1024.0):F2} GB";
+        }
+        else // < 1GB，顯示為 MB
+        {
+            formattedSize = $"{fileSizeBytes / (1024.0 * 1024.0):F2} MB";
+        }
+
+        return SendMessageAsync("logFileSize", new
+        {
+            fileSizeBytes,
+            formattedSize
         });
     }
 }

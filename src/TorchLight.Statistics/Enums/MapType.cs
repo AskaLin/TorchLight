@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TorchLight.Statistics.Enums;
+﻿namespace TorchLight.Statistics.Enums;
 
 /// <summary>
 /// 地圖類型枚舉
@@ -30,4 +24,9 @@ public enum MapType
     /// 秘境
     /// </summary>
     SecretRealm,
+
+    /// <summary>
+    /// 首領地圖
+    /// </summary>
+    Boss
 }

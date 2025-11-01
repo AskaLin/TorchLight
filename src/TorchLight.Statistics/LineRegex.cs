@@ -31,4 +31,18 @@ public static partial class LineRegex
     [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*?LastSceneName\s*=\s*World'[^']*/(?<from>[^/']+/[^/']+\.[^/']+)'\s+NextSceneName\s*=\s*World'[^']*/(?<to>[^/']+/[^/']+\.[^/']+)'$", RegexOptions.Singleline)]
     public static partial Regex MapLine();
 
+    /// <summary>
+    /// 只取最前面的時間
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex(@"\[(\d{4}\.\d{2}\.\d{2}-\d{2}\.\d{2}\.\d{2}:\d{3})\]")]
+    public static partial Regex GetDateTimeValue();
+
+    /// <summary>
+    /// 取得`[ ]` 內的值
+    /// Ex: [12345] => 12345
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex(@"\[(\d+)\]")]
+    public static partial Regex GetCellValue();
 }

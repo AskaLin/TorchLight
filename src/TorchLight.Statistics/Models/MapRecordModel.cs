@@ -1,46 +1,61 @@
-﻿namespace TorchLight.Statistics.Models
+﻿using TorchLight.Statistics.Enums;
+
+namespace TorchLight.Statistics.Models
 {
     public class MapRecordModel
     {
         /// <summary>
-        /// 唯一識別碼
-        /// </summary>
-        public Guid RecordId { get; set; } = Guid.NewGuid();
-
-        /// <summary>
-        /// 地圖ID
+        /// 地圖ID(GeBuLinCunLuo01)
         /// </summary>
         public string Id { get; set; }
+        
+        /// <summary>
+        /// 地圖Token(1465431321654)
+        /// </summary>
+        public string RecordId { get; set; }
 
+        public MapType Type { get; set; }
         /// <summary>
         /// 地圖名稱
         /// </summary>
         public string Name { get; set; }
-
+        public int Level { get; set; }
+        public int MapId { get; set; }
         /// <summary>
         /// 使用門票
         /// </summary>
         public string MapTicket { get; set; }
-        
-        private readonly string[] _compass = new string[4];
+        public int MapTicketId { get; set; }
+
         /// <summary>
         /// 使用羅盤
         /// </summary>
-        public string[] Compass => _compass;
+        public List<string> Compass { get; set; } = [];
 
         /// <summary>
         /// 使用探針
         /// </summary>
         public string Probe { get; set; }
 
+        public int Resonance { get; set; }
+
+
         /// <summary>
         /// 主要是紀錄 BaseId 與數量, PickedItemDataModel 後續看要不要拿來取得價格
         /// </summary>
         public Dictionary<int, PickedItemDataModel> PickRecord { get; set; }
-        
+
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
 
         public string UseTime => (EndTime - StartTime).ToString(@"hh\:mm\:ss");
+
+        public bool MapInfoComplete()
+        {
+            return !string.IsNullOrEmpty(RecordId)
+                && Level != 0
+                && MapId != 0;
+
+        }
     }
 }

@@ -6,15 +6,24 @@ namespace TorchLight.Statistics.Core;
 /// 設定檔案監控器 - 提供檔案變更監控和自動重載功能
 /// </summary>
 /// <typeparam name="T">設定項目類型</typeparam>
-public class ConfigFileWatcher<T> : IDisposable where T : class
+/// <remarks>
+/// 建構函式
+/// </remarks>
+/// <param name="configFilePath">設定檔路徑</param>
+/// <param name="loadConfigFunc">載入設定的函式</param>
+/// <param name="onConfigUpdated">設定更新時的回調</param>
+public class ConfigFileWatcher<T>(
+    string configFilePath,
+    Func<string, List<T>> loadConfigFunc,
+    Action<bool, string> onConfigUpdated) : IDisposable where T : class
 {
     private readonly object _lock = new();
-    private FileSystemWatcher? _fileWatcher;
+    private FileSystemWatcher _fileWatcher;
     private DateTime _lastReloadTime = DateTime.MinValue;
     private readonly TimeSpan _reloadDebounceTime = TimeSpan.FromSeconds(1);
-    private readonly string _configFilePath;
-    private readonly Func<string, List<T>> _loadConfigFunc;
-    private readonly Action<bool, string> _onConfigUpdated;
+    private readonly string _configFilePath = configFilePath;
+    private readonly Func<string, List<T>> _loadConfigFunc = loadConfigFunc;
+    private readonly Action<bool, string> _onConfigUpdated = onConfigUpdated;
     private List<T> _configs = [];
 
     /// <summary>
@@ -26,25 +35,9 @@ public class ConfigFileWatcher<T> : IDisposable where T : class
         {
             lock (_lock)
             {
-                return new List<T>(_configs);
+                return [.. _configs];
             }
         }
-    }
-
-    /// <summary>
-    /// 建構函式
-    /// </summary>
-    /// <param name="configFilePath">設定檔路徑</param>
-    /// <param name="loadConfigFunc">載入設定的函式</param>
-    /// <param name="onConfigUpdated">設定更新時的回調</param>
-    public ConfigFileWatcher(
-        string configFilePath,
-        Func<string, List<T>> loadConfigFunc,
-        Action<bool, string> onConfigUpdated)
-    {
-        _configFilePath = configFilePath;
-        _loadConfigFunc = loadConfigFunc;
-        _onConfigUpdated = onConfigUpdated;
     }
 
     /// <summary>
@@ -54,7 +47,7 @@ public class ConfigFileWatcher<T> : IDisposable where T : class
     {
         lock (_lock)
         {
-            _configs = new List<T>(initialConfigs);
+            _configs = [.. initialConfigs];
         }
 
         StartFileWatcher();
@@ -67,7 +60,7 @@ public class ConfigFileWatcher<T> : IDisposable where T : class
     {
         lock (_lock)
         {
-            _configs = new List<T>(configs);
+            _configs = [.. configs];
         }
     }
 

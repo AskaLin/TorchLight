@@ -29,13 +29,16 @@ namespace TorchLight.Statistics
             {
                 // 初始化核心組件
                 Log.Information("正在初始化...");
-                
+
                 // 初始化地圖映射器
                 MapInfoMapper.Initialize();
 
                 // 初始化物品映射器
                 ItemInfoMapper.Initialize();
-            
+
+                // 創建 WebViewHub（需要在 MainWindow 中初始化）
+                var webViewHub = new WebViewHub();
+
                 var itemTable = ItemInfoMapper.GetItemTable();
                 Log.Information("已載入 {ItemCount} 個物品定義", itemTable.Count);
 
@@ -65,17 +68,30 @@ namespace TorchLight.Statistics
                     TimeSpan.FromSeconds(AppConfiguration.FilePollingIntervalSeconds),
                     startFromEnd: AppConfiguration.StartFromFileEnd);
 
-                tail.OnNewLine += logProcessor.ProcessLine;
-                // tail.Start();
+                // 🆕 將 tail 傳遞給 logProcessor 以便在檢測到"已開啟日誌"時啟用監控
+                logProcessor.SetFileTailWatcher(tail);
 
-                // 測試用, 讀取現有日誌內容 進行處理
-                using FileStream fs = new("E:\\SideProjects\\UE_game-疊界4.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                using StreamReader sr = new(fs, Encoding.UTF8);
-                string line;
-                while ((line = sr.ReadLine()) != null)
+                tail.OnNewLine += logProcessor.ProcessLine;
+                // 訂閱檔案大小變更事件
+                tail.OnFileSizeChanged += (fileSize) =>
                 {
-                    logProcessor.ProcessLine(line);
-                }
+                    // 通知前端檔案大小變更
+                    _ = Task.Run(async () =>
+                    {
+                        await webViewHub.NotifyLogFileSizeAsync(fileSize);
+                    });
+                };
+
+                tail.Start();
+
+                //測試用, 讀取現有日誌內容 進行處理
+                //using FileStream fs = new("D:\\SideProjects\\UE_game-疊界4.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                //using StreamReader sr = new(fs, Encoding.UTF8);
+                //string line;
+                //while ((line = sr.ReadLine()) != null)
+                //{
+                //    logProcessor.ProcessLine(line);
+                //}
 
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");
@@ -87,12 +103,10 @@ namespace TorchLight.Statistics
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                // 創建 WebViewHub（需要在 MainWindow 中初始化）
-                var webViewHub = new WebViewHub();
-                
+
                 // 設定 GameLogProcessor 使用 WebViewHub
                 logProcessor.SetWebViewHub(webViewHub);
-                
+
                 // 創建 MainWindow 並傳入 WebViewHub
                 var mainWindow = new MainWindow(logProcessor.MapPickRecordManager, logProcessor, webViewHub);
 
