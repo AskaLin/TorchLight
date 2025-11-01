@@ -19,6 +19,17 @@ public class WebViewHub
         WriteIndented = false
     };
 
+    private static readonly List<string> _denyEventNames = new()
+    {
+        // "bagSyncStatus",
+        // "newMapRecord",
+        // "itemPicked",
+        // "currentMapUpdate",
+        // "mapConfigUpdated",
+        // "pickupStatisticsConfigUpdated",
+        "logFileSize"
+    };
+
     /// <summary>
     /// 初始化 WebView2 通訊
     /// </summary>
@@ -66,8 +77,8 @@ public class WebViewHub
                 var script = $"window.postMessage({json}, '*')";
                 await _coreWebView2.ExecuteScriptAsync(script);
             }
-
-            Log.Debug("發送訊息到前端: {EventName}", eventName);
+            if(!_denyEventNames.Contains(eventName))
+                Log.Debug("發送訊息到前端: {EventName}", eventName);
         }
         catch (Exception ex)
         {

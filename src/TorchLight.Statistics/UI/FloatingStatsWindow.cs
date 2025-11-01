@@ -18,17 +18,21 @@ public class FloatingStatsWindow : Form
     private Point _resizeStartPoint;
     private Size _resizeStartSize;
     private const int ResizeBorderWidth = 8;
-    private const int MinWidth = 80;
-    private const int MinHeight = 200;
-    private const int MaxWidth = 800;
-    private const int MaxHeight = 800;
+    private const int MinWidth = 50;
+    private const int MinHeight = 50;
+    private const int MaxWidth = 1800;
+    private const int MaxHeight = 900;
 
-    // 🆕 顯示模式
-    private DisplayMode _displayMode = DisplayMode.Vertical;
+    // 🆕 延遲重新計算位置
+    private System.Windows.Forms.Timer _resizeDebounceTimer;
+    private const int ResizeDebounceDelay = 200; // 200ms 延遲
+
+    // 🆕 顯示模式 - ✅ 預設改為橫列
+    private DisplayMode _displayMode = DisplayMode.Horizontal;  // ✅ 從 Vertical 改為 Horizontal
     private const int VerticalWidth = 100;
     private const int VerticalHeight = 400;
-    private const int HorizontalWidth = 600;
-    private const int HorizontalHeight = 100;
+    private const int HorizontalWidth = 900;
+    private const int HorizontalHeight = 50;
 
     // 顏色配置
     private readonly Color _backgroundColor = Color.FromArgb(20, 20, 30);
@@ -59,10 +63,10 @@ public class FloatingStatsWindow : Form
         TopMost = true;  // 永遠置頂
         ShowInTaskbar = false;  // 不顯示在工作列
 
-        // 設定窗體大小和位置（細長型）
-        Width = VerticalWidth;
-        Height = VerticalHeight;
-        Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - Width - 20, 100);
+        // 設定窗體大小和位置 - ✅ 根據預設橫列模式設定
+        Width = HorizontalWidth;   // ✅ 從 VerticalWidth 改為 HorizontalWidth
+        Height = HorizontalHeight; // ✅ 從 VerticalHeight 改為 HorizontalHeight
+    Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - Width - 20, 100);
 
         // 啟用雙緩衝以避免閃爍
         DoubleBuffered = true;
@@ -76,7 +80,7 @@ public class FloatingStatsWindow : Form
         MouseMove += OnMouseMove;
         MouseUp += OnMouseUp;
 
-        // 🆕 雙擊事件
+        // ?? 雙擊事件
         DoubleClick += OnDoubleClick;
 
         // 當窗體顯示時，強制置頂
@@ -84,15 +88,22 @@ public class FloatingStatsWindow : Form
 
         // 當窗體失去焦點時，確保仍然置頂
         Deactivate += OnDeactivate;
+
+        // ?? 初始化延遲計時器
+        _resizeDebounceTimer = new System.Windows.Forms.Timer
+        {
+            Interval = ResizeDebounceDelay
+        };
+        _resizeDebounceTimer.Tick += OnResizeDebounceTimerTick;
     }
 
-    // 🆕 雙擊切換顯示模式
+    // ?? 雙擊切換顯示模式
     private void OnDoubleClick(object sender, EventArgs e)
     {
         ToggleDisplayMode();
     }
 
-    // 🆕 切換顯示模式
+    // ?? 切換顯示模式
     private void ToggleDisplayMode()
     {
         _displayMode = _displayMode == DisplayMode.Vertical ? DisplayMode.Horizontal : DisplayMode.Vertical;
@@ -109,34 +120,60 @@ public class FloatingStatsWindow : Form
             Height = HorizontalHeight;
         }
 
-        // 重新計算統計項目位置
+        // ? 切換模式時立即重新計算（不延遲）
         RecalculateItemPositions();
-
         Invalidate();
     }
 
-    // 🆕 根據顯示模式重新計算項目位置
+    // ?? 延遲計時器觸發事件
+    private void OnResizeDebounceTimerTick(object sender, EventArgs e)
+    {
+        _resizeDebounceTimer.Stop();
+        RecalculateItemPositions();
+        Invalidate();
+    }
+
+    // ?? 根據顯示模式重新計算項目位置
     private void RecalculateItemPositions()
     {
         if (_displayMode == DisplayMode.Vertical)
         {
             // 直排模式：垂直排列
-            int startY = 40;
+            var normalItems = _statItems.Where(i => !i.IsWatchItem).ToList();
+            var watchItems = _statItems.Where(i => i.IsWatchItem).ToList();
+
+            // 普通項目 - ? 從頂部開始（移除標題後）
+            int startY = 10;
             int spacing = 60;
-            for (int i = 0; i < _statItems.Count; i++)
+            for (int i = 0; i < normalItems.Count; i++)
             {
-                _statItems[i].Y = startY + (i * spacing);
+                normalItems[i].Y = startY + (i * spacing);
+            }
+
+            // 監控項目（在普通項目下方，間隔更大）
+            int watchStartY = startY + (normalItems.Count * spacing) + 20;
+            int watchSpacing = 80;  // ? 監控項目需要更大的間隔（顯示三行數字）
+            for (int i = 0; i < watchItems.Count; i++)
+            {
+                watchItems[i].Y = watchStartY + (i * watchSpacing);
             }
         }
         else
         {
-            // 橫列模式：水平排列
+            // 橫列模式：水平排列 - ? 所有項目在同一列
+            var allItems = _statItems.ToList();
+
+            // ? 所有項目在同一列水平排列
             int startX = 10;
-            int itemWidth = (Width - 20) / _statItems.Count;
-            for (int i = 0; i < _statItems.Count; i++)
+            int totalItems = allItems.Count;
+            if (totalItems > 0)
             {
-                _statItems[i].X = startX + (i * itemWidth);
-                _statItems[i].Y = 40;
+                int itemWidth = (Width - 20) / totalItems;
+                for (int i = 0; i < allItems.Count; i++)
+                {
+                    allItems[i].X = startX + (i * itemWidth);
+                    allItems[i].Y = 10;  // ? 統一 Y 座標
+                }
             }
         }
     }
@@ -182,11 +219,7 @@ public class FloatingStatsWindow : Form
     private void InitializeStatItems()
     {
         _statItems.Add(new StatItem("地圖數", "0", 40, 0));
-        _statItems.Add(new StatItem("物品種類", "0", 100, 0));
-        _statItems.Add(new StatItem("總數量", "0", 160, 0));
-        _statItems.Add(new StatItem("遊戲時間", "00:00:00", 220, 0));
-        _statItems.Add(new StatItem("當前地圖", "待機中", 280, 0));
-        _statItems.Add(new StatItem("拾取數", "0", 340, 0));
+        // ?? 註解：監控物品會動態添加，不在這裡初始化
     }
 
     /// <summary>
@@ -213,6 +246,30 @@ public class FloatingStatsWindow : Form
         }
     }
 
+    /// <summary>
+    /// ?? 更新監控物品列表（動態新增/移除）
+    /// </summary>
+    /// <param name="watchedItems">監控物品資訊列表</param>
+    public void UpdateWatchedItems(List<WatchedItemInfo> watchedItems)
+    {
+        // 移除所有舊的監控項目
+        _statItems.RemoveAll(item => item.IsWatchItem);
+
+        // 添加新的監控項目
+        int startY = 70;  // ? 從 100 改為 70（移除標題後）
+        int spacing = 80;
+        for (int i = 0; i < watchedItems.Count; i++)
+        {
+            var watchItem = watchedItems[i];
+            var displayValue = $"{watchItem.BagTotal:N0} / {watchItem.PickupTotal:N0} / {watchItem.CurrentMapPickup:N0}";
+
+            _statItems.Add(new StatItem(watchItem.ItemName, displayValue, startY + (i * spacing), 0, isWatchItem: true));
+        }
+
+        RecalculateItemPositions();
+        Invalidate();
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
@@ -222,7 +279,6 @@ public class FloatingStatsWindow : Form
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
         DrawBackground(g);
-        DrawTitle(g);
         DrawStatItems(g);
     }
 
@@ -239,32 +295,14 @@ public class FloatingStatsWindow : Form
         g.DrawPath(borderPen, path);
     }
 
-    private void DrawTitle(Graphics g)
-    {
-        using var titleFont = new Font("微軟正黑體", 10, FontStyle.Bold);
-        using var titleBrush = new SolidBrush(Color.FromArgb(100, 150, 255));
-
-        // 🆕 根據模式調整標題顯示
-        var titleText = _displayMode == DisplayMode.Vertical ? "🔥 統計面板" : "🔥 統計面板 (雙擊切換模式)";
-        var titleRect = new RectangleF(0, 5, Width, 25);
-        var titleFormat = new StringFormat
-        {
-            Alignment = StringAlignment.Center,
-            LineAlignment = StringAlignment.Center
-        };
-
-        g.DrawString(titleText, titleFont, titleBrush, titleRect, titleFormat);
-
-        using var linePen = new Pen(Color.FromArgb(60, 60, 80), 1);
-        g.DrawLine(linePen, 20, 30, Width - 20, 30);
-    }
-
     private void DrawStatItems(Graphics g)
     {
         using var labelFont = new Font("微軟正黑體", 8);
         using var valueFont = new Font("Consolas", 10, FontStyle.Bold);
+        using var watchFont = new Font("Consolas", 9, FontStyle.Bold);  // ?? 監控項目用較小字體
         using var labelBrush = new SolidBrush(_labelColor);
         using var valueBrush = new SolidBrush(_valueColor);
+        using var watchBrush = new SolidBrush(Color.FromArgb(33, 150, 243));  // ?? 藍色（監控顏色）
 
         if (_displayMode == DisplayMode.Vertical)
         {
@@ -274,27 +312,57 @@ public class FloatingStatsWindow : Form
                 var labelRect = new RectangleF(15, item.Y, Width - 30, 15);
                 g.DrawString(item.Label, labelFont, labelBrush, labelRect);
 
-                var valueRect = new RectangleF(15, item.Y + 18, Width - 30, 20);
-                var valueFormat = new StringFormat { Alignment = StringAlignment.Far };
-                g.DrawString(item.Value, valueFont, valueBrush, valueRect, valueFormat);
+                var valueRect = new RectangleF(15, item.Y + 18, Width - 30, 35);  // ? 增加高度以容納三行數字
+                var valueFormat = new StringFormat { Alignment = StringAlignment.Center };  // ? 改為置中
+
+                // ?? 監控項目使用特殊字體和顏色
+                if (item.IsWatchItem)
+                {
+                    // ? 監控項目顯示三行數字（置中）
+                    var lines = item.Value.Split('/');
+                    if (lines.Length == 3)
+                    {
+                        var lineHeight = 12;
+                        for (int i = 0; i < 3; i++)
+                        {
+                            var lineRect = new RectangleF(15, item.Y + 18 + (i * lineHeight), Width - 30, lineHeight);
+                            g.DrawString(lines[i].Trim(), watchFont, watchBrush, lineRect, valueFormat);
+                        }
+                    }
+                    else
+                    {
+                        g.DrawString(item.Value, watchFont, watchBrush, valueRect, valueFormat);
+                    }
+                }
+                else
+                {
+                    g.DrawString(item.Value, valueFont, valueBrush, valueRect, valueFormat);
+                }
             }
         }
         else
         {
-            // 橫列模式：水平排列
-            int itemWidth = (Width - 20) / _statItems.Count;
-            for (int i = 0; i < _statItems.Count; i++)
+            // 橫列模式：水平排列 - ? 所有項目在同一列
+            var allItems = _statItems.ToList();
+
+            if (allItems.Count > 0)
             {
-                var item = _statItems[i];
-                float x = 10 + (i * itemWidth);
+                int itemWidth = (Width - 20) / allItems.Count;
+                for (int i = 0; i < allItems.Count; i++)
+                {
+                    var item = allItems[i];
+                    float x = 10 + (i * itemWidth);
+                    var brush = item.IsWatchItem ? watchBrush : valueBrush;
+                    var font = item.IsWatchItem ? watchFont : valueFont;
 
-                var labelRect = new RectangleF(x, 40, itemWidth - 5, 15);
-                var labelFormat = new StringFormat { Alignment = StringAlignment.Center };
-                g.DrawString(item.Label, labelFont, labelBrush, labelRect, labelFormat);
+                    var labelRect = new RectangleF(x, 10, itemWidth - 5, 15);
+                    var labelFormat = new StringFormat { Alignment = StringAlignment.Center };
+                    g.DrawString(item.Label, labelFont, item.IsWatchItem ? watchBrush : labelBrush, labelRect, labelFormat);
 
-                var valueRect = new RectangleF(x, 58, itemWidth - 5, 20);
-                var valueFormat = new StringFormat { Alignment = StringAlignment.Center };
-                g.DrawString(item.Value, valueFont, valueBrush, valueRect, valueFormat);
+                    var valueRect = new RectangleF(x, 28, itemWidth - 5, 20);
+                    var valueFormat = new StringFormat { Alignment = StringAlignment.Center };
+                    g.DrawString(item.Value, font, brush, valueRect, valueFormat);
+                }
             }
         }
     }
@@ -345,9 +413,9 @@ public class FloatingStatsWindow : Form
         else if (_isDragging)
         {
             var newLocation = new Point(
-                      Location.X + e.X - _dragStartPoint.X,
-            Location.Y + e.Y - _dragStartPoint.Y
-                      );
+ Location.X + e.X - _dragStartPoint.X,
+       Location.Y + e.Y - _dragStartPoint.Y
+ );
             Location = newLocation;
         }
         else
@@ -359,6 +427,14 @@ public class FloatingStatsWindow : Form
     private void OnMouseUp(object sender, MouseEventArgs e)
     {
         _isDragging = false;
+
+        // ? 當調整大小完成時，啟動延遲計時器
+        if (_isResizing)
+        {
+            _resizeDebounceTimer.Stop();
+            _resizeDebounceTimer.Start();
+        }
+
         _isResizing = false;
         _resizeDirection = ResizeDirection.None;
         Cursor = Cursors.Default;
@@ -456,16 +532,16 @@ public class FloatingStatsWindow : Form
         newHeight = Math.Max(MinHeight, Math.Min(MaxHeight, newHeight));
 
         if (_resizeDirection == ResizeDirection.Left ||
-        _resizeDirection == ResizeDirection.TopLeft ||
-         _resizeDirection == ResizeDirection.BottomLeft)
+          _resizeDirection == ResizeDirection.TopLeft ||
+            _resizeDirection == ResizeDirection.BottomLeft)
         {
             int actualWidthChange = newWidth - Width;
             newX = Location.X - actualWidthChange;
         }
 
         if (_resizeDirection == ResizeDirection.Top ||
-            _resizeDirection == ResizeDirection.TopLeft ||
-          _resizeDirection == ResizeDirection.TopRight)
+      _resizeDirection == ResizeDirection.TopLeft ||
+  _resizeDirection == ResizeDirection.TopRight)
         {
             int actualHeightChange = newHeight - Height;
             newY = Location.Y - actualHeightChange;
@@ -474,8 +550,7 @@ public class FloatingStatsWindow : Form
         Location = new Point(newX, newY);
         Size = new Size(newWidth, newHeight);
 
-        // 🆕 調整大小後重新計算項目位置
-        RecalculateItemPositions();
+        // ? 調整大小時不立即重新計算位置（等待 OnMouseUp 觸發延遲計時器）
     }
 
     private enum ResizeDirection
@@ -493,11 +568,22 @@ public class FloatingStatsWindow : Form
 
     #endregion
 
-    // 🆕 顯示模式列舉
+    // ?? 顯示模式列舉
     private enum DisplayMode
     {
         Vertical,    // 直排
         Horizontal   // 橫列
+    }
+
+    // ?? 釋放資源
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _resizeDebounceTimer?.Stop();
+            _resizeDebounceTimer?.Dispose();
+        }
+        base.Dispose(disposing);
     }
 
     private class StatItem
@@ -505,14 +591,28 @@ public class FloatingStatsWindow : Form
         public string Label { get; set; }
         public string Value { get; set; }
         public int Y { get; set; }
-        public int X { get; set; }  // 🆕 新增 X 座標
+        public int X { get; set; }
+        public bool IsWatchItem { get; set; }
 
-        public StatItem(string label, string value, int y, int x)
+        public StatItem(string label, string value, int y, int x, bool isWatchItem = false)
         {
             Label = label;
             Value = value;
             Y = y;
             X = x;
+            IsWatchItem = isWatchItem;
         }
     }
+}
+
+/// <summary>
+/// ?? 監控物品資訊
+/// </summary>
+public class WatchedItemInfo
+{
+    public int ItemId { get; set; }
+    public string ItemName { get; set; }
+    public int BagTotal { get; set; }
+    public int PickupTotal { get; set; }
+    public int CurrentMapPickup { get; set; }
 }

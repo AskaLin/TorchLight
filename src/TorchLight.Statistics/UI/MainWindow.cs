@@ -92,34 +92,98 @@ public class MainWindow : Form
         try
         {
             var records = _mapPickRecordManager.MapRecords;
-            var currentMap = _mapPickRecordManager.IsInMap
-                ? _mapPickRecordManager.CurrentMapName
-                : "待機中";
+            // var currentMap = _mapPickRecordManager.IsInMap
+            //    ? _mapPickRecordManager.CurrentMapName
+            //    : "待機中";
 
-            // 計算總遊戲時間
-            var totalSeconds = records.Sum(r => (r.EndTime - r.StartTime).TotalSeconds);
-            var totalTime = TimeSpan.FromSeconds(totalSeconds).ToString(@"hh\:mm\:ss");
+            //// 計算總遊戲時間
+            //var totalSeconds = records.Sum(r => (r.EndTime - r.StartTime).TotalSeconds);
+            //var totalTime = TimeSpan.FromSeconds(totalSeconds).ToString(@"hh\:mm\:ss");
 
-            // 計算當前地圖拾取數
-            var currentMapPickCount = _mapPickRecordManager.IsInMap
-                ? _mapPickRecordManager.GetCurrentMapRecord()?.PickRecord?.Sum(p => p.Value.Total) ?? 0
-                : 0;
+            //// 計算當前地圖拾取數
+            //var currentMapPickCount = _mapPickRecordManager.IsInMap
+            //    ? _mapPickRecordManager.GetCurrentMapRecord()?.PickRecord?.Sum(p => p.Value.Total) ?? 0
+            //    : 0;
 
             var stats = new Dictionary<string, string>
             {
                 { "地圖數", records.Count.ToString() },
-                { "物品種類", records.Sum(r => r.PickRecord?.Count ?? 0).ToString() },
-                { "總數量", records.Sum(r => r.PickRecord?.Select(p=>p.Value.Total).Sum() ?? 0).ToString() },
-                { "遊戲時間", totalTime },
-                { "當前地圖", currentMap },
-                { "拾取數", currentMapPickCount.ToString() }
+                //{ "物品種類", records.Sum(r => r.PickRecord?.Count ?? 0).ToString() },
+                //{ "總數量", records.Sum(r => r.PickRecord?.Select(p=>p.Value.Total).Sum() ?? 0).ToString() },
+                //{ "遊戲時間", totalTime },
+                //{ "當前地圖", currentMap },
+                //{ "拾取數", currentMapPickCount.ToString() }
             };
 
             _floatingStatsWindow.UpdateStats(stats);
+
+            // 🆕 更新監控物品數量
+            UpdateWatchedItemsStats();
         }
         catch (Exception ex)
         {
             Log.Error(ex, "更新懸浮統計窗體失敗");
+        }
+    }
+
+    // 🆕 更新監控物品的統計數據
+    private void UpdateWatchedItemsStats()
+    {
+        try
+        {
+            var allItems = ItemInfoMapper.GetAllItemConfigs();
+            var watchedItems = allItems.Where(i => i.Watch).ToList();
+
+            // ✅ 如果沒有監控物品，清空顯示
+            if (watchedItems.Count == 0)
+            {
+                _floatingStatsWindow.UpdateWatchedItems(new List<WatchedItemInfo>());
+                return;
+            }
+
+            var watchedItemInfos = new List<WatchedItemInfo>();
+
+            // ✅ 為每個監控物品分別計算三個數量
+            foreach (var watchedItem in watchedItems)
+            {
+                var itemId = watchedItem.Id;
+
+                // 1. 背包內的總數量
+                int bagTotal = _gameLogProcessor.BagInventoryManager.BagData
+                    .Where(kvp => kvp.Key == itemId)
+                    .Sum(kvp => kvp.Value.Total);
+
+                // 2. 拾取的總數量（所有地圖記錄）
+                int pickupTotal = _mapPickRecordManager.MapRecords
+                    .SelectMany(r => r.PickRecord?.Values ?? Enumerable.Empty<Models.PickedItemDataModel>())
+                    .Where(p => p.BaseId == itemId)
+                    .Sum(p => p.Total);
+
+                // 3. 當前地圖拾取的數量
+                int currentMapPickup = 0;
+                if (_mapPickRecordManager.IsInMap)
+                {
+                    var currentRecord = _mapPickRecordManager.GetCurrentMapRecord();
+                    currentMapPickup = currentRecord?.PickRecord?.Values
+                          .Where(p => p.BaseId == itemId)
+                          .Sum(p => p.Total) ?? 0;
+                }
+
+                watchedItemInfos.Add(new WatchedItemInfo
+                {
+                    ItemId = itemId,
+                    ItemName = watchedItem.Name,
+                    BagTotal = bagTotal,
+                    PickupTotal = pickupTotal + currentMapPickup, // 總計所有地圖的拾取數 在即時呈現時 應該加入目前的地圖拾取數
+                    CurrentMapPickup = currentMapPickup
+                });
+            }
+
+            _floatingStatsWindow.UpdateWatchedItems(watchedItemInfos);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "更新監控物品統計失敗");
         }
     }
 
@@ -293,9 +357,9 @@ public class MainWindow : Form
     {
         if (_isInitialized)
         {
-          // ❌ 移除：不再需要通知 logMonitoringStatus
+            // ❌ 移除：不再需要通知 logMonitoringStatus
             // await _webViewHub.NotifyLogMonitoringStatusAsync("監控日誌中");
- Log.Information("已檢測到：已開啟日誌");
+            Log.Information("已檢測到：已開啟日誌");
         }
     }
 
@@ -319,16 +383,16 @@ public class MainWindow : Form
         if (_isInitialized)
         {
             await _webViewHub.NotifyMapConfigUpdatedAsync(success, message);
-     
+
             // ✅ 如果玩家正在地圖中，立即更新當前地圖資訊
             if (success && _mapPickRecordManager.IsInMap)
             {
                 var currentMapData = _gameLogProcessor.GetCurrentMapData();
-          await _webViewHub.NotifyCurrentMapUpdateAsync(currentMapData);
-    Log.Information("當前地圖資訊已更新");
-}
-            
-      Log.Information("地圖設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
+                await _webViewHub.NotifyCurrentMapUpdateAsync(currentMapData);
+                Log.Information("當前地圖資訊已更新");
+            }
+
+            Log.Information("地圖設定更新通知已發送 - Success: {Success}, Message: {Message}", success, message);
         }
     }
 

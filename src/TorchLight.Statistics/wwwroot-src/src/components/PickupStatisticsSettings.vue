@@ -19,7 +19,7 @@
     <Transition name="fade">
       <div v-if="loading" class="loading-overlay">
         <div class="loading-spinner">
-     <div class="spinner"></div>
+          <div class="spinner"></div>
           <p>載入中...</p>
         </div>
       </div>
@@ -32,7 +32,7 @@
       <template #item="{ items }">
         <div v-for="item in items"
              :key="item.itemId"
-             :class="['statistics-card', { disabled: !item.enabled }]" @click="toggleItemEnabled(item)">
+             :class="['statistics-card', { disabled: !item.enabled }]">
           <div class="card-header">
             <div class="item-info">
               <!-- ✅ 星星圖示 - 使用 computed 方法計算路徑 -->
@@ -43,7 +43,10 @@
                    :style="{ opacity: item.enabled ? 1 : 0.3, cursor: 'pointer' }" />
               <div class="item-name">{{ item.itemName }}</div>
             </div>
-            <div class="item-status-icon">
+            <div class="item-status-icon" @click="toggleItemWatch(item)">
+              {{ item.watch ? '👁️' : '🚫' }}
+            </div>
+            <div class="item-status-icon" @click="toggleItemEnabled(item)">
               {{ item.enabled ? '✓' : '✗' }}
             </div>
           </div>
@@ -218,51 +221,69 @@
     }
   }
 
-  // 切換項目啟用狀態
-  const toggleItemEnabled = async (item) => {
-    const newEnabled = !item.enabled
+  // ✅ 統一的狀態切換方法
+  const toggleItemStatus = async (item, statusType) => {
+    const isEnabled = statusType === 'enabled'
+    const currentValue = isEnabled ? item.enabled : item.watch
+    const newValue = !currentValue
 
     try {
       const result = await apiCall(
- 'SavePickupStatisticsItem',
-     item.itemId,
+        'SavePickupStatisticsItem',
+        item.itemId,
         item.itemName,
- item.pageId,
-        newEnabled,
-    item.itemType
+        item.pageId,
+        isEnabled ? newValue : item.enabled,  // enabled 值
+        item.itemType,
+        isEnabled ? item.watch : newValue     // watch 值
       )
 
       if (result.success) {
-        item.enabled = newEnabled
+        if (isEnabled) {
+          item.enabled = newValue
+        } else {
+          item.watch = newValue
+        }
         // ✅ 移除通知，直接更新狀態
       } else {
- // ❌ 只在失敗時顯示錯誤
-     showNotification('error', result.message)
+        // ❌ 只在失敗時顯示錯誤
+        showNotification('error', result.message)
       }
     } catch (err) {
-      showNotification('error', '更新狀態失敗: ' + err.message)
+      const errorMsg = isEnabled ? '更新狀態失敗' : '更新監控狀態失敗'
+      showNotification('error', `${errorMsg}: ${err.message}`)
     }
+  }
+
+  // 切換項目啟用狀態
+  const toggleItemEnabled = async (item) => {
+    await toggleItemStatus(item, 'enabled')
+  }
+
+  // 切換項目監控狀態
+  const toggleItemWatch = async (item) => {
+    await toggleItemStatus(item, 'watch')
   }
 
   // ✅ 新增：更新物品的 Like 值
   const updateItemLike = async (item) => {
     try {
-  const result = await apiCall('UpdateItemLike', item.itemId)
+      const result = await apiCall('UpdateItemLike', item.itemId)
 
       if (result.success) {
-  // ✅ 直接更新物件的屬性，避免替換整個物件
+        // ✅ 直接更新物件的屬性，避免替換整個物件
         // 使用 Vue 3 的響應式更新，不會觸發整個列表重新渲染
-    item.like = result.like
+        item.like = result.like
 
         // ✅ 如果後端也返回 enabled 狀態，同時更新
-   if (result.hasOwnProperty('enabled')) {
-   item.enabled = result.enabled
+        if (result.hasOwnProperty('enabled')) {
+          item.enabled = result.enabled
         }
 
         // ✅ 移除通知，直接更新星星
- } else {
+      } else {
         // ❌ 只在失敗時顯示錯誤
-    showNotification('error', result.message)
+        showNotification('error', result.message)
       }
     } catch (err) {
       showNotification('error', '更新星星失敗: ' + err.message)
@@ -344,11 +365,12 @@
         editingItem.value.itemName,
         editingItem.value.pageId,
         editingItem.value.enabled,
-        editingItem.value.itemType
+        editingItem.value.itemType,
+        editingItem.value.watch ?? false  // ✅ 新增：傳遞 watch 狀態，預設為 false
       )
 
       if (result.success) {
-        showNotification('success', result.message)
+        // ✅ 移除成功通知，直接關閉對話框和重新載入
         closeDialog()
         await loadStatisticsConfigs()
       } else {
@@ -369,7 +391,7 @@
       const result = await apiCall('DeletePickupStatisticsItem', item.pageId, item.itemId)
 
       if (result.success) {
-        showNotification('success', result.message)
+        // ✅ 移除成功通知，直接重新載入
         await loadStatisticsConfigs()
       } else {
         showNotification('error', result.message)
@@ -463,14 +485,14 @@
   /* 通知訊息 */
   /* ✅ 浮動通知 - 固定在頂部中央 */
   .notification-float {
-  position: fixed;
+    position: fixed;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 9999;
     padding: 15px 30px;
     border-radius: 8px;
-  font-weight: 500;
+    font-weight: 500;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(10px);
     min-width: 300px;
@@ -478,17 +500,17 @@
     text-align: center;
   }
 
-  .notification-float.success {
-    background: rgba(76, 175, 80, 0.95);
-    border: 1px solid #4caf50;
-    color: white;
-  }
+    .notification-float.success {
+      background: rgba(76, 175, 80, 0.95);
+      border: 1px solid #4caf50;
+      color: white;
+    }
 
-  .notification-float.error {
-    background: rgba(244, 67, 54, 0.95);
-    border: 1px solid #f44336;
-    color: white;
-  }
+    .notification-float.error {
+      background: rgba(244, 67, 54, 0.95);
+      border: 1px solid #f44336;
+      color: white;
+    }
 
   /* ✅ 通知動畫 - 從上方滑入 */
   .notification-slide-enter-active {
@@ -504,7 +526,8 @@
       opacity: 0;
       transform: translateX(-50%) translateY(-20px);
     }
- to {
+
+    to {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
@@ -515,6 +538,7 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+
     to {
       opacity: 0;
       transform: translateX(-50%) translateY(-20px);
@@ -543,7 +567,7 @@
 
   .spinner {
     width: 50px;
- height: 50px;
+    height: 50px;
     margin: 0 auto 20px;
     border: 4px solid rgba(255, 255, 255, 0.3);
     border-top-color: #667eea;
@@ -559,7 +583,7 @@
 
   .loading-spinner p {
     color: white;
- font-size: 1.2rem;
+    font-size: 1.2rem;
     font-weight: 500;
   }
 
@@ -587,7 +611,7 @@
     flex-direction: column;
     gap: 12px;
   }
-  
+
     .statistics-card:hover {
       border-color: rgba(255, 255, 255, 0.3);
       transform: translateY(-5px);
@@ -667,17 +691,30 @@
     font-weight: bold;
     flex-shrink: 0;
     transition: all 0.3s;
+    cursor: pointer; /* ✅ 新增：可點擊的游標 */
   }
 
-  .statistics-card:not(.disabled) .item-status-icon {
-    background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-  }
+    /* ✅ 啟用狀態樣式 */
+    .item-status-icon:nth-child(3) { /* 第三個 status-icon 是 enabled */
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+    }
 
-  .statistics-card.disabled .item-status-icon {
+  .statistics-card.disabled .item-status-icon:nth-child(3) {
     background: rgba(244, 67, 54, 0.2);
     color: #f44336;
   }
+
+  /* ✅ 新增：監控狀態樣式 */
+  .item-status-icon:nth-child(2) { /* 第二個 status-icon 是 watch */
+    background: rgba(33, 150, 243, 0.2); /* 藍色背景 */
+    color: #2196f3; /* 藍色文字 */
+  }
+
+    .item-status-icon:nth-child(2):hover {
+      background: rgba(33, 150, 243, 0.3);
+      transform: scale(1.1);
+    }
 
   /* 卡片底部 */
   .card-footer {

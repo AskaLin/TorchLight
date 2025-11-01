@@ -115,7 +115,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         if (_currentMapRecord.Resonance > 0)
         {
             Log.Information("  使用迴響: {Resonance}", _currentMapRecord.Resonance);
-        }        
+        }
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// </summary>
     public void EndMapRecord(DateTime endTime)
     {
-        if (string.IsNullOrEmpty(_currentMapRecord.RecordId))
+        if (_currentMapRecord.StartTime == DateTime.MinValue)
         {
             Log.Warning("嘗試結束地圖記錄，但當前沒有有效的地圖記錄");
             return;
@@ -251,8 +251,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         _currentMapRecord = new();
         _currentMapPickData = [];
         IsInMap = false;
-        CurrentMapName = string.Empty;        
-    }  
+        CurrentMapName = string.Empty;
+    }
 
     /// <summary>
     /// 顯示當前地圖的拾取記錄

@@ -515,92 +515,94 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         {
      var allItems = ItemInfoMapper.GetAllItemConfigs();
 
-            // 按 PageIdType 和 ItemType 雙層分組
-    var configsByPageId = new Dictionary<int, Dictionary<string, List<object>>>();
+          // 按 PageIdType 和 ItemType 雙層分組
+      var configsByPageId = new Dictionary<int, Dictionary<string, List<object>>>();
 
-          foreach (var item in allItems)
-          {
-                var pageId = (int)item.PageIdType;
-var itemType = item.Type.ToString();
+            foreach (var item in allItems)
+            {
+           var pageId = (int)item.PageIdType;
+        var itemType = item.Type.ToString();
 
-         if (!configsByPageId.TryGetValue(pageId, out Dictionary<string, List<object>> value))
-   {
-     value = [];
-             configsByPageId[pageId] = value;
-    }
+  if (!configsByPageId.TryGetValue(pageId, out Dictionary<string, List<object>> value))
+      {
+          value = [];
+          configsByPageId[pageId] = value;
+        }
 
-             if (!value.TryGetValue(itemType, out List<object> value1))
-    {
-      value1 = [];
-          value[itemType] = value1;
-       }
-
-      value1.Add(new
+ if (!value.TryGetValue(itemType, out List<object> value1))
   {
-           ItemId = item.Id,
+ value1 = [];
+                    value[itemType] = value1;
+ }
+
+                value1.Add(new
+     {
+             ItemId = item.Id,
       ItemName = item.Name,
-    PageId = pageId,
-          ItemType = itemType,
-        Enabled = item.Enable,
-      Like = item.Like  // ✅ 新增 Like 屬性
-    });
-       }
+        PageId = pageId,
+       ItemType = itemType,
+    Enabled = item.Enable,
+   Watch = item.Watch,  // ✅ 新增：包含 watch 屬性
+        Like = item.Like
+       });
+            }
 
             return JsonSerializer.Serialize(configsByPageId, _ops);
         }
-        catch (Exception ex)
- {
-      Log.Error(ex, "獲取拾取統計設定失敗");
-         return JsonSerializer.Serialize(new { error = ex.Message });
-}
+   catch (Exception ex)
+        {
+            Log.Error(ex, "獲取拾取統計設定失敗");
+     return JsonSerializer.Serialize(new { error = ex.Message });
+   }
     }
 
     /// <summary>
     /// 保存拾取統計項目（更新到 ItemInfo.json）
     /// </summary>
-    public string SavePickupStatisticsItem(int itemId, string itemName, int pageId, bool enabled, string itemType)
+    public string SavePickupStatisticsItem(int itemId, string itemName, int pageId, bool enabled, string itemType, bool watch = false)
     {
         try
         {
             // 從 ItemInfoMapper 獲取現有配置
             var allItems = ItemInfoMapper.GetAllItemConfigs();
-            var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
+    var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
 
-            if (existingItem != null)
+    if (existingItem != null)
             {
-                // 更新現有項目
-                existingItem.Name = itemName;
-                existingItem.PageIdType = (PageIdType)pageId;
-                existingItem.Enable = enabled;
+        // 更新現有項目
+    existingItem.Name = itemName;
+     existingItem.PageIdType = (PageIdType)pageId;
+         existingItem.Enable = enabled;
+             existingItem.Watch = watch;  // ✅ 新增：更新 watch 狀態
 
-                // 更新物品類型
-                if (!string.IsNullOrWhiteSpace(itemType) && Enum.TryParse<ItemType>(itemType, out var parsedItemType))
+      // 更新物品類型
+         if (!string.IsNullOrWhiteSpace(itemType) && Enum.TryParse<ItemType>(itemType, out var parsedItemType))
                 {
-                    existingItem.Type = parsedItemType;
-                }
-
-                // 儲存回 ItemInfo.json
-                var success = ItemInfoMapper.SaveToJson();
-
-                return JsonSerializer.Serialize(new
-                {
-                    success,
-                    message = success ? "拾取統計項目已儲存" : "儲存失敗"
-                }, _ops);
+   existingItem.Type = parsedItemType;
             }
-            else
+
+     // 儲存回 ItemInfo.json
+              var success = ItemInfoMapper.SaveToJson();
+
+        return JsonSerializer.Serialize(new
+         {
+       success,
+               message = success ? "拾取統計項目已儲存" : "儲存失敗"
+     }, _ops);
+   }
+    else
             {
-                return JsonSerializer.Serialize(new
-                {
-                    success = false,
-                    message = "找不到指定的物品ID"
-                }, _ops);
-            }
+     return JsonSerializer.Serialize(new
+         {
+        success = false,
+          message = "找不到指定的物品ID"
+    }, _ops);
+      }
         }
         catch (Exception ex)
         {
             Log.Error(ex, "保存拾取統計項目失敗");
-            return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
+      return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
         }
     }
 

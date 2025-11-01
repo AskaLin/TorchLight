@@ -95,13 +95,13 @@ public class GameLogProcessor
                 return;
             }
 
-            if (LineParser.IsCurrentLevelLine(line, out int mapLevel, _mapPickRecordManager.CurrentMapRecordInfoComplete()))
+            if (LineParser.IsCurrentLevelLine(line, out int mapLevel, !_mapPickRecordManager.CurrentMapRecordInfoComplete()))
             {
                 _mapPickRecordManager.SetMapLevel(mapLevel);
                 return;
             }
 
-            if (LineParser.IsCurrentOpenMapIDLine(line, out int mapId, _mapPickRecordManager.CurrentMapRecordInfoComplete()))
+            if (LineParser.IsCurrentOpenMapIDLine(line, out int mapId, !_mapPickRecordManager.CurrentMapRecordInfoComplete()))
             {
                 _mapPickRecordManager.SetMapId(mapId);
                 return;

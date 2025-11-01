@@ -82,7 +82,7 @@
    */
   const props = defineProps({
     sections: {
-   type: Array,
+      type: Array,
       required: true,
       default: () => []
     }
@@ -102,7 +102,7 @@
   const saveState = (key, value) => {
     try {
       localStorage.setItem(key, JSON.stringify(value))
-  } catch (e) {
+    } catch (e) {
       console.warn('無法儲存展開狀態:', e)
     }
   }
