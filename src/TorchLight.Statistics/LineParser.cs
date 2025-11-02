@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System;
 using System.Text.RegularExpressions;
 using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.Models;
@@ -59,7 +60,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 datetime = ParseUnrealDateTime(match.Groups[1].Value);
                 return true;
             }
-        }        
+        }
         return false;
     }
 
@@ -70,10 +71,10 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// <param name="openMapFlag"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    public static bool IsTokenLine(string line, out string token, bool openMapFlag = false)
+    public static bool IsTokenLine(string line, out string token)
     {
         token = string.Empty;
-        if (openMapFlag && line.Contains("+TokenKey ["))
+        if (line.Contains("+TokenKey ["))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -81,14 +82,14 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 token = match.Groups[1].Value;
                 return true;
             }
-        }        
+        }
         return false;
     }
 
-    public static bool IsCurrentLevelLine(string line, out int level, bool openMapFlag = false)
+    public static bool IsCurrentLevelLine(string line, out int level)
     {
         level = 0;
-        if (openMapFlag && line.Contains("+CurrentLevel ["))
+        if (line.Contains("+CurrentLevel ["))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -96,14 +97,14 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 level = int.Parse(match.Groups[1].Value);
                 return true;
             }
-        }        
+        }
         return false;
     }
 
-    public static bool IsCurrentOpenMapIDLine(string line, out int mapId, bool openMapFlag = false)
+    public static bool IsCurrentOpenMapIDLine(string line, out int mapId)
     {
         mapId = 0;
-        if (openMapFlag && line.Contains("+CurrentOpenMapID ["))
+        if (line.Contains("+CurrentOpenMapID ["))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -111,8 +112,19 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 mapId = int.Parse(match.Groups[1].Value);
                 return true;
             }
-        }        
+        }
         return false;
+    }
+
+    public static DateTime GetLineDateTime(string line)
+    {
+        var match = LineRegex.GetDateTimeValue().Match(line);
+        if (match.Success)
+        {
+            Log.Debug("開始開新圖");
+            return ParseUnrealDateTime(match.Groups[1].Value);
+        }
+        return DateTime.MinValue;
     }
 
     /// <summary>

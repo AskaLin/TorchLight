@@ -31,7 +31,7 @@ namespace TorchLight.Statistics
                 Log.Information("正在初始化...");
 
                 // 載入Config 初始化資料
-                // AppConfiguration.LoadConfigData();
+                AppConfiguration.LoadConfigData();
 
                 // 初始化地圖映射器
                 MapInfoMapper.Initialize();
@@ -88,7 +88,7 @@ namespace TorchLight.Statistics
                 tail.Start();
 
                 //測試用, 讀取現有日誌內容 進行處理
-                //using FileStream fs = new("D:\\SideProjects\\UE_game-疊界4.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 //using StreamReader sr = new(fs, Encoding.UTF8);
                 //string line;
                 //while ((line = sr.ReadLine()) != null)

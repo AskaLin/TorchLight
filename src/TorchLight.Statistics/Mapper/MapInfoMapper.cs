@@ -180,6 +180,17 @@ public class MapInfoMapper
             };
         }
     }
+    public static MapIdConfig GetMapInfo(int mapId)
+    {
+        lock (_lock)
+        {
+            if (_mapIdConfig.TryGetValue(mapId, out var config))
+            {
+                return config;
+            }
+            return null;
+        }
+    }
 
     /// <summary>
     /// 從完整路徑獲取地圖名稱

@@ -3,6 +3,7 @@ using TorchLight.Statistics.Enums;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace TorchLight.Statistics;
 
@@ -88,24 +89,9 @@ public class GameLogProcessor
                 return;
             }
 
+            
             // 搭配開圖, 取得地圖 Token
-            if (LineParser.IsTokenLine(line, out string mapToken, !_mapPickRecordManager.CurrentMapRecordInfoComplete()))
-            {
-                _mapPickRecordManager.SetMapToken(mapToken);
-                return;
-            }
-
-            if (LineParser.IsCurrentLevelLine(line, out int mapLevel, !_mapPickRecordManager.CurrentMapRecordInfoComplete()))
-            {
-                _mapPickRecordManager.SetMapLevel(mapLevel);
-                return;
-            }
-
-            if (LineParser.IsCurrentOpenMapIDLine(line, out int mapId, !_mapPickRecordManager.CurrentMapRecordInfoComplete()))
-            {
-                _mapPickRecordManager.SetMapId(mapId);
-                return;
-            }
+           
 
             // 0. 檢查 "已開啟日誌" 訊息
             if (LineParser.IsLogOpenedMessage(line))
@@ -162,23 +148,61 @@ public class GameLogProcessor
             }
 
             // 3. 地圖切換
-            if (LineParser.IsMoveMap(line))
+            //if (LineParser.IsMoveMap(line))
+            //{
+            //    var (time, fromPath, toPath, success) = LineParser.GetMapPathData(line);
+            //    if (success)
+            //    {
+            //        var fromMapInfo = MapInfoMapper.GetMapInfo(fromPath);
+            //        var toMapInfo = MapInfoMapper.GetMapInfo(toPath);
+
+            //        Log.Debug("地圖切換: {From} -> {To}", fromPath, toPath);
+            //        Log.Information($"{time:yyyy/MM/dd HH:mm:ss}\t從地圖 {fromMapInfo.Name} 進入地圖 {toMapInfo.Name}");
+
+            //        // 從藏身處進入異界地圖, 開啟地圖拾取紀錄
+            //        if (fromMapInfo.Type == MapType.Hideout && toMapInfo.Type != MapType.Hideout)
+            //        {
+            //            _mapPickRecordManager.StartMapRecord(toMapInfo, time);
+            //        }
+
+            //        // 通知前端地圖切換
+            //        if (_webViewHub != null)
+            //        {
+            //            _ = Task.Run(async () =>
+            //            {
+            //                await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+            //            });
+            //        }
+            //    }
+            //    return;
+            //}
+
+            // 0. 遊戲關閉
+            if (LineParser.CloseGame(line))
             {
-                var (time, fromPath, toPath, success) = LineParser.GetMapPathData(line);
-                if (success)
+                Log.Information("偵測到遊戲關閉, 結算關卡資料");
+                NotifyNewMapRecord();
+                return;
+            }
+
+            if (!_mapPickRecordManager.CurrentMapRecordInfoComplete())
+            {
+                if (LineParser.IsTokenLine(line, out string mapToken))
                 {
-                    var fromMapInfo = MapInfoMapper.GetMapInfo(fromPath);
-                    var toMapInfo = MapInfoMapper.GetMapInfo(toPath);
+                    _mapPickRecordManager.SetMapToken(mapToken);
+                }
+                else if (LineParser.IsCurrentLevelLine(line, out int mapLevel))
+                {
+                    _mapPickRecordManager.SetMapLevel(mapLevel);
+                }
+                else if (LineParser.IsCurrentOpenMapIDLine(line, out int mapId))
+                {
+                    _mapPickRecordManager.SetMapId(mapId);
+                }
 
-                    Log.Debug("地圖切換: {From} -> {To}", fromPath, toPath);
-                    Log.Information($"{time:yyyy/MM/dd HH:mm:ss}\t從地圖 {fromMapInfo.Name} 進入地圖 {toMapInfo.Name}");
-
-                    // 從藏身處進入異界地圖, 開啟地圖拾取紀錄
-                    if (fromMapInfo.Type == MapType.Hideout && toMapInfo.Type != MapType.Hideout)
-                    {
-                        _mapPickRecordManager.StartMapRecord(toMapInfo, time);
-                    }
-
+                if (_mapPickRecordManager.CurrentMapRecordInfoComplete())
+                {                    
+                    _mapPickRecordManager.StartMapRecord(DateTime.Now);
                     // 通知前端地圖切換
                     if (_webViewHub != null)
                     {
@@ -192,15 +216,7 @@ public class GameLogProcessor
             }
 
             // 4. 處理物品變更（區塊處理）
-            _itemChangeProcessor.HandleLine(line);
-
-            // 0. 遊戲關閉
-            if (LineParser.CloseGame(line))
-            {
-                Log.Information("偵測到遊戲關閉, 結算關卡資料");
-                NotifyNewMapRecord();
-                return;
-            }
+            _itemChangeProcessor.HandleLine(line);         
         }
         catch (Exception ex)
         {

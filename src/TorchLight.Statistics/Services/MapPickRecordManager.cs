@@ -25,18 +25,23 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
 
     public void SetMapToken(string token)
-    {        
+    {
         _currentMapRecord.RecordId = token;
         Log.Debug("設定 Map Token {tok}", _currentMapRecord.RecordId);
     }
     public void SetMapId(int mapId)
-    {        
-        _currentMapRecord.MapId = mapId;        
-        _currentMapRecord.Name = MapInfoMapper.GetMapName(mapId);
-        Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
+    {
+        _currentMapRecord.MapId = mapId;
+        var mapIdConfig = MapInfoMapper.GetMapInfo(mapId);
+        if (mapIdConfig != null)
+        {
+            _currentMapRecord.Name = mapIdConfig.Name;
+            _currentMapRecord.Type = mapIdConfig.Type;
+            Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
+        }
     }
     public void SetMapLevel(int mapLevel)
-    {        
+    {
         _currentMapRecord.Level = mapLevel;
         Log.Debug("設定 Map Level {level}", _currentMapRecord.Level);
     }
@@ -83,14 +88,10 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// <summary>
     /// 開始記錄新地圖
     /// </summary>
-    public void StartMapRecord(MapInfo map, DateTime startTime)
+    public void StartMapRecord(DateTime startTime)
     {
-        // var mapRealName = map.Type == MapType.Netherrealm ? map.RealName(_currentMapRecord.MapTicketId) : map.Name;
-
-        _currentMapRecord.Id = map.Id;
-        // _currentMapRecord.Name = mapRealName;
-        _currentMapRecord.StartTime = startTime;
-        _currentMapRecord.Type = map.Type;
+        // _currentMapRecord.Id = map.Id;
+        _currentMapRecord.StartTime = startTime;       
 
         _currentMapPickData = [];
         IsInMap = true;
