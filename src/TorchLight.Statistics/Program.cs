@@ -30,6 +30,9 @@ namespace TorchLight.Statistics
                 // 初始化核心組件
                 Log.Information("正在初始化...");
 
+                // 載入Config 初始化資料
+                // AppConfiguration.LoadConfigData();
+
                 // 初始化地圖映射器
                 MapInfoMapper.Initialize();
 

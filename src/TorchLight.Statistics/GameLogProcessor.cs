@@ -294,21 +294,12 @@ public class GameLogProcessor
                 return new MapRecordViewModel(false, MapType.Hideout, _mapPickRecordManager.CurrentMapName);
             }
             else if (currentRecord != null)
-            {
-                // ✅ 即時從 MapInfoMapper 獲取最新的地圖名稱
-                var latestMapName = MapInfoMapper.GetMapName(currentRecord.Id);
-                var mapInfo = new MapInfo()
-                {
-                    Id = currentRecord.Id,
-                    Name = latestMapName,
-                    Type = currentRecord.Type
-                };
-
+            {               
                 return new MapRecordViewModel
                 {
                     IsInMap = true,
                     MapType = MapType.Netherrealm.ToString(),
-                    MapName = mapInfo.RealName(currentRecord.MapTicketId),
+                    MapName = currentRecord.Name,
                     RecordId = currentRecord.RecordId,
                     MapTicket = currentRecord.MapTicket,
                     Compass = currentRecord.Compass,

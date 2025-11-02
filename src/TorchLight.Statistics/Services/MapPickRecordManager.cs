@@ -25,22 +25,20 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
 
     public void SetMapToken(string token)
-    {
-        Log.Debug("設定 Map Token {tok}", token);
+    {        
         _currentMapRecord.RecordId = token;
+        Log.Debug("設定 Map Token {tok}", _currentMapRecord.RecordId);
     }
     public void SetMapId(int mapId)
-    {
-        Log.Debug("設定 Map ID {id}", mapId);
-        _currentMapRecord.MapId = mapId;
-
-        // 知道ID 就知道Name
-        // _currentMapRecord.Name = MapInfoMapper.GetMapNameById(mapId);
+    {        
+        _currentMapRecord.MapId = mapId;        
+        _currentMapRecord.Name = MapInfoMapper.GetMapName(mapId);
+        Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
     }
     public void SetMapLevel(int mapLevel)
-    {
-        Log.Debug("設定 Map Level {level}", mapLevel);
+    {        
         _currentMapRecord.Level = mapLevel;
+        Log.Debug("設定 Map Level {level}", _currentMapRecord.Level);
     }
     public bool CurrentMapRecordInfoComplete()
     {
@@ -87,16 +85,16 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// </summary>
     public void StartMapRecord(MapInfo map, DateTime startTime)
     {
-        var mapRealName = map.Type == MapType.Netherrealm ? map.RealName(_currentMapRecord.MapTicketId) : map.Name;
+        // var mapRealName = map.Type == MapType.Netherrealm ? map.RealName(_currentMapRecord.MapTicketId) : map.Name;
 
         _currentMapRecord.Id = map.Id;
-        _currentMapRecord.Name = mapRealName;
+        // _currentMapRecord.Name = mapRealName;
         _currentMapRecord.StartTime = startTime;
         _currentMapRecord.Type = map.Type;
 
         _currentMapPickData = [];
         IsInMap = true;
-        CurrentMapName = mapRealName;
+        CurrentMapName = _currentMapRecord.Name; // 先不動CurrentMapName，之後在處理他
 
         Log.Information("{Time} 進入異界地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
 
@@ -126,6 +124,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         if (_currentMapRecord.StartTime == DateTime.MinValue)
         {
             Log.Warning("嘗試結束地圖記錄，但當前沒有有效的地圖記錄");
+            Reset();
+            Log.Warning("置地圖記錄狀態");
             return;
         }
 

@@ -66,21 +66,12 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     }
 
     private static MapRecordDetail GetMapRecord(MapRecordModel model)
-    {
-        // ✅ 即時從 MapInfoMapper 獲取最新的地圖名稱
-        var latestMapName = MapInfoMapper.GetMapName(model.Id);
-        var mapInfo = new MapInfo()
-        {
-            Id = model.Id,
-            Name = latestMapName,
-            Type = model.Type
-        };
-
+    {       
         return new MapRecordDetail
         {
             RecordId = model.RecordId,
             Id = model.Id,
-            Name = mapInfo.RealName(model.MapTicketId),  // ✅ 使用最新的地圖名稱
+            Name = model.Name,
             MapTicket = model.MapTicket,
             Compass = [.. model.Compass.Where(c => !string.IsNullOrEmpty(c))],
             Probe = model.Probe,

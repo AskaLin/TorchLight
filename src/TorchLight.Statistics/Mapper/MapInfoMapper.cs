@@ -13,7 +13,9 @@ namespace TorchLight.Statistics.Mapper;
 public class MapInfoMapper
 {
     private static readonly object _lock = new();
+    [Obsolete("之後用_mapIdConfig代替")]
     private static List<MapConfigItem> _mapConfigs = [];
+    private static Dictionary<int, MapIdConfig> _mapIdConfig = [];
     private static ConfigFileWatcher<MapConfigItem> _configWatcher;
     private static readonly JsonSerializerOptions _ops = new()
     {
@@ -38,7 +40,7 @@ public class MapInfoMapper
     public static void Initialize()
     {
         LoadFromJson();
-
+        _mapIdConfig = AppConfiguration.MapIdDictionary;
         // 初始化檔案監控器
         _configWatcher = new ConfigFileWatcher<MapConfigItem>(
           ConfigFilePath,
@@ -123,6 +125,7 @@ public class MapInfoMapper
     private static void LoadDefaultConfig()
     {
         _mapConfigs = [.. AppConfiguration.DefaultMapConfigs];
+        _mapIdConfig = AppConfiguration.MapIdDictionary;
     }
 
     /// <summary>
@@ -197,6 +200,17 @@ public class MapInfoMapper
             return config?.Name ?? mapId;
         }
     }
+    public static string GetMapName(int mapId)
+    {
+        lock (_lock)
+        {
+            if (_mapIdConfig.TryGetValue(mapId, out var config))
+            {
+                return config.Name;
+            }
+            return mapId.ToString();
+        }
+    }
 
     /// <summary>
     /// 判斷地圖類型
@@ -220,6 +234,14 @@ public class MapInfoMapper
     {
         var config = _mapConfigs.FirstOrDefault(m => m.Id == mapId);
         return config?.Type ?? MapType.Unknown;
+    }
+    public static MapType GetMapType(int mapId)
+    {
+        if (_mapIdConfig.TryGetValue(mapId, out var config))
+        {
+            return config.Type;
+        }
+        return MapType.Unknown;
     }
 
     /// <summary>

@@ -1,5 +1,9 @@
 ﻿using TorchLight.Statistics.Enums;
 using TorchLight.Statistics.Models;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Serilog;
+using System.Security.Permissions;
 
 namespace TorchLight.Statistics.Configuration;
 
@@ -66,11 +70,11 @@ public class AppConfiguration
         new() { Id = "KD_YuanSuKuangDong000", Name = "元素礦洞", Type = MapType.Netherrealm },
         new() { Id = "SQ_BianChuiZhiDi200", Name = "蠻荒原野", Type = MapType.Netherrealm },
         new() { Id = "DD_DiDuTingYuan200", Name = "暗夜王庭", Type = MapType.Netherrealm },
-        new() { Id = "KD_AiRenDiSanCeng", Name = "群山之心", Type = MapType.Netherrealm },        
+        new() { Id = "KD_AiRenDiSanCeng", Name = "群山之心", Type = MapType.Netherrealm },
         new() { Id = "JH_MengZhongShengDi000", Name = "微光禮堂", Type = MapType.Netherrealm },
         new() { Id = "SD_ShouGuSiDi000", Name = "龍眠峽谷", Type = MapType.Netherrealm },
 
-        new() { Id = "JH_ShengDeLanXiuDaoYuan000", Name = "懺悔學院", Type = MapType.Netherrealm },        
+        new() { Id = "JH_ShengDeLanXiuDaoYuan000", Name = "懺悔學院", Type = MapType.Netherrealm },
         new() { Id = "JH_ZuiRenMiDian000", Name = "告罪之間", Type = MapType.Netherrealm },
         // 冰已有 new() { Id = "YJ_LuoRiQiongDi200", Name = "落日穹底", Type = MapType.Netherrealm }, 
         new() { Id = "KD_RongHuoHeXin000", Name = "熔鐵工廠", Type = MapType.Netherrealm },
@@ -216,7 +220,7 @@ public class AppConfiguration
         new() {Id = 6054, Name = "學者的奇思", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
         new() {Id = 6055, Name = "安東尼奧的研究", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
         new() {Id = 6111, Name = "超新星爆發", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6118, Name = "萬神的回聲", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other, Like = 6 },
+        new() {Id = 6118, Name = "萬神的迴響", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other, Like = 6 },
         new() {Id = 6119, Name = "離群的螢火", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
         new() {Id = 6125, Name = "百倍橫財", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
         new() {Id = 6127, Name = "眾火俱焚", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other, Like = 6 },
@@ -317,7 +321,6 @@ public class AppConfiguration
         new() {Id = 12031, Name = "螢光之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
         new() {Id = 12040, Name = "羅盤之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
         new() {Id = 12041, Name = "羅盤之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12050, Name = "信標之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
         new() {Id = 100001, Name = "罪孽之劫掠羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
         new() {Id = 100200, Name = "初火靈砂", Type= ItemType.Currency, PageIdType= PageIdType.Currency },
         new() {Id = 100300, Name = "初火源質", Type= ItemType.Currency, PageIdType= PageIdType.Currency, Like = 6 },
@@ -380,11 +383,150 @@ public class AppConfiguration
         new() {Id = 440004, Name = "神威紋章-狩獵", Type= ItemType.DivineCrest, PageIdType= PageIdType.Other },
         new() {Id = 990005, Name = "迷霧的本質", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
         new() {Id = 990007, Name = "居民的眼睛", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 990091, Name = "征伐灰記", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
+        new() {Id = 990091, Name = "征伐徽記", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
         new() {Id = 3000001, Name = "勇者之證I", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
         new() {Id = 3000002, Name = "勇者之證II", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
         new() {Id = 3000003, Name = "勇者之證III", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
         new() {Id = 3000004, Name = "勇者之證IV", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
         new() {Id = 3000005, Name = "勇者之證V", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other }
     ];
+
+
+    /// <summary>
+    /// 地圖ID對應字典
+    /// </summary>
+    /// <example>
+    /// 使用範例：
+    /// <code>
+    /// // 查詢特定地圖資訊
+    /// var mapInfo = AppConfiguration.GetMapInfo(1061000);
+    /// if (mapInfo != null)
+    /// {
+    ///  Console.WriteLine($"地圖名稱: {mapInfo.Name}, 類型: {mapInfo.Type}");
+    /// }
+    /// 
+    /// // 或直接從字典查詢
+    /// if (AppConfiguration.MapIdDictionary.TryGetValue(1061000, out var info))
+    /// {
+    ///   Console.WriteLine($"找到地圖: {info.Name}");
+    /// }
+    /// </code>
+    /// </example>
+    public static Dictionary<int, MapIdConfig> MapIdDictionary { get; private set; } = [];
+
+
+    public static void LoadConfigData()
+    {
+        LoadConfigData<MapperItem>("Seed/MapMapper.json", (mapperItems) =>
+        {
+            // 清空現有字典
+            MapIdDictionary.Clear();
+            string prefix = string.Empty;
+            string levelStr = string.Empty;
+            // 將每個ID對應到地圖資訊
+            foreach (var item in mapperItems)
+            {                      
+                levelStr = string.Empty;
+                prefix = string.Empty;
+                foreach (var id in item.Id)
+                {                    
+                    if (item.Type == MapType.Netherrealm)
+                    {
+                        levelStr = GetLevel(int.Parse(id.ToString().Substring(2, 1)));
+                        if (id > 1120000)
+                        {
+                            prefix = "幽邃的";
+                        }
+                        else if(id > 1090000)
+                        {
+                            var idStr = id.ToString().Substring(3, 2);
+                            prefix = idStr switch
+                            {
+                                "10" => "滾燙的",
+                                "11" => "徹骨的",
+                                "12" => "柔軟的",
+                                "13" => "漆黑的",
+                                "14" => "耀眼的",
+                                _ => string.Empty,
+                            };
+                        }                        
+                    }
+                    MapIdDictionary[id] = new MapIdConfig
+                    {
+                        Id = id,
+                        Name = $"{levelStr} {prefix}{item.Name}",
+                        Type = item.Type
+                    };
+                }
+            }
+        });
+        static string GetLevel(int levelNum)
+        {
+            return levelNum switch
+            {
+                6 => "7-0",
+                7 => "7-1",
+                8 => "7-2",
+                9 => "8-0",
+                10 => "8-1",
+                11 => "8-2",
+                12 => "U8",
+                _ => ""
+            };
+        }
+    }
+
+    /// <summary>
+    /// 根據地圖ID取得地圖資訊
+    /// </summary>
+    /// <param name="mapId">地圖ID</param>
+    /// <returns>地圖資訊，若找不到則回傳 null</returns>
+    public static MapIdConfig GetMapInfo(int mapId)
+    {
+        return MapIdDictionary.TryGetValue(mapId, out var mapInfo) ? mapInfo : null;
+    }
+    /// <summary>
+    /// 載入地圖ID對應字典
+    /// </summary>
+    /// <param name="jsonFilePath">JSON檔案路徑，預設為 Seed/MapMapper.json</param>
+    private static void LoadConfigData<T>(string jsonFilePath, Action<List<T>> action)
+    {
+        try
+        {
+            if (!File.Exists(jsonFilePath))
+            {
+                Log.Error("找不到地圖對應檔案: {FilePath}", jsonFilePath);
+            }
+
+            var jsonContent = File.ReadAllText(jsonFilePath);
+            var mapperItems = JsonSerializer.Deserialize<List<T>>(jsonContent);
+
+            if (mapperItems == null)
+            {
+                Log.Warning("無法解析對應檔案: {FilePath}", jsonFilePath);
+            }
+
+            action(mapperItems);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "載入地圖ID對應字典失敗: {Message}", ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// JSON檔案對應類別
+    /// </summary>
+    private class MapperItem
+    {
+        [JsonPropertyName("id")]
+        public List<int> Id { get; set; } = [];
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("type")]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public MapType Type { get; set; }
+    }
 }

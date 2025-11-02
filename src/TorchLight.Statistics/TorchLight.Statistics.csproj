@@ -21,6 +21,14 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Seed\MapMapper.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Seed\MapMapper.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <!-- 顯示方案根目錄特定檔案（如 README.md、LICENSE、CHANGELOG.md） -->
   <ItemGroup>
