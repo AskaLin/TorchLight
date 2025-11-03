@@ -10,7 +10,7 @@ namespace TorchLight.Statistics.LogProcessor;
 /// 遊戲日誌處理器 - 整合所有日誌處理邏輯
 /// </summary>
 public class GameLogProcessor
-{    
+{
     private readonly BagInventoryManager _bagInventoryManager;
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly ConsoleLogger _logger;
@@ -22,7 +22,7 @@ public class GameLogProcessor
     private readonly ItemChangeProcessor _itemChangeProcessor;
     private readonly OpenMapProcessor _openMapProcessor;
     private readonly InitBagProcessor _initBagProcessor;
-
+    private readonly SearchItemProcessor _searchItemProcessor;
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
     /// </summary>
@@ -35,20 +35,24 @@ public class GameLogProcessor
     public event Action OnBagSyncCompleted;
 
 
-    public GameLogProcessor(WebViewHub webViewHub = null)    {
-        
+    public GameLogProcessor(WebViewHub webViewHub = null)
+    {
         _itemTable = ItemInfoMapper.GetItemTable();
         _webViewHub = webViewHub;
         _bagInventoryManager = new BagInventoryManager(_itemTable);
         _mapPickRecordManager = new MapPickRecordManager(_itemTable);
         _logger = new ConsoleLogger();
 
-
         _itemChangeProcessor = new ItemChangeProcessor();
         _openMapProcessor = new OpenMapProcessor();
         _initBagProcessor = new InitBagProcessor();
+        _searchItemProcessor = new SearchItemProcessor();
 
+        RegisterEventHandlers();
+    }
 
+    private void RegisterEventHandlers()
+    {
         // 註冊事件處理
         _itemChangeProcessor.OnItemChanged += HandleBagModification;
 
@@ -59,7 +63,13 @@ public class GameLogProcessor
         _initBagProcessor.OnItemInitialized += HandleItemInitialized;
         _initBagProcessor.OnInitCompleted += HandleInitCompleted;
 
+        _searchItemProcessor.OnSerachComplete += (itemBaseId) =>
+        {
+            // 將搜到的id  發到 前端 註冊物品頁
+        };
     }
+
+    
 
     /// <summary>
     /// 設定 WebViewHub（用於後續通知前端）
@@ -294,11 +304,11 @@ public class GameLogProcessor
     /// </summary>
     private void HandleInitCompleted(InitBagEvent initEvent)
     {
-        foreach(var item in initEvent.Items)
+        foreach (var item in initEvent.Items)
         {
             _bagInventoryManager.InitializeBagItem(item);
         }
-        
+
         _bagInventoryManager.PrintInitializedBag();
         OnBagSyncCompleted?.Invoke();
     }

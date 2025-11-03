@@ -303,6 +303,5 @@ public partial class LineParser()
 
         return false;
     }
-
     #endregion
 }

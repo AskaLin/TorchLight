@@ -15,20 +15,20 @@ public class OpenMapProcessor
     public event Action<DateTime> OnMapStart;
     public event Action<OpenMapEvent> OnMapComplete;
 
-    private bool inOpenMapBlock = false;
+    private bool _inOpenMapBlock = false;
     private OpenMapEvent currentMapEvent = null;
 
     public void HandleLine(string line)
     {
         if (LineParser.OpenMapStart(line, out var startTime))
         {
-            inOpenMapBlock = true;
+            _inOpenMapBlock = true;
             currentMapEvent = new OpenMapEvent(startTime);
             OnMapStart?.Invoke(startTime);
             return;
         }
 
-        if (inOpenMapBlock)
+        if (_inOpenMapBlock)
         {
             if (LineParser.IsTokenLine(line, out string token))
             {
@@ -49,7 +49,7 @@ public class OpenMapProcessor
             // 假設區塊結束條件是遇到某個特定行
             if (LineParser.OpenMapEnd(line, out var endTime))
             {
-                inOpenMapBlock = false;
+                _inOpenMapBlock = false;
                 OnMapComplete?.Invoke(currentMapEvent);
             }
         }
