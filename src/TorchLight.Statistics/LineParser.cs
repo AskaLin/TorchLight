@@ -1,6 +1,6 @@
 ﻿using Serilog;
-using System.Text.RegularExpressions;
 using TorchLight.Statistics.Configuration;
+using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics;
@@ -8,19 +8,19 @@ namespace TorchLight.Statistics;
 /// <summary>
 /// 日誌行解析器 - 負責解析遊戲日誌的各種格式
 /// </summary>
-public partial class LineParser(Dictionary<int, ItemModel> itemTable)
+public partial class LineParser()
 {
-    private readonly Dictionary<int, ItemModel> _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
+    private static readonly Dictionary<int, ItemModel> _itemTable = ItemInfoMapper.GetItemTable();
 
     /// <summary>
     /// 需要忽略的頁面ID（裝備欄與技能欄）
     /// </summary>
-    private readonly HashSet<int> _ignorePageIds = [100, 101];
+    private static readonly HashSet<int> _ignorePageIds = [100, 101];
 
     /// <summary>
     /// 標記是否正在進行背包初始化
     /// </summary>
-    private bool _isInitializingBag = false;
+    private static bool _isInitializingBag = false;
 
     #region 日誌行類型判斷
 
@@ -47,7 +47,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// <param name="line"></param>
     /// <param name="datetime"></param>
     /// <returns></returns>
-    public static bool OpenMap(string line, out DateTime datetime)
+    public static bool OpenMapStart(string line, out DateTime datetime)
     {
         datetime = DateTime.MinValue;
         if (line.Contains("----Socket RecvMessage STT----Spv3Open----"))
@@ -59,7 +59,23 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 datetime = ParseUnrealDateTime(match.Groups[1].Value);
                 return true;
             }
-        }        
+        }
+        return false;
+    }
+
+    public static bool OpenMapEnd(string line, out DateTime datetime)
+    {
+        datetime = DateTime.MinValue;
+        if (line.Contains("----Socket RecvMessage End----"))
+        {
+            var match = LineRegex.GetDateTimeValue().Match(line);
+            if (match.Success)
+            {
+                Log.Debug("結束開新圖");
+                datetime = ParseUnrealDateTime(match.Groups[1].Value);
+                return true;
+            }
+        }
         return false;
     }
 
@@ -70,10 +86,10 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// <param name="openMapFlag"></param>
     /// <param name="token"></param>
     /// <returns></returns>
-    public static bool IsTokenLine(string line, out string token, bool openMapFlag = false)
+    public static bool IsTokenLine(string line, out string token)
     {
         token = string.Empty;
-        if (openMapFlag && line.Contains("+TokenKey ["))
+        if (line.Contains("+TokenKey ["))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -81,14 +97,14 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 token = match.Groups[1].Value;
                 return true;
             }
-        }        
+        }
         return false;
     }
 
-    public static bool IsCurrentLevelLine(string line, out int level, bool openMapFlag = false)
+    public static bool IsCurrentLevelLine(string line, out int level)
     {
         level = 0;
-        if (openMapFlag && line.Contains("+CurrentLevel ["))
+        if (line.Contains("+CurrentLevel ["))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -96,14 +112,14 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 level = int.Parse(match.Groups[1].Value);
                 return true;
             }
-        }        
+        }
         return false;
     }
 
-    public static bool IsCurrentOpenMapIDLine(string line, out int mapId, bool openMapFlag = false)
+    public static bool IsCurrentOpenMapIDLine(string line, out int mapId)
     {
         mapId = 0;
-        if (openMapFlag && line.Contains("+CurrentOpenMapID ["))
+        if (line.Contains("+CurrentOpenMapID ["))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -111,15 +127,26 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
                 mapId = int.Parse(match.Groups[1].Value);
                 return true;
             }
-        }        
+        }
         return false;
+    }
+
+    public static DateTime GetLineDateTime(string line)
+    {
+        var match = LineRegex.GetDateTimeValue().Match(line);
+        if (match.Success)
+        {
+            Log.Debug("開始開新圖");
+            return ParseUnrealDateTime(match.Groups[1].Value);
+        }
+        return DateTime.MinValue;
     }
 
     /// <summary>
     /// 是否為初始化完成的日誌（已廢棄，改用 CheckBagInitializationState）
     /// </summary>
-    [Obsolete("請使用 CheckBagInitializationState 來判斷初始化狀態")]
-    public bool IsInitFinished(string line) => line.Contains("LuaLoading@ NetData _LoadFunctionNetData Progress = 1.0");
+    //[Obsolete("請使用 CheckBagInitializationState 來判斷初始化狀態")]
+    //public bool IsInitFinished(string line) => line.Contains("LuaLoading@ NetData _LoadFunctionNetData Progress = 1.0");
 
     /// <summary>
     /// 檢查並更新背包初始化狀態
@@ -132,7 +159,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// - isComplete: 初始化是否完成
     /// - isFirstInit: 是否為第一次開始初始化
     /// </returns>
-    public (bool isInitLine, bool shouldProcess, bool isComplete, bool isFirstInit) CheckBagInitializationState(string line)
+    public static (bool isInitLine, bool shouldProcess, bool isComplete, bool isFirstInit) CheckBagInitializationState(string line)
     {
         bool hasInitBagData = line.Contains("BagMgr@:InitBagData");
         bool isIgnored = IsIgnoredPage(line);
@@ -165,30 +192,30 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
         }
     }
 
-    /// <summary>
-    /// 是否為初始化背包物品的日誌（保留用於相容性，但建議使用 CheckBagInitializationState）
-    /// </summary>
-    public bool IsInitBagItemData(string line) => line.Contains("BagMgr@:InitBagData") && !IsIgnoredPage(line);
+    ///// <summary>
+    ///// 是否為初始化背包物品的日誌（保留用於相容性，但建議使用 CheckBagInitializationState）
+    ///// </summary>
+    //public bool IsInitBagItemData(string line) => line.Contains("BagMgr@:InitBagData") && !IsIgnoredPage(line);
 
-    /// <summary>
-    /// 是否為修改背包物品的日誌
-    /// </summary>
-    public bool IsModfyBagItemData(string line) => line.Contains("BagMgr@:Modfy BagItem") && !IsIgnoredPage(line);
+    ///// <summary>
+    ///// 是否為修改背包物品的日誌
+    ///// </summary>
+    //public bool IsModfyBagItemData(string line) => line.Contains("BagMgr@:Modfy BagItem") && !IsIgnoredPage(line);
 
-    /// <summary>
-    /// 是否為刪除背包物品的日誌
-    /// </summary>
-    public bool IsDeleteBagItemData(string line) => line.Contains("BagMgr@:RemoveBagItem") && !IsIgnoredPage(line);
+    ///// <summary>
+    ///// 是否為刪除背包物品的日誌
+    ///// </summary>
+    //public bool IsDeleteBagItemData(string line) => line.Contains("BagMgr@:RemoveBagItem") && !IsIgnoredPage(line);
 
-    /// <summary>
-    /// 是否為地圖切換的日誌
-    /// </summary>
-    public static bool IsMoveMap(string line) => line.Contains("PageApplyBase@ _UpdateGameEnd: LastSceneName = World'/Game/Art/Maps/");
+    ///// <summary>
+    ///// 是否為地圖切換的日誌
+    ///// </summary>
+    //public static bool IsMoveMap(string line) => line.Contains("PageApplyBase@ _UpdateGameEnd: LastSceneName = World'/Game/Art/Maps/");
 
     /// <summary>
     /// 重置初始化狀態（登入時使用）
     /// </summary>
-    public void ResetInitializationState()
+    public static void ResetInitializationState()
     {
         _isInitializingBag = false;
     }
@@ -220,7 +247,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// <summary>
     /// 解析物品資料
     /// </summary>
-    public ItemModel GetItemData(string line)
+    public static ItemModel GetItemData(string line)
     {
         var match = LineRegex.BagItemLine().Match(line);
         if (!match.Success)
@@ -229,7 +256,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
         }
 
         var configBaseId = Convert.ToInt32(match.Groups["config"].Value);
-        var itemName = GetItemName(configBaseId);
+        var itemName = _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知物品({configBaseId})";
 
         return new ItemModel
         {
@@ -256,17 +283,9 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     }
 
     /// <summary>
-    /// 獲取物品名稱
-    /// </summary>
-    private string GetItemName(int configBaseId)
-    {
-        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知物品({configBaseId})";
-    }
-
-    /// <summary>
     /// 判斷是否為需要忽略的頁面
     /// </summary>
-    private bool IsIgnoredPage(string line)
+    private static bool IsIgnoredPage(string line)
     {
         // 快速檢查：尋找 "PageId = XXX" 模式
         var pageIdIndex = line.IndexOf("PageId = ", StringComparison.Ordinal);
@@ -284,6 +303,5 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
 
         return false;
     }
-
     #endregion
 }

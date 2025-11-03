@@ -33,6 +33,11 @@
           <span>{{ floatingWindowVisible ? '📊' : '📉' }}</span>
         </button>
 
+        <!-- 斬殺線控制按鈕 -->
+        <button @click="toggleExecuteLine" class="btn-icon btn-execute" :title="executeLineVisible ? '隱藏斬殺線' : '顯示斬殺線'">
+          <span>{{ executeLineVisible ? '⚔️' : '🗡️' }}</span>
+        </button>
+
         <button @click="minimizeWindow" class="btn-icon" title="最小化">
           <span>-</span>
         </button>
@@ -45,7 +50,7 @@
 </template>
 
 <script setup>
-  import { computed, ref } from 'vue'
+  import { computed, ref, onMounted } from 'vue'
   import { useMapStore } from '../stores/mapStore'
   import { apiCall } from '../utils/api'
 
@@ -53,6 +58,7 @@
   const currentMapInfo = computed(() => mapStore.currentMapInfo)
   const isSettling = ref(false)
   const floatingWindowVisible = ref(true)
+  const executeLineVisible = ref(false)
 
   const minimizeWindow = () => {
     apiCall('MinimizeWindow').catch(console.error)
@@ -108,6 +114,35 @@
       console.error('切換浮動窗體時發生錯誤:', error)
     }
   }
+
+  // 切換斬殺線顯示
+  const toggleExecuteLine = async () => {
+    try {
+      const result = await apiCall('ToggleExecuteLineWindow')
+
+      if (result && result.success) {
+        executeLineVisible.value = result.isVisible
+        console.log(result.message)
+      } else {
+        console.error('切換斬殺線失敗:', result?.message)
+      }
+    } catch (error) {
+      console.error('切換斬殺線時發生錯誤:', error)
+    }
+  }
+
+  // 啟動時向後端查詢斬殺線設定（包含 isVisible）
+  onMounted(async () => {
+    try {
+      const result = await apiCall('GetExecuteLineSettings')
+      if (result && typeof result.isVisible !== 'undefined') {
+        console.log('載入斬殺線設定', result)
+        executeLineVisible.value = result.isVisible
+      }
+    } catch (err) {
+      console.error('載入斬殺線設定失敗:', err)
+    }
+  })
 </script>
 
 <style scoped>
@@ -263,6 +298,16 @@
 
     .btn-float:hover {
       background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      transform: scale(1.1);
+    }
+
+  /* 斬殺線按鈕特殊樣式 */
+  .btn-execute {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  }
+
+    .btn-execute:hover {
+      background: linear-gradient(135deg, #ee5a6f 0%, #ff6b6b 100%);
       transform: scale(1.1);
     }
 

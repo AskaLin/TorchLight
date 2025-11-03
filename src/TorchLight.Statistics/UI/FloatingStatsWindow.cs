@@ -66,7 +66,7 @@ public class FloatingStatsWindow : Form
         // 設定窗體大小和位置 - ✅ 根據預設橫列模式設定
         Width = HorizontalWidth;   // ✅ 從 VerticalWidth 改為 HorizontalWidth
         Height = HorizontalHeight; // ✅ 從 VerticalHeight 改為 HorizontalHeight
-    Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - Width - 20, 100);
+        Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - Width - 20, 100);
 
         // 啟用雙緩衝以避免閃爍
         DoubleBuffered = true;

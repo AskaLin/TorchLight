@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using TorchLight.Statistics.Enums;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
@@ -67,20 +68,12 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
 
     private static MapRecordDetail GetMapRecord(MapRecordModel model)
     {
-        // ✅ 即時從 MapInfoMapper 獲取最新的地圖名稱
-        var latestMapName = MapInfoMapper.GetMapName(model.Id);
-        var mapInfo = new MapInfo()
-        {
-            Id = model.Id,
-            Name = latestMapName,
-            Type = model.Type
-        };
-
         return new MapRecordDetail
         {
             RecordId = model.RecordId,
-            Id = model.Id,
-            Name = mapInfo.RealName(model.MapTicketId),  // ✅ 使用最新的地圖名稱
+            // Id = model.Id,
+            MapId = model.MapId,
+            Name = model.Name,
             MapTicket = model.MapTicket,
             Compass = [.. model.Compass.Where(c => !string.IsNullOrEmpty(c))],
             Probe = model.Probe,
@@ -150,22 +143,21 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            var allItems = ItemInfoMapper.GetAllItemConfigs();
-            var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
+            var item = ItemInfoMapper.GetItemInfo(itemId);
 
-            if (existingItem != null)
+            if (item != null)
             {
                 // Like 值循環：0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 0
-                existingItem.Like = (existingItem.Like + 1) % 7;
+                item.Like = (item.Like + 1) % 7;
 
-                // 儲存回 ItemInfo.json
-                var success = ItemInfoMapper.SaveToJson();
+                // 更新並儲存
+                var success = ItemInfoMapper.AddOrUpdateItem(item);
 
                 return JsonSerializer.Serialize(new
                 {
                     success,
-                    like = existingItem.Like,
-                    message = success ? $"已更新為 {existingItem.Like} 星" : "更新失敗"
+                    like = item.Like,
+                    message = success ? $"已更新為 {item.Like} 星" : "更新失敗"
                 }, _ops);
             }
             else
@@ -237,14 +229,25 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     }
 
     /// <summary>
-    /// 獲取所有地圖設定（按地圖類型分類）
+    /// 獲取所有地圖設定（按地圖類型分類，以名稱分組）
     /// </summary>
     public string GetMapConfigs()
     {
         try
         {
-            var configsByType = MapInfoMapper.GetAllMapConfigsByType();
-            return JsonSerializer.Serialize(configsByType, _ops);
+            var configsByNameGrouped = MapInfoMapper.GetMapConfigsByNameGrouped();
+
+            // 轉換為前端需要的格式
+            var result = configsByNameGrouped.ToDictionary(
+                        typeGroup => typeGroup.Key.ToString(),
+                        typeGroup => typeGroup.Value.Select(group => new
+                        {
+                            name = group.Name,
+                            type = group.Type.ToString(),
+                            mapIds = group.MapIds
+                        }).ToList());
+
+            return JsonSerializer.Serialize(result, _ops);
         }
         catch (Exception ex)
         {
@@ -254,15 +257,31 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     }
 
     /// <summary>
-    /// 新增或更新地圖設定
+    /// 新增或更新地圖設定（支援多個MapId對應一個名稱）
     /// </summary>
-    public string SaveMapConfig(string mapId, string mapName, string mapType)
+    public string SaveMapConfig(string mapName, string mapIdsJson, string mapType)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(mapId) || string.IsNullOrWhiteSpace(mapName))
+            if (string.IsNullOrWhiteSpace(mapName))
             {
-                return JsonSerializer.Serialize(new { success = false, message = "地圖ID和名稱不能為空" });
+                return JsonSerializer.Serialize(new { success = false, message = "地圖名稱不能為空" });
+            }
+
+            // 解析 MapIds JSON 字串
+            List<int> mapIds;
+            try
+            {
+                mapIds = JsonSerializer.Deserialize<List<int>>(mapIdsJson) ?? new List<int>();
+            }
+            catch
+            {
+                return JsonSerializer.Serialize(new { success = false, message = "地圖 ID 格式錯誤" });
+            }
+
+            if (mapIds.Count == 0)
+            {
+                return JsonSerializer.Serialize(new { success = false, message = "至少需要一個地圖 ID" });
             }
 
             MapType type = mapType switch
@@ -274,7 +293,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 _ => MapType.Unknown
             };
 
-            var success = MapInfoMapper.AddOrUpdateMapMapping(mapId, mapName, type);
+            var success = MapInfoMapper.AddOrUpdateMapMappingByName(mapName, mapIds, type);
 
             return JsonSerializer.Serialize(new
             {
@@ -290,13 +309,13 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     }
 
     /// <summary>
-    /// 刪除地圖設定
+    /// 刪除地圖設定（基於名稱）
     /// </summary>
-    public string DeleteMapConfig(string mapId)
+    public string DeleteMapConfig(string mapName)
     {
         try
         {
-            var success = MapInfoMapper.DeleteMapMapping(mapId);
+            var success = MapInfoMapper.DeleteMapMappingByName(mapName);
 
             return JsonSerializer.Serialize(new
             {
@@ -395,12 +414,18 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            var itemTypes = Enum.GetValues<ItemType>().Where(t => t != ItemType.Unknown)
+            List<ItemType> notExistsType = [ItemType.Unknown100, ItemType.Unknown100, ItemType.Unknown100, ItemType.Unknown100];
+            var itemTypes = Enum.GetValues<ItemType>()
+                .Where(t => t != ItemType.Unknown)
                 .Select(t => new
                 {
                     Value = t.ToString(),
                     Name = t switch
                     {
+                        ItemType.Unknown100 => "❓ 未知裝備",
+                        ItemType.Unknown101 => "❓ 未知技能",
+                        ItemType.Unknown102 => "❓ 未知通貨",
+                        ItemType.Unknown103 => "❓ 未知耗材",
                         ItemType.Currency => "💰 通貨",
                         ItemType.EquipmentMaterial => "⚙️ 裝備材料",
                         ItemType.MemoryMaterial => "🧩 追憶材料",
@@ -416,14 +441,39 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                         ItemType.BossTicket => "👑 BOSS門票",
                         ItemType.MemoryFirefly => "🔥 記憶螢光",
                         ItemType.DivinitySlate => "📖 神格石板",
-                        ItemType.SkillItem => "⚡ 技能道具",
                         ItemType.Compass => "🧭 羅盤",
                         ItemType.Probe => "🛰️ 探針",
                         ItemType.DivineCrest => "🛡️ 神威紋章",
+
+                        // Equipment 子類型
+                        ItemType.EquipmentHead => "🎩 頭部",
+                        ItemType.EquipmentChest => "👔 胸甲",
+                        ItemType.EquipmentGloves => "🧤 手套",
+                        ItemType.EquipmentBoots => "👢 鞋子",
+                        ItemType.EquipmentWeapon => "⚔️ 武器",
+                        ItemType.EquipmentShield => "🛡️ 盾牌",
+                        ItemType.EquipmentNecklace => "📿 項鍊",
+                        ItemType.EquipmentRing => "💍 戒指",
+                        ItemType.EquipmentBelt => "🎀 腰帶",
+                        ItemType.EquipmentFate => "🌟 宿命",
+                        ItemType.EquipmentPrism => "💎 棱鏡",
+
+                        // Skill 子類型
+                        ItemType.SkillActive => "⚡ 主動技能",
+                        ItemType.SkillSupport => "🔧 輔助技能",
+                        ItemType.SkillPassive => "🛡️ 被動技能",
+                        ItemType.SkillCatalyst => "🧪 觸媒技能",
+                        ItemType.SkillSupportNoble => "👑 華貴輔助技能",
+                        ItemType.SkillSupportExalted => "✨ 崇高輔助技能",
+
                         _ => t.ToString()
                     },
                     Description = t switch
                     {
+                        ItemType.Unknown100 => "❓ 未知裝備",
+                        ItemType.Unknown101 => "❓ 未知技能",
+                        ItemType.Unknown102 => "❓ 未知通貨",
+                        ItemType.Unknown103 => "❓ 未知耗材",
                         ItemType.Currency => "基礎通貨類",
                         ItemType.EquipmentMaterial => "用於強化裝備的材料",
                         ItemType.MemoryMaterial => "追憶系統相關材料",
@@ -439,10 +489,31 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                         ItemType.BossTicket => "挑戰 BOSS 的門票",
                         ItemType.MemoryFirefly => "記憶螢光類物品",
                         ItemType.DivinitySlate => "神格石板類物品",
-                        ItemType.SkillItem => "技能相關物品",
                         ItemType.Compass => "羅盤類物品",
                         ItemType.Probe => "探針類物品",
                         ItemType.DivineCrest => "神威紋章類物品",
+
+                        // Equipment 子類型
+                        ItemType.EquipmentHead => "頭部裝備",
+                        ItemType.EquipmentChest => "胸甲裝備",
+                        ItemType.EquipmentGloves => "手套裝備",
+                        ItemType.EquipmentBoots => "鞋子裝備",
+                        ItemType.EquipmentWeapon => "武器裝備",
+                        ItemType.EquipmentShield => "盾牌裝備",
+                        ItemType.EquipmentNecklace => "項鍊飾品",
+                        ItemType.EquipmentRing => "戒指飾品",
+                        ItemType.EquipmentBelt => "腰帶裝備",
+                        ItemType.EquipmentFate => "宿命裝備",
+                        ItemType.EquipmentPrism => "棱鏡裝備",
+
+                        // Skill 子類型
+                        ItemType.SkillActive => "主動技能",
+                        ItemType.SkillSupport => "輔助技能",
+                        ItemType.SkillPassive => "被動技能",
+                        ItemType.SkillCatalyst => "觸媒技能",
+                        ItemType.SkillSupportNoble => "華貴輔助技能",
+                        ItemType.SkillSupportExalted => "崇高輔助技能",
+
                         _ => ""
                     }
                 }).ToArray();
@@ -467,12 +538,37 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             var mapping = new Dictionary<int, List<string>>
             {
                 // Equipment (100) - 裝備類
-                [(int)PageIdType.Equipment] = [nameof(ItemType.DivinitySlate)],
+                [(int)PageIdType.Equipment] =
+                [
+                    nameof(ItemType.Unknown100),
+                    nameof(ItemType.DivinitySlate),
+                    nameof(ItemType.EquipmentHead),
+                    nameof(ItemType.EquipmentChest),
+                    nameof(ItemType.EquipmentGloves),
+                    nameof(ItemType.EquipmentBoots),
+                    nameof(ItemType.EquipmentWeapon),
+                    nameof(ItemType.EquipmentShield),
+                    nameof(ItemType.EquipmentNecklace),
+                    nameof(ItemType.EquipmentRing),
+                    nameof(ItemType.EquipmentBelt),
+                    nameof(ItemType.EquipmentFate),
+                    nameof(ItemType.EquipmentPrism)
+                ],
                 // Skill (101) - 技能類
-                [(int)PageIdType.Skill] = [nameof(ItemType.SkillItem)],
+                [(int)PageIdType.Skill] =
+                [
+                    nameof(ItemType.Unknown101),
+                    nameof(ItemType.SkillActive),
+                    nameof(ItemType.SkillSupport),
+                    nameof(ItemType.SkillPassive),
+                    nameof(ItemType.SkillCatalyst),
+                    nameof(ItemType.SkillSupportNoble),
+                    nameof(ItemType.SkillSupportExalted)
+                ],
                 // Currency (102) - 通貨類
                 [(int)PageIdType.Currency] =
                 [
+                    nameof(ItemType.Unknown102),
                     nameof(ItemType.Currency),
                     nameof(ItemType.EquipmentMaterial),
                     nameof(ItemType.MemoryMaterial),
@@ -487,6 +583,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 // Other (103) - 其他類
                 [(int)PageIdType.Other] =
                 [
+                    nameof(ItemType.Unknown103),
                     nameof(ItemType.GameplayTicket),
                     nameof(ItemType.MapTicket),
                     nameof(ItemType.BossTicket),
@@ -513,96 +610,91 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-     var allItems = ItemInfoMapper.GetAllItemConfigs();
+            var allItems = ItemInfoMapper.GetAllItemConfigs();
 
-          // 按 PageIdType 和 ItemType 雙層分組
-      var configsByPageId = new Dictionary<int, Dictionary<string, List<object>>>();
+            // 按 PageIdType 和 ItemType 雙層分組
+            var configsByPageId = new Dictionary<int, Dictionary<string, List<object>>>();
 
             foreach (var item in allItems)
             {
-           var pageId = (int)item.PageIdType;
-        var itemType = item.Type.ToString();
+                var pageId = (int)item.PageIdType;
+                var itemType = item.Type.ToString();
 
-  if (!configsByPageId.TryGetValue(pageId, out Dictionary<string, List<object>> value))
-      {
-          value = [];
-          configsByPageId[pageId] = value;
-        }
+                if (!configsByPageId.TryGetValue(pageId, out Dictionary<string, List<object>> value))
+                {
+                    value = [];
+                    configsByPageId[pageId] = value;
+                }
 
- if (!value.TryGetValue(itemType, out List<object> value1))
-  {
- value1 = [];
+                if (!value.TryGetValue(itemType, out List<object> value1))
+                {
+                    value1 = [];
                     value[itemType] = value1;
- }
+                }
 
                 value1.Add(new
-     {
-             ItemId = item.Id,
-      ItemName = item.Name,
-        PageId = pageId,
-       ItemType = itemType,
-    Enabled = item.Enable,
-   Watch = item.Watch,  // ✅ 新增：包含 watch 屬性
-        Like = item.Like
-       });
+                {
+                    ItemId = item.Id,
+                    ItemName = item.Name,
+                    PageId = pageId,
+                    ItemType = itemType,
+                    Enabled = item.Enable,
+                    Watch = item.Watch,  // ✅ 新增：包含 watch 屬性
+                    Like = item.Like
+                });
             }
 
             return JsonSerializer.Serialize(configsByPageId, _ops);
         }
-   catch (Exception ex)
+        catch (Exception ex)
         {
             Log.Error(ex, "獲取拾取統計設定失敗");
-     return JsonSerializer.Serialize(new { error = ex.Message });
-   }
+            return JsonSerializer.Serialize(new { error = ex.Message });
+        }
     }
 
     /// <summary>
-    /// 保存拾取統計項目（更新到 ItemInfo.json）
+    /// 保存拾取統計項目（更新到 ItemMapper.json）
     /// </summary>
     public string SavePickupStatisticsItem(int itemId, string itemName, int pageId, bool enabled, string itemType, bool watch = false)
     {
         try
         {
-            // 從 ItemInfoMapper 獲取現有配置
-            var allItems = ItemInfoMapper.GetAllItemConfigs();
-    var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
+            var item = ItemInfoMapper.GetItemInfo(itemId);
 
-    if (existingItem != null)
+            item ??= new ItemBaseModel();
+
+            item.Name = itemName;
+            item.PageIdType = (PageIdType)pageId;
+            item.Enable = enabled;
+            item.Watch = watch;
+
+            // 更新物品類型
+            if (!string.IsNullOrWhiteSpace(itemType) && Enum.TryParse<ItemType>(itemType, out var parsedItemType))
             {
-        // 更新現有項目
-    existingItem.Name = itemName;
-     existingItem.PageIdType = (PageIdType)pageId;
-         existingItem.Enable = enabled;
-             existingItem.Watch = watch;  // ✅ 新增：更新 watch 狀態
-
-      // 更新物品類型
-         if (!string.IsNullOrWhiteSpace(itemType) && Enum.TryParse<ItemType>(itemType, out var parsedItemType))
-                {
-   existingItem.Type = parsedItemType;
+                item.Type = parsedItemType;
             }
 
-     // 儲存回 ItemInfo.json
-              var success = ItemInfoMapper.SaveToJson();
+            // 儲存
+            var success = ItemInfoMapper.AddOrUpdateItem(item);
 
-        return JsonSerializer.Serialize(new
-         {
-       success,
-               message = success ? "拾取統計項目已儲存" : "儲存失敗"
-     }, _ops);
-   }
-    else
+            
+            _gameLogProcessor.UpdateItemInfo(item);
+
+            return JsonSerializer.Serialize(new
             {
-     return JsonSerializer.Serialize(new
-         {
-        success = false,
-          message = "找不到指定的物品ID"
-    }, _ops);
-      }
+                success,
+                message = success ? "拾取統計項目已儲存" : "儲存失敗"
+            }, _ops);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "保存拾取統計項目失敗");
-      return JsonSerializer.Serialize(new { success = false, message = ex.Message }, _ops);
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = ex.Message
+            }, _ops);
         }
     }
 
@@ -613,17 +705,15 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            // 從 ItemInfoMapper 獲取現有配置
-            var allItems = ItemInfoMapper.GetAllItemConfigs();
-            var existingItem = allItems.FirstOrDefault(i => i.Id == itemId);
+            var item = ItemInfoMapper.GetItemInfo(itemId);
 
-            if (existingItem != null)
+            if (item != null)
             {
                 // 將 Enable 設為 false
-                existingItem.Enable = false;
+                item.Enable = false;
 
-                // 儲存回 ItemInfo.json
-                var success = ItemInfoMapper.SaveToJson();
+                // 儲存
+                var success = ItemInfoMapper.AddOrUpdateItem(item);
 
                 return JsonSerializer.Serialize(new
                 {
@@ -786,6 +876,199 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     }
 
     /// <summary>
+    /// 🆕 獲取斬殺線設定 - 三階段
+    /// </summary>
+    public string GetExecuteLineSettings()
+    {
+        try
+        {
+            var (stage1Percentage, stage1ColorHex,
+                 stage2Percentage, stage2ColorHex,
+                 stage3Percentage, stage3ColorHex,
+                 defaultColorHex, opacity) = _mainWindow.GetExecuteLineSettings();
+
+            // 直接從設定物件取得可見性
+            var settings = Services.AppSettingsManager.GetSettings();
+            var isVisible = settings?.ExecuteLine?.IsVisible ?? false;
+
+            return JsonSerializer.Serialize(new
+            {
+                stage1Percentage,
+                stage1Color = stage1ColorHex,
+                stage2Percentage,
+                stage2Color = stage2ColorHex,
+                stage3Percentage,
+                stage3Color = stage3ColorHex,
+                defaultColor = defaultColorHex,
+                opacity,
+                isVisible
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取斬殺線設定失敗");
+            return JsonSerializer.Serialize(new { error = ex.Message }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 儲存斬殺線設定 - 三階段
+    /// </summary>
+    public string SaveExecuteLineSettings(
+        int stage1Percentage, string stage1ColorHex,
+        int stage2Percentage, string stage2ColorHex,
+        int stage3Percentage, string stage3ColorHex,
+        string defaultColorHex, double opacity)
+    {
+        try
+        {
+            var success = _mainWindow.SaveExecuteLineSettings(
+                stage1Percentage, stage1ColorHex,
+                stage2Percentage, stage2ColorHex,
+                stage3Percentage, stage3ColorHex,
+                defaultColorHex, opacity);
+
+            return JsonSerializer.Serialize(new
+            {
+                success,
+                message = success ? "斬殺線設定已儲存" : "儲存失敗：三階段百分比總和不能超過 100%"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "儲存斬殺線設定失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"儲存失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 更新斬殺線預覽 - 三階段
+    /// </summary>
+    public string UpdateExecuteLinePreview(
+        int stage1Percentage, string stage1ColorHex,
+        int stage2Percentage, string stage2ColorHex,
+        int stage3Percentage, string stage3ColorHex,
+        string defaultColorHex, double opacity)
+    {
+        try
+        {
+            _mainWindow.UpdateExecuteLineSettings(
+                stage1Percentage, stage1ColorHex,
+                stage2Percentage, stage2ColorHex,
+                stage3Percentage, stage3ColorHex,
+                defaultColorHex, opacity);
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "預覽已更新"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "更新斬殺線預覽失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"更新失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 顯示斬殺線視窗
+    /// </summary>
+    public string ShowExecuteLineWindow()
+    {
+        try
+        {
+            _mainWindow.Invoke(() =>
+            {
+                _mainWindow.ShowExecuteLineWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "斬殺線視窗已顯示"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "顯示斬殺線視窗失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"顯示失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 隱藏斬殺線視窗
+    /// </summary>
+    public string HideExecuteLineWindow()
+    {
+        try
+        {
+            _mainWindow.Invoke(() =>
+            {
+                _mainWindow.HideExecuteLineWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "斬殺線視窗已隱藏"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "隱藏斬殺線視窗失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"隱藏失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 切換斬殺線視窗顯示狀態
+    /// </summary>
+    public string ToggleExecuteLineWindow()
+    {
+        try
+        {
+            bool isVisible = false;
+            _mainWindow.Invoke(() =>
+            {
+                isVisible = _mainWindow.ToggleExecuteLineWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = isVisible ? "斬殺線視窗已顯示" : "斬殺線視窗已隱藏",
+                isVisible
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "切換斬殺線視窗失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"切換失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
     /// 🆕 獲取所有歷史記錄檔案列表
     /// </summary>
     public string GetHistoryRecords()
@@ -807,8 +1090,8 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                     fileName,
                     filePath = file,
                     recordTime = savedRecord.Summary.TotalMaps > 0 && savedRecord.Records.Count > 0
-              ? savedRecord.Records[0].StartTime.ToString("MM/dd HH:mm")
-                  : "未知",
+          ? savedRecord.Records[0].StartTime.ToString("MM/dd HH:mm")
+            : "未知",
                     totalMaps = savedRecord.Summary.TotalMaps,
                     totalItems = savedRecord.Summary.TotalItems,
                     totalQuantity = savedRecord.Summary.TotalQuantity,
@@ -873,6 +1156,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         public string RecordId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
+        public int MapId { get; set; }
         public string MapTicket { get; set; }
         public string[] Compass { get; set; }
         public string Probe { get; set; }

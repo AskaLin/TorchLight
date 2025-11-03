@@ -22,7 +22,7 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="label">地圖ID：</span>
-              <span class="value">{{ detail.id }}</span>
+              <span class="value">{{ detail.mapId }}</span>
             </div>
             <div class="info-item">
               <span class="label">開始時間：</span>

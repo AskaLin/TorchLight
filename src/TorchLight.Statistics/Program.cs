@@ -1,9 +1,10 @@
-﻿using System.Text;
-using Serilog;
+﻿using Serilog;
+using System.Text;
 using TorchLight.Statistics.Configuration;
-using TorchLight.Statistics.UI;
-using TorchLight.Statistics.Services;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
+using TorchLight.Statistics.Services;
+using TorchLight.Statistics.UI;
 
 namespace TorchLight.Statistics
 {
@@ -30,6 +31,13 @@ namespace TorchLight.Statistics
                 // 初始化核心組件
                 Log.Information("正在初始化...");
 
+                // 🆕 載入應用程式設定
+                Services.AppSettingsManager.LoadSettings();
+                Log.Information("已載入應用程式設定");
+
+                // 載入Config 初始化資料
+                AppConfiguration.LoadConfigData();
+
                 // 初始化地圖映射器
                 MapInfoMapper.Initialize();
 
@@ -39,12 +47,11 @@ namespace TorchLight.Statistics
                 // 創建 WebViewHub（需要在 MainWindow 中初始化）
                 var webViewHub = new WebViewHub();
 
-                var itemTable = ItemInfoMapper.GetItemTable();
-                Log.Information("已載入 {ItemCount} 個物品定義", itemTable.Count);
+                
+                Log.Information("已載入 {ItemCount} 個物品定義", ItemInfoMapper.GetItemTable().Count);
 
-                var lineParser = new LineParser(itemTable);
-                var itemChangeProcessor = new ItemChangeBlockProcessor();
-                var logProcessor = new GameLogProcessor(itemTable, lineParser, itemChangeProcessor);
+                     
+                var logProcessor = new GameLogProcessor();
                 Log.Information("核心組件初始化完成");
 
                 // 設定日誌檔案路徑
@@ -85,13 +92,13 @@ namespace TorchLight.Statistics
                 tail.Start();
 
                 //測試用, 讀取現有日誌內容 進行處理
-                //using FileStream fs = new("D:\\SideProjects\\UE_game-疊界4.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                //using StreamReader sr = new(fs, Encoding.UTF8);
-                //string line;
-                //while ((line = sr.ReadLine()) != null)
-                //{
-                //    logProcessor.ProcessLine(line);
-                //}
+                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using StreamReader sr = new(fs, Encoding.UTF8);
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    logProcessor.ProcessLine(line);
+                }
 
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");

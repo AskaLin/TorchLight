@@ -21,6 +21,25 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_API.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_CHECKLIST.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_IMPLEMENTATION.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_QUICK_GUIDE_V2.1.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_QUICK_REFERENCE.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_SUMMARY.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_TEST_GUIDE.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V2.1.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V2.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V3.0.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V3.1.md" />
+    <None Remove="Seed\MapMapper.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Seed\MapMapper.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <!-- 顯示方案根目錄特定檔案（如 README.md、LICENSE、CHANGELOG.md） -->
   <ItemGroup>
@@ -32,6 +51,9 @@
 
   <ItemGroup>
     <None Update="ItemIdTable.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Seed\ItemMapper.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="UE_game.log">

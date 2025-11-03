@@ -7,8 +7,8 @@ namespace TorchLight.Statistics.Models
         /// <summary>
         /// 地圖ID(GeBuLinCunLuo01)
         /// </summary>
-        public string Id { get; set; }
-        
+        // public string Id { get; set; }
+
         /// <summary>
         /// 地圖Token(1465431321654)
         /// </summary>
@@ -25,7 +25,7 @@ namespace TorchLight.Statistics.Models
         /// 使用門票
         /// </summary>
         public string MapTicket { get; set; }
-        public int MapTicketId { get; set; }
+        // public int MapTicketId { get; set; }
 
         /// <summary>
         /// 使用羅盤

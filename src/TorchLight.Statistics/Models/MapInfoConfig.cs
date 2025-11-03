@@ -4,8 +4,9 @@ using TorchLight.Statistics.Enums;
 namespace TorchLight.Statistics.Models;
 
 /// <summary>
-/// 地圖設定項目
+/// 地圖設定項目（已棄用，請使用 MapIdConfig）
 /// </summary>
+[Obsolete("此類別已棄用，請使用 MapIdConfig 代替（使用 int Id 而非 string Id）")]
 public class MapConfigItem
 {
     /// <summary>

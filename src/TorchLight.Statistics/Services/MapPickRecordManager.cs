@@ -15,6 +15,13 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     private MapRecordModel _currentMapRecord = new();
     private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
     private readonly Dictionary<int, ItemModel> _itemTable = itemTable;
+    private static readonly JsonSerializerOptions _ops = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
 
     // 🆕 存檔目錄
     private static readonly string SavedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
@@ -26,21 +33,24 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
 
     public void SetMapToken(string token)
     {
-        Log.Debug("設定 Map Token {tok}", token);
         _currentMapRecord.RecordId = token;
+        Log.Debug("設定 Map Token {tok}", _currentMapRecord.RecordId);
     }
     public void SetMapId(int mapId)
     {
-        Log.Debug("設定 Map ID {id}", mapId);
         _currentMapRecord.MapId = mapId;
-
-        // 知道ID 就知道Name
-        // _currentMapRecord.Name = MapInfoMapper.GetMapNameById(mapId);
+        var mapIdConfig = MapInfoMapper.GetMapInfo(mapId);
+        if (mapIdConfig != null)
+        {
+            _currentMapRecord.Name = mapIdConfig.GetDisplayName();
+            _currentMapRecord.Type = mapIdConfig.Type;
+            Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
+        }
     }
     public void SetMapLevel(int mapLevel)
     {
-        Log.Debug("設定 Map Level {level}", mapLevel);
         _currentMapRecord.Level = mapLevel;
+        Log.Debug("設定 Map Level {level}", _currentMapRecord.Level);
     }
     public bool CurrentMapRecordInfoComplete()
     {
@@ -61,7 +71,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
             case ItemType.BossTicket:
             case ItemType.GameplayTicket:
                 _currentMapRecord.MapTicket = item.Name;
-                _currentMapRecord.MapTicketId = item.ConfigBaseId;
+                // _currentMapRecord.MapTicketId = item.ConfigBaseId;
                 Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
                 break;
 
@@ -85,18 +95,13 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// <summary>
     /// 開始記錄新地圖
     /// </summary>
-    public void StartMapRecord(MapInfo map, DateTime startTime)
+    public void StartMapRecord(DateTime startTime)
     {
-        var mapRealName = map.Type == MapType.Netherrealm ? map.RealName(_currentMapRecord.MapTicketId) : map.Name;
-
-        _currentMapRecord.Id = map.Id;
-        _currentMapRecord.Name = mapRealName;
         _currentMapRecord.StartTime = startTime;
-        _currentMapRecord.Type = map.Type;
 
         _currentMapPickData = [];
         IsInMap = true;
-        CurrentMapName = mapRealName;
+        CurrentMapName = _currentMapRecord.Name; // 先不動CurrentMapName，之後在處理他
 
         Log.Information("{Time} 進入異界地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
 
@@ -104,7 +109,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         {
             Log.Information("  使用門票: {Ticket}", _currentMapRecord.MapTicket);
         }
-        if (_currentMapRecord.Compass.Any())
+        if (_currentMapRecord.Compass.Count != 0)
         {
             Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _currentMapRecord.Compass));
         }
@@ -126,6 +131,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         if (_currentMapRecord.StartTime == DateTime.MinValue)
         {
             Log.Warning("嘗試結束地圖記錄，但當前沒有有效的地圖記錄");
+            Reset();
+            Log.Warning("重置地圖記錄狀態");
             return;
         }
 
@@ -228,10 +235,10 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         var recordCopy = new MapRecordModel
         {
             RecordId = _currentMapRecord.RecordId,
-            Id = _currentMapRecord.Id,
+            // Id = _currentMapRecord.Id,
             Name = _currentMapRecord.Name,
             MapTicket = _currentMapRecord.MapTicket,
-            MapTicketId = _currentMapRecord.MapTicketId,
+            // MapTicketId = _currentMapRecord.MapTicketId,
             Compass = _currentMapRecord.Compass,
             Probe = _currentMapRecord.Probe,
             StartTime = _currentMapRecord.StartTime,
@@ -315,15 +322,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
                 SavedTime = DateTime.Now
             };
 
-            // 序列化並寫入檔案
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-            var json = JsonSerializer.Serialize(savedRecord, options);
+            // 序列化並寫入檔案           
+            var json = JsonSerializer.Serialize(savedRecord, _ops);
             File.WriteAllText(filePath, json);
 
             Log.Information("記錄已自動保存至: {FilePath}", filePath);
@@ -398,18 +398,31 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
                 return null;
 
             var json = File.ReadAllText(filePath);
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
 
-            return JsonSerializer.Deserialize<SavedRecordModel>(json, options);
+            return JsonSerializer.Deserialize<SavedRecordModel>(json, _ops);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "讀取歷史記錄檔案失敗: {FilePath}", filePath);
             return null;
         }
+    }
+
+    public void UpdateItemInfo(ItemBaseModel item)
+    {
+        Log.Debug("更新尚未存檔的拾取物品資訊: {ItemId}", item.Id);
+        if (_currentMapPickData.TryGetValue(item.Id, out var pickedItem))
+        {
+            pickedItem.Name = item.Name;
+        }
+
+        foreach (var mapRecord in _mapRecords)
+        {
+            if (mapRecord.PickRecord != null && mapRecord.PickRecord.TryGetValue(item.Id, out var pickedItemInRecord))
+            {
+                pickedItemInRecord.Name = item.Name;
+            }
+        }        
     }
 }
 

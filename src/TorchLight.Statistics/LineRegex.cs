@@ -45,4 +45,10 @@ public static partial class LineRegex
     /// <returns></returns>
     [GeneratedRegex(@"\[(\d+)\]")]
     public static partial Regex GetCellValue();
+
+    /// <summary>
+    /// 🆕 時間和執行緒ID（通用模式）
+    /// </summary>
+    [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId)]
+    public static partial Regex TimeAndThreadId();
 }
