@@ -1,6 +1,4 @@
 ﻿using Serilog;
-using System;
-using System.Text.RegularExpressions;
 using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.Models;
 
@@ -48,7 +46,7 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
     /// <param name="line"></param>
     /// <param name="datetime"></param>
     /// <returns></returns>
-    public static bool OpenMap(string line, out DateTime datetime)
+    public static bool OpenMapStart(string line, out DateTime datetime)
     {
         datetime = DateTime.MinValue;
         if (line.Contains("----Socket RecvMessage STT----Spv3Open----"))
@@ -57,6 +55,22 @@ public partial class LineParser(Dictionary<int, ItemModel> itemTable)
             if (match.Success)
             {
                 Log.Debug("開始開新圖");
+                datetime = ParseUnrealDateTime(match.Groups[1].Value);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool OpenMapEnd(string line, out DateTime datetime)
+    {
+        datetime = DateTime.MinValue;
+        if (line.Contains("----Socket RecvMessage End----"))
+        {
+            var match = LineRegex.GetDateTimeValue().Match(line);
+            if (match.Success)
+            {
+                Log.Debug("結束開新圖");
                 datetime = ParseUnrealDateTime(match.Groups[1].Value);
                 return true;
             }

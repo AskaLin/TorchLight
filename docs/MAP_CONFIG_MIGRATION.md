@@ -1,46 +1,46 @@
-# MapConfigItem ¡÷ MapIdConfig ¾E²¾¤å¥ó
+ï»¿# MapConfigItem â†’ MapIdConfig é·ç§»æ–‡ä»¶
 
-## ·§­z
+## æ¦‚è¿°
 
-¥»¦¸¾E²¾±N¦a¹Ï³]©w¨t²Î±q¨Ï¥Î `string Id` ªº `MapConfigItem` ¥ş­±§ï¬°¨Ï¥Î `int Id` ªº `MapIdConfig`¡C
+æœ¬æ¬¡é·ç§»å°‡åœ°åœ–è¨­å®šç³»çµ±å¾ä½¿ç”¨ `string Id` çš„ `MapConfigItem` å…¨é¢æ”¹ç‚ºä½¿ç”¨ `int Id` çš„ `MapIdConfig`ã€‚
 
-## ÅÜ§óºK­n
+## è®Šæ›´æ‘˜è¦
 
-### ®Ö¤ßÅÜ§ó
+### æ ¸å¿ƒè®Šæ›´
 
-| ¶µ¥Ø | ÂÂ¨t²Î (MapConfigItem) | ·s¨t²Î (MapIdConfig) |
+| é …ç›® | èˆŠç³»çµ± (MapConfigItem) | æ–°ç³»çµ± (MapIdConfig) |
 |------|------------------------|----------------------|
-| **¸ê®ÆÃş«¬** | `public class MapConfigItem` | `public class MapIdConfig` |
-| **ID Ãş«¬** | `string Id` | `int Id` |
-| **¸ê®Æ¨Ó·½** | `mapInfo.json` + `DefaultMapConfigs` | `Seed/MapMapper.json` + `MapIdDictionary` |
-| **ÀÉ®×ºÊ±±** | ? ¤ä´© | ? ¤£¤ä´©¡]±qºØ¤lÀÉ®×¸ü¤J¡^ |
-| **«eºİ½s¿è** | ? ¤ä´© | ? ¤ä´©¡]°O¾ĞÅé¤º­×§ï¡^ |
+| **è³‡æ–™é¡å‹** | `public class MapConfigItem` | `public class MapIdConfig` |
+| **ID é¡å‹** | `string Id` | `int Id` |
+| **è³‡æ–™ä¾†æº** | `mapInfo.json` + `DefaultMapConfigs` | `Seed/MapMapper.json` + `MapIdDictionary` |
+| **æª”æ¡ˆç›£æ§** | ? æ”¯æ´ | ? ä¸æ”¯æ´ï¼ˆå¾ç¨®å­æª”æ¡ˆè¼‰å…¥ï¼‰ |
+| **å‰ç«¯ç·¨è¼¯** | ? æ”¯æ´ | ? æ”¯æ´ï¼ˆè¨˜æ†¶é«”å…§ä¿®æ”¹ï¼‰ |
 
 ---
 
-## ÀÉ®×ÅÜ§ó²M³æ
+## æª”æ¡ˆè®Šæ›´æ¸…å–®
 
-### «áºİÅÜ§ó
+### å¾Œç«¯è®Šæ›´
 
-#### 1. **MapInfoMapper.cs** - §¹¥ş­«ºc ?
+#### 1. **MapInfoMapper.cs** - å®Œå…¨é‡æ§‹ ?
 
-**¥D­nÅÜ§ó**:
-- ? ²¾°£©Ò¦³ `MapConfigItem` ¬ÛÃöµ{¦¡½X
-- ? ²¾°£ `_mapConfigs` (List<MapConfigItem>)
-- ? ²¾°£ `ConfigFileWatcher<MapConfigItem>`
-- ? ²¾°£ `LoadFromJson()`, `SaveToJson()` µ¥ÀÉ®×¾Ş§@¤èªk
-- ? ¥u«O¯d `_mapIdConfig` (Dictionary<int, MapIdConfig>)
-- ? ·s¼W `Initialize()` - ±q AppConfiguration ¸ü¤J
-- ? ©Ò¦³¤èªk§ï¬°¨Ï¥Î `int mapId` °Ñ¼Æ
-- ? `AddOrUpdateMapMapping(int, string, MapType)` - °O¾ĞÅé¤º­×§ï
-- ? `DeleteMapMapping(int)` - °O¾ĞÅé¤º­×§ï
-- ? `GetAllMapConfigs()` - ªğ¦^ `List<MapIdConfig>`
-- ? `GetAllMapConfigsByType()` - ªğ¦^ `Dictionary<MapType, List<MapIdConfig>>`
-- ? `ReloadConfigs()` - ­«·s±q AppConfiguration ¸ü¤J
+**ä¸»è¦è®Šæ›´**:
+- ? ç§»é™¤æ‰€æœ‰ `MapConfigItem` ç›¸é—œç¨‹å¼ç¢¼
+- ? ç§»é™¤ `_mapConfigs` (List<MapConfigItem>)
+- ? ç§»é™¤ `ConfigFileWatcher<MapConfigItem>`
+- ? ç§»é™¤ `LoadFromJson()`, `SaveToJson()` ç­‰æª”æ¡ˆæ“ä½œæ–¹æ³•
+- ? åªä¿ç•™ `_mapIdConfig` (Dictionary<int, MapIdConfig>)
+- ? æ–°å¢ `Initialize()` - å¾ AppConfiguration è¼‰å…¥
+- ? æ‰€æœ‰æ–¹æ³•æ”¹ç‚ºä½¿ç”¨ `int mapId` åƒæ•¸
+- ? `AddOrUpdateMapMapping(int, string, MapType)` - è¨˜æ†¶é«”å…§ä¿®æ”¹
+- ? `DeleteMapMapping(int)` - è¨˜æ†¶é«”å…§ä¿®æ”¹
+- ? `GetAllMapConfigs()` - è¿”å› `List<MapIdConfig>`
+- ? `GetAllMapConfigsByType()` - è¿”å› `Dictionary<MapType, List<MapIdConfig>>`
+- ? `ReloadConfigs()` - é‡æ–°å¾ AppConfiguration è¼‰å…¥
 
-**²¾°£ªº¤èªk**:
+**ç§»é™¤çš„æ–¹æ³•**:
 ```csharp
-// ? ¤w²¾°£
+// ? å·²ç§»é™¤
 private static void LoadFromJson()
 private static List<MapConfigItem> LoadConfigsFromFile(string)
 private static void LoadDefaultConfig()
@@ -55,9 +55,9 @@ public static bool AddOrUpdateMapMapping(string, string, MapType)
 public static bool DeleteMapMapping(string)
 ```
 
-**·s¼W/«O¯dªº¤èªk**:
+**æ–°å¢/ä¿ç•™çš„æ–¹æ³•**:
 ```csharp
-// ? ·s¼W/«O¯d
+// ? æ–°å¢/ä¿ç•™
 public static void Initialize()
 public static MapIdConfig GetMapInfo(int mapId)
 public static string GetMapName(int mapId)
@@ -72,44 +72,44 @@ public static void ReloadConfigs()
 
 ---
 
-#### 2. **WebViewApi.cs** - API §ó·s ?
+#### 2. **WebViewApi.cs** - API æ›´æ–° ?
 
-**ÅÜ§ó**:
+**è®Šæ›´**:
 ```csharp
-// ? ÂÂª©
+// ? èˆŠç‰ˆ
 public string SaveMapConfig(string mapId, string mapName, string mapType)
 public string DeleteMapConfig(string mapId)
 
-// ? ·sª©
+// ? æ–°ç‰ˆ
 public string SaveMapConfig(int mapId, string mapName, string mapType)
 public string DeleteMapConfig(int mapId)
 ```
 
-**GetMapConfigs()**: ªğ¦^Ãş«¬¦Û°Ê±q `Dictionary<MapType, List<MapConfigItem>>` ÅÜ¬° `Dictionary<MapType, List<MapIdConfig>>`
+**GetMapConfigs()**: è¿”å›é¡å‹è‡ªå‹•å¾ `Dictionary<MapType, List<MapConfigItem>>` è®Šç‚º `Dictionary<MapType, List<MapIdConfig>>`
 
 ---
 
-#### 3. **AppConfiguration.cs** - ²¾°£ÂÂ°t¸m ?
+#### 3. **AppConfiguration.cs** - ç§»é™¤èˆŠé…ç½® ?
 
-**ÅÜ§ó**:
+**è®Šæ›´**:
 ```csharp
-// ? ¤w²¾°£
+// ? å·²ç§»é™¤
 public static readonly List<MapConfigItem> DefaultMapConfigs = [...];
 
-// ? «O¯d
+// ? ä¿ç•™
 public static Dictionary<int, MapIdConfig> MapIdDictionary { get; private set; } = [];
-public static void LoadConfigData() // ±q Seed/MapMapper.json ¸ü¤J
+public static void LoadConfigData() // å¾ Seed/MapMapper.json è¼‰å…¥
 ```
 
 ---
 
-#### 4. **MapInfoConfig.cs** - ¼Ğ°O¹L®É ?
+#### 4. **MapInfoConfig.cs** - æ¨™è¨˜éæ™‚ ?
 
 ```csharp
 /// <summary>
-/// ¦a¹Ï³]©w¶µ¥Ø¡]¤w±ó¥Î¡A½Ğ¨Ï¥Î MapIdConfig¡^
+/// åœ°åœ–è¨­å®šé …ç›®ï¼ˆå·²æ£„ç”¨ï¼Œè«‹ä½¿ç”¨ MapIdConfigï¼‰
 /// </summary>
-[Obsolete("¦¹Ãş§O¤w±ó¥Î¡A½Ğ¨Ï¥Î MapIdConfig ¥N´À¡]¨Ï¥Î int Id ¦Ó«D string Id¡^")]
+[Obsolete("æ­¤é¡åˆ¥å·²æ£„ç”¨ï¼Œè«‹ä½¿ç”¨ MapIdConfig ä»£æ›¿ï¼ˆä½¿ç”¨ int Id è€Œé string Idï¼‰")]
 public class MapConfigItem
 {
     // ...existing code...
@@ -118,20 +118,20 @@ public class MapConfigItem
 
 ---
 
-### «eºİÅÜ§ó
+### å‰ç«¯è®Šæ›´
 
-#### 5. **MapSettingsPanel.vue** - §ó·s¬° int ID ?
+#### 5. **MapSettingsPanel.vue** - æ›´æ–°ç‚º int ID ?
 
-**¥D­nÅÜ§ó**:
+**ä¸»è¦è®Šæ›´**:
 ```javascript
-// ? ÂÂª©
+// ? èˆŠç‰ˆ
 const editingMap = ref({
   mapId: '',   // string
   mapName: '',
   mapType: 'Netherrealm'
 })
 
-// ? ·sª©
+// ? æ–°ç‰ˆ
 const editingMap = ref({
   mapId: 0,      // number
   mapName: '',
@@ -139,134 +139,134 @@ const editingMap = ref({
 })
 ```
 
-**¿é¤J®ØÅÜ§ó**:
+**è¼¸å…¥æ¡†è®Šæ›´**:
 ```vue
-<!-- ? ÂÂª© -->
+<!-- ? èˆŠç‰ˆ -->
 <input v-model="editingMap.mapId"
        type="text"
-       placeholder="¨Ò¦p: GeBuLinCunLuo01" />
+       placeholder="ä¾‹å¦‚: GeBuLinCunLuo01" />
 
-<!-- ? ·sª© -->
+<!-- ? æ–°ç‰ˆ -->
 <input v-model.number="editingMap.mapId"
        type="number"
-       placeholder="¨Ò¦p: 1061000"
+       placeholder="ä¾‹å¦‚: 1061000"
        min="1" />
-<div class="form-hint">½Ğ¿é¤J¦a¹Ïªº¼Æ¦r ID¡]¨Ò¦p: 1061000¡^</div>
+<div class="form-hint">è«‹è¼¸å…¥åœ°åœ–çš„æ•¸å­— IDï¼ˆä¾‹å¦‚: 1061000ï¼‰</div>
 ```
 
-**API ©I¥sÅÜ§ó**:
+**API å‘¼å«è®Šæ›´**:
 ```javascript
-// ? Àx¦s¦a¹Ï
+// ? å„²å­˜åœ°åœ–
 const result = await apiCall(
   'SaveMapConfig',
-  parseInt(editingMap.value.mapId),  // ½T«O¬°¾ã¼Æ
+  parseInt(editingMap.value.mapId),  // ç¢ºä¿ç‚ºæ•´æ•¸
   editingMap.value.mapName,
   editingMap.value.mapType
 )
 
-// ? §R°£¦a¹Ï
+// ? åˆªé™¤åœ°åœ–
 const result = await apiCall(
   'DeleteMapConfig', 
-  parseInt(map.mapId)  // ½T«O¬°¾ã¼Æ
+  parseInt(map.mapId)  // ç¢ºä¿ç‚ºæ•´æ•¸
 )
 ```
 
-**ÅçÃÒÅŞ¿è§ó·s**:
+**é©—è­‰é‚è¼¯æ›´æ–°**:
 ```javascript
-// ? ·s¼W¼Æ¦rÅçÃÒ
+// ? æ–°å¢æ•¸å­—é©—è­‰
 if (!editingMap.value.mapId || editingMap.value.mapId <= 0) {
-  showNotification('error', '¦a¹Ï ID ¥²¶·¬O¤j©ó 0 ªº¼Æ¦r')
+  showNotification('error', 'åœ°åœ– ID å¿…é ˆæ˜¯å¤§æ–¼ 0 çš„æ•¸å­—')
   return
 }
 ```
 
 ---
 
-## ¸ê®Æ¬yµ{ÅÜ§ó
+## è³‡æ–™æµç¨‹è®Šæ›´
 
-### ÂÂ¨t²Î (MapConfigItem)
+### èˆŠç³»çµ± (MapConfigItem)
 ```
-À³¥Îµ{¦¡±Ò°Ê
-  ¡õ
+æ‡‰ç”¨ç¨‹å¼å•Ÿå‹•
+  â†“
 MapMapper.Initialize()
-  ¡õ
-Åª¨ú mapInfo.json (string Id)
-  ¡õ
-±Ò°Ê FileSystemWatcher
-  ¡õ
-«eºİ­×§ï ¡÷ ¼g¤J mapInfo.json
-  ¡õ
-FileSystemWatcher °»´ú ¡÷ ­«·s¸ü¤J
+  â†“
+è®€å– mapInfo.json (string Id)
+  â†“
+å•Ÿå‹• FileSystemWatcher
+  â†“
+å‰ç«¯ä¿®æ”¹ â†’ å¯«å…¥ mapInfo.json
+  â†“
+FileSystemWatcher åµæ¸¬ â†’ é‡æ–°è¼‰å…¥
 ```
 
-### ·s¨t²Î (MapIdConfig)
+### æ–°ç³»çµ± (MapIdConfig)
 ```
-À³¥Îµ{¦¡±Ò°Ê
-  ¡õ
+æ‡‰ç”¨ç¨‹å¼å•Ÿå‹•
+  â†“
 AppConfiguration.LoadConfigData()
-  ¡õ
-Åª¨ú Seed/MapMapper.json (int Id)
-  ¡õ
-«Ø¥ß MapIdDictionary
-  ¡õ
+  â†“
+è®€å– Seed/MapMapper.json (int Id)
+  â†“
+å»ºç«‹ MapIdDictionary
+  â†“
 MapInfoMapper.Initialize()
-  ¡õ
-¸ü¤J MapIdDictionary
-  ¡õ
-«eºİ­×§ï ¡÷ °O¾ĞÅé¤º§ó·s _mapIdConfig
-  ¡õ
-? ¤£¼g¦^ÀÉ®×¡]°O¾ĞÅé¤º­×§ï¡^
+  â†“
+è¼‰å…¥ MapIdDictionary
+  â†“
+å‰ç«¯ä¿®æ”¹ â†’ è¨˜æ†¶é«”å…§æ›´æ–° _mapIdConfig
+  â†“
+? ä¸å¯«å›æª”æ¡ˆï¼ˆè¨˜æ†¶é«”å…§ä¿®æ”¹ï¼‰
 ```
 
 ---
 
-## ¥\¯à¤ñ¸û
+## åŠŸèƒ½æ¯”è¼ƒ
 
-| ¥\¯à | ÂÂ¨t²Î (MapConfigItem) | ·s¨t²Î (MapIdConfig) | »¡©ú |
+| åŠŸèƒ½ | èˆŠç³»çµ± (MapConfigItem) | æ–°ç³»çµ± (MapIdConfig) | èªªæ˜ |
 |------|------------------------|----------------------|------|
-| **¸ê®Æ¨Ó·½** | mapInfo.json | Seed/MapMapper.json | ºØ¤l¸ê®ÆÀÉ®× |
-| **ID Ãş«¬** | String | Integer | ¾ã¼Æ§ó°ª®Ä |
-| **ÀÉ®×ºÊ±±** | ? ¤ä´© | ? ¤£¤ä´© | ¤£»İ­n¡A¦]¬°±qºØ¤lÀÉ¸ü¤J |
-| **ÀÉ®×«ù¤[¤Æ** | ? ¦Û°ÊÀx¦s | ? ¤£Àx¦s | ­×§ï¥u¦b°O¾ĞÅé¤º |
-| **«eºİ½s¿è** | ? ¤ä´© | ? ¤ä´© | ¨âªÌ³£¤ä´© |
-| **­«±Ò«á«O¯d** | ? ¬O | ? §_ | ­«±Ò«á¦^¨ìºØ¤l¸ê®Æ |
-| **§å¦¸¸ü¤J** | ? ³vµ§ | ? §å¦¸ | ±q JSON ¤@¦¸¸ü¤J |
-| **®Ä¯à** | ¤¤µ¥ | °ª | Dictionary ¬d¸ß§ó§Ö |
+| **è³‡æ–™ä¾†æº** | mapInfo.json | Seed/MapMapper.json | ç¨®å­è³‡æ–™æª”æ¡ˆ |
+| **ID é¡å‹** | String | Integer | æ•´æ•¸æ›´é«˜æ•ˆ |
+| **æª”æ¡ˆç›£æ§** | ? æ”¯æ´ | ? ä¸æ”¯æ´ | ä¸éœ€è¦ï¼Œå› ç‚ºå¾ç¨®å­æª”è¼‰å…¥ |
+| **æª”æ¡ˆæŒä¹…åŒ–** | ? è‡ªå‹•å„²å­˜ | ? ä¸å„²å­˜ | ä¿®æ”¹åªåœ¨è¨˜æ†¶é«”å…§ |
+| **å‰ç«¯ç·¨è¼¯** | ? æ”¯æ´ | ? æ”¯æ´ | å…©è€…éƒ½æ”¯æ´ |
+| **é‡å•Ÿå¾Œä¿ç•™** | ? æ˜¯ | ? å¦ | é‡å•Ÿå¾Œå›åˆ°ç¨®å­è³‡æ–™ |
+| **æ‰¹æ¬¡è¼‰å…¥** | ? é€ç­† | ? æ‰¹æ¬¡ | å¾ JSON ä¸€æ¬¡è¼‰å…¥ |
+| **æ•ˆèƒ½** | ä¸­ç­‰ | é«˜ | Dictionary æŸ¥è©¢æ›´å¿« |
 
 ---
 
-## ¾E²¾¼vÅT¤ÀªR
+## é·ç§»å½±éŸ¿åˆ†æ
 
-### ? ¤w§¹¦¨
-- [x] «áºİ API ¥ş­±§ï¥Î `int mapId`
-- [x] «eºİ¿é¤J§ï¬° `number` Ãş«¬
-- [x] ¸ê®ÆÅçÃÒ§ó·s¡]¼Æ¦r > 0¡^
-- [x] ÂÂÃş§O¼Ğ°O¬° `[Obsolete]`
-- [x] ²¾°£ÀÉ®×ºÊ±±¾÷¨î
-- [x] ²¾°£ JSON ÀÉ®×Åª¼gÅŞ¿è
+### ? å·²å®Œæˆ
+- [x] å¾Œç«¯ API å…¨é¢æ”¹ç”¨ `int mapId`
+- [x] å‰ç«¯è¼¸å…¥æ”¹ç‚º `number` é¡å‹
+- [x] è³‡æ–™é©—è­‰æ›´æ–°ï¼ˆæ•¸å­— > 0ï¼‰
+- [x] èˆŠé¡åˆ¥æ¨™è¨˜ç‚º `[Obsolete]`
+- [x] ç§»é™¤æª”æ¡ˆç›£æ§æ©Ÿåˆ¶
+- [x] ç§»é™¤ JSON æª”æ¡ˆè®€å¯«é‚è¼¯
 
-### ?? ª`·N¨Æ¶µ
-1. **«eºİ­×§ï¤£«ù¤[¤Æ**: ­×§ï¦a¹Ï³]©w«á¡A­«±ÒÀ³¥Îµ{¦¡·|¦^¨ì­ì©lªº `Seed/MapMapper.json` ¸ê®Æ
-2. **µLÀÉ®×ºÊ±±**: ¥~³¡½s¿è `Seed/MapMapper.json` ¤£·|¦Û°Ê­«·s¸ü¤J¡]»İ­n­«±Ò©Î¤â°Ê©I¥s `ReloadConfigs()`¡^
-3. **ID ®æ¦¡ÅÜ§ó**: ÂÂªº string ID¡]¦p "GeBuLinCunLuo01"¡^µLªkª½±µ¨Ï¥Î¡A»İ­nÂà´«¬° int ID¡]¦p 1061000¡^
+### ?? æ³¨æ„äº‹é …
+1. **å‰ç«¯ä¿®æ”¹ä¸æŒä¹…åŒ–**: ä¿®æ”¹åœ°åœ–è¨­å®šå¾Œï¼Œé‡å•Ÿæ‡‰ç”¨ç¨‹å¼æœƒå›åˆ°åŸå§‹çš„ `Seed/MapMapper.json` è³‡æ–™
+2. **ç„¡æª”æ¡ˆç›£æ§**: å¤–éƒ¨ç·¨è¼¯ `Seed/MapMapper.json` ä¸æœƒè‡ªå‹•é‡æ–°è¼‰å…¥ï¼ˆéœ€è¦é‡å•Ÿæˆ–æ‰‹å‹•å‘¼å« `ReloadConfigs()`ï¼‰
+3. **ID æ ¼å¼è®Šæ›´**: èˆŠçš„ string IDï¼ˆå¦‚ "GeBuLinCunLuo01"ï¼‰ç„¡æ³•ç›´æ¥ä½¿ç”¨ï¼Œéœ€è¦è½‰æ›ç‚º int IDï¼ˆå¦‚ 1061000ï¼‰
 
-### ?? ÀuÂI
-- ? ®Ä¯à§ó¦n¡]Dictionary<int> ¬d¸ß§ó§Ö¡^
-- ? ¸ê®Æ¤@­P©Ê¡]±q³æ¤@ºØ¤lÀÉ®×¸ü¤J¡^
-- ? °O¾ĞÅé¦û¥Î§ó¤p¡]int ¤ñ string §ó¬ÙªÅ¶¡¡^
-- ? Ãş«¬¦w¥ş¡]Á×§K string ¤ñ¸û¿ù»~¡^
-- ? ÂX®i©Ê±j¡]ID ½d³ò¤j¡A1-2147483647¡^
+### ?? å„ªé»
+- ? æ•ˆèƒ½æ›´å¥½ï¼ˆDictionary<int> æŸ¥è©¢æ›´å¿«ï¼‰
+- ? è³‡æ–™ä¸€è‡´æ€§ï¼ˆå¾å–®ä¸€ç¨®å­æª”æ¡ˆè¼‰å…¥ï¼‰
+- ? è¨˜æ†¶é«”ä½”ç”¨æ›´å°ï¼ˆint æ¯” string æ›´çœç©ºé–“ï¼‰
+- ? é¡å‹å®‰å…¨ï¼ˆé¿å… string æ¯”è¼ƒéŒ¯èª¤ï¼‰
+- ? æ“´å±•æ€§å¼·ï¼ˆID ç¯„åœå¤§ï¼Œ1-2147483647ï¼‰
 
-### ?? ¯ÊÂI
-- ? «eºİ­×§ï¤£«ù¤[¤Æ¡]­«±Ò«á¿ò¥¢¡^
-- ? µL¥~³¡ÀÉ®×ºÊ±±¡]»İ¤â°Ê­«·s¸ü¤J¡^
-- ? ÂÂ¨t²Î API ¤£¬Û®e¡]»İ­n¾E²¾²{¦³µ{¦¡½X¡^
+### ?? ç¼ºé»
+- ? å‰ç«¯ä¿®æ”¹ä¸æŒä¹…åŒ–ï¼ˆé‡å•Ÿå¾Œéºå¤±ï¼‰
+- ? ç„¡å¤–éƒ¨æª”æ¡ˆç›£æ§ï¼ˆéœ€æ‰‹å‹•é‡æ–°è¼‰å…¥ï¼‰
+- ? èˆŠç³»çµ± API ä¸ç›¸å®¹ï¼ˆéœ€è¦é·ç§»ç¾æœ‰ç¨‹å¼ç¢¼ï¼‰
 
 ---
 
-## ´ú¸Õ«ØÄ³
+## æ¸¬è©¦å»ºè­°
 
-### ³æ¤¸´ú¸Õ
+### å–®å…ƒæ¸¬è©¦
 
 ```csharp
 [Fact]
@@ -280,7 +280,7 @@ public void MapInfoMapper_GetMapName_ShouldReturnCorrectName()
     var mapName = MapInfoMapper.GetMapName(1061000);
     
     // Assert
-    Assert.Equal("7-0 ´d­·ªL¦a", mapName);
+    Assert.Equal("7-0 æ‚²é¢¨æ—åœ°", mapName);
 }
 
 [Fact]
@@ -290,61 +290,61 @@ public void MapInfoMapper_AddOrUpdateMapMapping_ShouldUpdateInMemory()
     MapInfoMapper.Initialize();
     
     // Act
-    var success = MapInfoMapper.AddOrUpdateMapMapping(9999999, "´ú¸Õ¦a¹Ï", MapType.Netherrealm);
+    var success = MapInfoMapper.AddOrUpdateMapMapping(9999999, "æ¸¬è©¦åœ°åœ–", MapType.Netherrealm);
     var mapName = MapInfoMapper.GetMapName(9999999);
     
     // Assert
     Assert.True(success);
-    Assert.Equal("´ú¸Õ¦a¹Ï", mapName);
+    Assert.Equal("æ¸¬è©¦åœ°åœ–", mapName);
 }
 ```
 
-### ¾ã¦X´ú¸Õ
+### æ•´åˆæ¸¬è©¦
 
-1. **«eºİ·s¼W¦a¹Ï**
-   - ¿é¤J mapId: `8888888`
-   - ¿é¤J mapName: `´ú¸Õ¦a¹Ï`
-   - ¿ï¾Ü mapType: `Netherrealm`
-   - ÂIÀ»Àx¦s
-   - ? À³¸Ó¦¨¥\·s¼W
-   - ? ¦Cªí¤¤À³¸ÓÅã¥Ü·s¦a¹Ï
+1. **å‰ç«¯æ–°å¢åœ°åœ–**
+   - è¼¸å…¥ mapId: `8888888`
+   - è¼¸å…¥ mapName: `æ¸¬è©¦åœ°åœ–`
+   - é¸æ“‡ mapType: `Netherrealm`
+   - é»æ“Šå„²å­˜
+   - ? æ‡‰è©²æˆåŠŸæ–°å¢
+   - ? åˆ—è¡¨ä¸­æ‡‰è©²é¡¯ç¤ºæ–°åœ°åœ–
 
-2. **«eºİ½s¿è¦a¹Ï**
-   - ¿ï¾Ü²{¦³¦a¹Ï
-   - ­×§ï¦WºÙ
-   - ÂIÀ»Àx¦s
-   - ? À³¸Ó¦¨¥\§ó·s
-   - ? ¦Cªí¤¤Åã¥Ü·s¦WºÙ
+2. **å‰ç«¯ç·¨è¼¯åœ°åœ–**
+   - é¸æ“‡ç¾æœ‰åœ°åœ–
+   - ä¿®æ”¹åç¨±
+   - é»æ“Šå„²å­˜
+   - ? æ‡‰è©²æˆåŠŸæ›´æ–°
+   - ? åˆ—è¡¨ä¸­é¡¯ç¤ºæ–°åç¨±
 
-3. **«eºİ§R°£¦a¹Ï**
- - ¿ï¾Ü²{¦³¦a¹Ï
-   - ÂIÀ»§R°£
-   - ½T»{§R°£
-   - ? À³¸Ó¦¨¥\§R°£
-   - ? ¦Cªí¤¤¤£¦AÅã¥Ü
+3. **å‰ç«¯åˆªé™¤åœ°åœ–**
+ - é¸æ“‡ç¾æœ‰åœ°åœ–
+   - é»æ“Šåˆªé™¤
+   - ç¢ºèªåˆªé™¤
+   - ? æ‡‰è©²æˆåŠŸåˆªé™¤
+   - ? åˆ—è¡¨ä¸­ä¸å†é¡¯ç¤º
 
-4. **­«±Ò´ú¸Õ**
-   - ·s¼W´ú¸Õ¦a¹Ï
-   - ­«±ÒÀ³¥Îµ{¦¡
-   - ? ´ú¸Õ¦a¹ÏÀ³¸Ó®ø¥¢¡]¦^¨ìºØ¤l¸ê®Æ¡^
+4. **é‡å•Ÿæ¸¬è©¦**
+   - æ–°å¢æ¸¬è©¦åœ°åœ–
+   - é‡å•Ÿæ‡‰ç”¨ç¨‹å¼
+   - ? æ¸¬è©¦åœ°åœ–æ‡‰è©²æ¶ˆå¤±ï¼ˆå›åˆ°ç¨®å­è³‡æ–™ï¼‰
 
 ---
 
-## ¬Û®e©Ê»¡©ú
+## ç›¸å®¹æ€§èªªæ˜
 
-### ÂÂµ{¦¡½X¾E²¾
+### èˆŠç¨‹å¼ç¢¼é·ç§»
 
-¦pªG¦³¨ä¥Lµ{¦¡½X¨Ï¥ÎÂÂªº `MapConfigItem`¡A»İ­n¶i¦æ¥H¤UÅÜ§ó¡G
+å¦‚æœæœ‰å…¶ä»–ç¨‹å¼ç¢¼ä½¿ç”¨èˆŠçš„ `MapConfigItem`ï¼Œéœ€è¦é€²è¡Œä»¥ä¸‹è®Šæ›´ï¼š
 
 ```csharp
-// ? ÂÂª©µ{¦¡½X
+// ? èˆŠç‰ˆç¨‹å¼ç¢¼
 var configs = MapInfoMapper.GetAllMapConfigs(); // List<MapConfigItem>
 foreach (var config in configs)
 {
     Console.WriteLine($"{config.Id} - {config.Name}"); // string Id
 }
 
-// ? ·sª©µ{¦¡½X
+// ? æ–°ç‰ˆç¨‹å¼ç¢¼
 var configs = MapInfoMapper.GetAllMapConfigs(); // List<MapIdConfig>
 foreach (var config in configs)
 {
@@ -352,46 +352,46 @@ foreach (var config in configs)
 }
 ```
 
-### API ¾E²¾
+### API é·ç§»
 
 ```csharp
-// ? ÂÂª© API
-MapInfoMapper.AddOrUpdateMapMapping("GeBuLinCunLuo01", "´ú¸Õ", MapType.Netherrealm);
+// ? èˆŠç‰ˆ API
+MapInfoMapper.AddOrUpdateMapMapping("GeBuLinCunLuo01", "æ¸¬è©¦", MapType.Netherrealm);
 
-// ? ·sª© API
-MapInfoMapper.AddOrUpdateMapMapping(1061000, "´ú¸Õ", MapType.Netherrealm);
+// ? æ–°ç‰ˆ API
+MapInfoMapper.AddOrUpdateMapMapping(1061000, "æ¸¬è©¦", MapType.Netherrealm);
 ```
 
 ---
 
-## ¥¼¨Ó§ï¶i¤è¦V
+## æœªä¾†æ”¹é€²æ–¹å‘
 
-1. **«ù¤[¤Æ¾÷¨î** (¥i¿ï)
-   - ²K¥[¡u¶×¥X³]©w¡v¥\¯à¡A±N°O¾ĞÅé¤ºªº­×§ï¶×¥X¬° JSON
-   - ²K¥[¡u¶×¤J³]©w¡v¥\¯à¡A±q JSON ¶×¤J¦Û­q¦a¹Ï
+1. **æŒä¹…åŒ–æ©Ÿåˆ¶** (å¯é¸)
+   - æ·»åŠ ã€ŒåŒ¯å‡ºè¨­å®šã€åŠŸèƒ½ï¼Œå°‡è¨˜æ†¶é«”å…§çš„ä¿®æ”¹åŒ¯å‡ºç‚º JSON
+   - æ·»åŠ ã€ŒåŒ¯å…¥è¨­å®šã€åŠŸèƒ½ï¼Œå¾ JSON åŒ¯å…¥è‡ªè¨‚åœ°åœ–
 
-2. **¦X¨Ö¾÷¨î** (¥i¿ï)
-   - Seed ¸ê®Æ + ¦Û­q¸ê®Æ¦X¨Ö
-   - ¦Û­q¸ê®ÆÂĞ»\ºØ¤l¸ê®Æªº¦P¦W¦a¹Ï
+2. **åˆä½µæ©Ÿåˆ¶** (å¯é¸)
+   - Seed è³‡æ–™ + è‡ªè¨‚è³‡æ–™åˆä½µ
+   - è‡ªè¨‚è³‡æ–™è¦†è“‹ç¨®å­è³‡æ–™çš„åŒååœ°åœ–
 
-3. **ª©¥»ºŞ²z** (¥i¿ï)
-   - °lÂÜ Seed ÀÉ®×ª©¥»
-   - ¦Û°Ê¾E²¾ÂÂª©¸ê®Æµ²ºc
-
----
-
-## µ²½×
-
-? **¾E²¾§¹¦¨**: ©Ò¦³ `MapConfigItem` ¬ÛÃöµ{¦¡½X¤w¥ş­±´À´«¬° `MapIdConfig`
-
-? **¦V«á¬Û®e**: ÂÂÃş§O«O¯d¨Ã¼Ğ°O¬° `[Obsolete]`¡AÁ×§K½sÄ¶¿ù»~
-
-? **®Ä¯à´£¤É**: ¨Ï¥Î `int Id` ©M `Dictionary` ´£¤É¬d¸ß®Ä¯à
-
-?? **ª`·N**: «eºİ­×§ï¤£·|«ù¤[¤Æ¡A­«±Ò«á¦^¨ìºØ¤l¸ê®Æ
+3. **ç‰ˆæœ¬ç®¡ç†** (å¯é¸)
+   - è¿½è¹¤ Seed æª”æ¡ˆç‰ˆæœ¬
+   - è‡ªå‹•é·ç§»èˆŠç‰ˆè³‡æ–™çµæ§‹
 
 ---
 
-**¤å¥óª©¥»**: 1.0  
-**³Ì«á§ó·s**: 2024/01/15  
-**ºûÅ@ªÌ**: TorchLight Statistics Team
+## çµè«–
+
+? **é·ç§»å®Œæˆ**: æ‰€æœ‰ `MapConfigItem` ç›¸é—œç¨‹å¼ç¢¼å·²å…¨é¢æ›¿æ›ç‚º `MapIdConfig`
+
+? **å‘å¾Œç›¸å®¹**: èˆŠé¡åˆ¥ä¿ç•™ä¸¦æ¨™è¨˜ç‚º `[Obsolete]`ï¼Œé¿å…ç·¨è­¯éŒ¯èª¤
+
+? **æ•ˆèƒ½æå‡**: ä½¿ç”¨ `int Id` å’Œ `Dictionary` æå‡æŸ¥è©¢æ•ˆèƒ½
+
+?? **æ³¨æ„**: å‰ç«¯ä¿®æ”¹ä¸æœƒæŒä¹…åŒ–ï¼Œé‡å•Ÿå¾Œå›åˆ°ç¨®å­è³‡æ–™
+
+---
+
+**æ–‡ä»¶ç‰ˆæœ¬**: 1.0  
+**æœ€å¾Œæ›´æ–°**: 2024/01/15  
+**ç¶­è­·è€…**: TorchLight Statistics Team

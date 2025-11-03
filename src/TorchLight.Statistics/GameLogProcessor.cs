@@ -1,9 +1,8 @@
 ﻿using Serilog;
 using TorchLight.Statistics.Enums;
-using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using TorchLight.Statistics.LogProcessor;
 
 namespace TorchLight.Statistics;
 
@@ -13,7 +12,6 @@ namespace TorchLight.Statistics;
 public class GameLogProcessor
 {
     private readonly LineParser _lineParser;
-    private readonly ItemChangeBlockProcessor _itemChangeProcessor;
     private readonly BagInventoryManager _bagInventoryManager;
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly ConsoleLogger _logger;
@@ -21,6 +19,10 @@ public class GameLogProcessor
     private WebViewHub _webViewHub;
     // 🆕 SafeFileTailWatcher 引用
     private SafeFileTailWatcher _fileTailWatcher;
+
+    private readonly ItemChangeProcessor _itemChangeProcessor;
+    private readonly OpenMapProcessor _openMapProcessor;
+    private readonly InitBagProcessor _initBagProcessor;
 
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
@@ -34,22 +36,31 @@ public class GameLogProcessor
     public event Action OnBagSyncCompleted;
 
 
-    public GameLogProcessor(
-       Dictionary<int, ItemModel> itemTable,
-       LineParser lineParser,
-       ItemChangeBlockProcessor itemChangeProcessor,
-       WebViewHub webViewHub = null)
+    public GameLogProcessor(Dictionary<int, ItemModel> itemTable, LineParser lineParser, WebViewHub webViewHub = null)
     {
         _lineParser = lineParser ?? throw new ArgumentNullException(nameof(lineParser));
-        _itemChangeProcessor = itemChangeProcessor ?? throw new ArgumentNullException(nameof(itemChangeProcessor));
         _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
         _webViewHub = webViewHub;
         _bagInventoryManager = new BagInventoryManager(itemTable);
-        _mapPickRecordManager = new MapPickRecordManager(itemTable); ;
+        _mapPickRecordManager = new MapPickRecordManager(itemTable);
         _logger = new ConsoleLogger();
 
+
+        _itemChangeProcessor = new ItemChangeProcessor();
+        _openMapProcessor = new OpenMapProcessor();
+        _initBagProcessor = new InitBagProcessor(lineParser);
+
+
         // 註冊事件處理
-        _itemChangeProcessor.OnBagModInsideBlock += HandleBagModification;
+        _itemChangeProcessor.OnItemChanged += HandleBagModification;
+
+        _openMapProcessor.OnMapStart += HandleMapInfoStart;
+        _openMapProcessor.OnMapComplete += HandleMapInfoComplete;
+
+        _initBagProcessor.OnInitStarted += HandleInitStart;
+        _initBagProcessor.OnItemInitialized += HandleItemInitialized;
+        _initBagProcessor.OnInitCompleted += HandleInitCompleted;
+
     }
 
     /// <summary>
@@ -79,20 +90,6 @@ public class GameLogProcessor
 
         try
         {
-
-            // 開始開新圖, 結算舊圖
-            if (LineParser.OpenMap(line, out var datetime))
-            {
-                _mapPickRecordManager.EndMapRecord(datetime);
-                // 通知前端：地圖結算完成，新記錄已產生
-                NotifyNewMapRecord();
-                return;
-            }
-
-            
-            // 搭配開圖, 取得地圖 Token
-           
-
             // 0. 檢查 "已開啟日誌" 訊息
             if (LineParser.IsLogOpenedMessage(line))
             {
@@ -105,33 +102,8 @@ public class GameLogProcessor
                 return;
             }
 
-            // 1. 檢查背包初始化狀態
-            var (isInitLine, shouldProcess, isComplete, isFirstInit) = _lineParser.CheckBagInitializationState(line);
-
-            if (isInitLine && shouldProcess)
-            {
-                // 只在第一次開始初始化時才重置背包
-                if (isFirstInit)
-                {
-                    Log.Information("偵測到背包初始化，重置背包資料");
-                    _bagInventoryManager.Reset();
-                }
-
-                // 處理初始化背包物品
-                var itemData = _lineParser.GetItemData(line);
-                _bagInventoryManager.InitializeBagItem(itemData);
-                Log.Debug("初始化背包物品: {ItemName} x{Count}", itemData.Name, itemData.Num);
-                return;
-            }
-
-            if (isComplete)
-            {
-                // 初始化完成
-                Log.Information("背包初始化完成，共 {Count} 種物品", _bagInventoryManager.BagData.Count);
-                _bagInventoryManager.PrintInitializedBag();
-                OnBagSyncCompleted?.Invoke();
-                return;
-            }
+            // 1. 處理背包初始化（使用 InitBagProcessor）
+            _initBagProcessor.HandleLine(line);
 
             // 2. 登入開始 - 重置所有資料
             if (LineParser.IsLoginStart(line))
@@ -139,7 +111,7 @@ public class GameLogProcessor
                 Log.Information("偵測到重新登入，重置所有資料");
                 _bagInventoryManager.Reset();
                 _mapPickRecordManager.Reset();
-                _lineParser.ResetInitializationState();
+                _initBagProcessor.Reset();
 
                 // 🆕 停用檔案大小監控（等待下次"已開啟日誌"訊息）
                 _fileTailWatcher?.DisableLogMonitoring();
@@ -147,35 +119,6 @@ public class GameLogProcessor
                 return;
             }
 
-            // 3. 地圖切換
-            //if (LineParser.IsMoveMap(line))
-            //{
-            //    var (time, fromPath, toPath, success) = LineParser.GetMapPathData(line);
-            //    if (success)
-            //    {
-            //        var fromMapInfo = MapInfoMapper.GetMapInfo(fromPath);
-            //        var toMapInfo = MapInfoMapper.GetMapInfo(toPath);
-
-            //        Log.Debug("地圖切換: {From} -> {To}", fromPath, toPath);
-            //        Log.Information($"{time:yyyy/MM/dd HH:mm:ss}\t從地圖 {fromMapInfo.Name} 進入地圖 {toMapInfo.Name}");
-
-            //        // 從藏身處進入異界地圖, 開啟地圖拾取紀錄
-            //        if (fromMapInfo.Type == MapType.Hideout && toMapInfo.Type != MapType.Hideout)
-            //        {
-            //            _mapPickRecordManager.StartMapRecord(toMapInfo, time);
-            //        }
-
-            //        // 通知前端地圖切換
-            //        if (_webViewHub != null)
-            //        {
-            //            _ = Task.Run(async () =>
-            //            {
-            //                await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-            //            });
-            //        }
-            //    }
-            //    return;
-            //}
 
             // 0. 遊戲關閉
             if (LineParser.CloseGame(line))
@@ -185,61 +128,34 @@ public class GameLogProcessor
                 return;
             }
 
-            if (!_mapPickRecordManager.CurrentMapRecordInfoComplete())
-            {
-                if (LineParser.IsTokenLine(line, out string mapToken))
-                {
-                    _mapPickRecordManager.SetMapToken(mapToken);
-                }
-                else if (LineParser.IsCurrentLevelLine(line, out int mapLevel))
-                {
-                    _mapPickRecordManager.SetMapLevel(mapLevel);
-                }
-                else if (LineParser.IsCurrentOpenMapIDLine(line, out int mapId))
-                {
-                    _mapPickRecordManager.SetMapId(mapId);
-                }
-
-                if (_mapPickRecordManager.CurrentMapRecordInfoComplete())
-                {                    
-                    _mapPickRecordManager.StartMapRecord(DateTime.Now);
-                    // 通知前端地圖切換
-                    if (_webViewHub != null)
-                    {
-                        _ = Task.Run(async () =>
-                        {
-                            await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-                        });
-                    }
-                }
-                return;
-            }
+            // 🆕 處理開啟地圖區塊（在檢查地圖資訊之前）
+            _openMapProcessor.HandleLine(line);
 
             // 4. 處理物品變更（區塊處理）
-            _itemChangeProcessor.HandleLine(line);         
+            _itemChangeProcessor.HandleLine(line);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "處理日誌行時發生錯誤，日誌內容: {Line}", line);
         }
+    }
 
-        void NotifyNewMapRecord()
+    private void NotifyNewMapRecord()
+    {
+        if (_webViewHub != null)
         {
-            if (_webViewHub != null)
+            _ = Task.Run(async () =>
             {
-                _ = Task.Run(async () =>
-                {
-                    await _webViewHub.NotifyNewMapRecordAsync();
-                    await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-                });
-            }
+                await _webViewHub.NotifyNewMapRecordAsync();
+                await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+            });
         }
     }
 
     /// <summary>
     /// 處理背包物品修改事件
     /// </summary>
-    private void HandleBagModification(BagModEvent ev)
+    private void HandleBagModification(ItemChangeEvent ev)
     {
         try
         {
@@ -267,7 +183,7 @@ public class GameLogProcessor
             }
 
             // 如果是增加物品（拾取），且在異界地圖中，則記錄拾取
-            if (bagResult.QuantityChange > 0 && ev.ProtoName == "PickItems")
+            if (bagResult.QuantityChange > 0 && (ev.ProtoName == "PickItems" || ev.ProtoName == "PickItem"))
             {
                 var mapResult = _mapPickRecordManager.RecordPickedItem(ev.ConfigBaseId, ev.SlotId, bagResult.QuantityChange);
                 if (mapResult != null)
@@ -310,7 +226,7 @@ public class GameLogProcessor
                 return new MapRecordViewModel(false, MapType.Hideout, _mapPickRecordManager.CurrentMapName);
             }
             else if (currentRecord != null)
-            {               
+            {
                 return new MapRecordViewModel
                 {
                     IsInMap = true,
@@ -353,4 +269,79 @@ public class GameLogProcessor
     /// 獲取地圖記錄管理器（用於測試或外部存取）
     /// </summary>
     public MapPickRecordManager MapPickRecordManager => _mapPickRecordManager;
+
+
+    #region 事件處理方法
+
+    /// <summary>
+    /// 處理背包初始化開始
+    /// </summary>
+    private void HandleInitStart(DateTime startTime)
+    {
+        Log.Information("偵測到背包初始化，重置背包資料");
+        _bagInventoryManager.Reset();
+    }
+
+    /// <summary>
+    /// 處理背包物品初始化
+    /// </summary>
+    private void HandleItemInitialized(ItemModel item)
+    {
+        //_bagInventoryManager.InitializeBagItem(item);
+        //Log.Debug("初始化背包物品: {ItemName} x{Count}", item.Name, item.Num);
+    }
+
+    /// <summary>
+    /// 處理背包初始化完成
+    /// </summary>
+    private void HandleInitCompleted(InitBagEvent initEvent)
+    {
+        foreach(var item in initEvent.Items)
+        {
+            _bagInventoryManager.InitializeBagItem(item);
+        }
+        
+        _bagInventoryManager.PrintInitializedBag();
+        OnBagSyncCompleted?.Invoke();
+    }
+
+    private void HandleMapInfoStart(DateTime start)
+    {
+        _mapPickRecordManager.EndMapRecord(start);
+        // 通知前端：地圖結算完成，新記錄已產生
+        NotifyNewMapRecord();
+    }
+
+    /// <summary>
+    /// 🆕 處理地圖資訊收集完成事件
+    /// </summary>
+    private void HandleMapInfoComplete(OpenMapEvent context)
+    {
+        try
+        {
+            _mapPickRecordManager.SetMapToken(context.Token);
+            _mapPickRecordManager.SetMapId(context.MapId);
+            _mapPickRecordManager.SetMapLevel(context.Level);
+
+            if (_mapPickRecordManager.CurrentMapRecordInfoComplete())
+            {
+                _mapPickRecordManager.StartMapRecord(context.StartTime);
+
+                // 通知前端地圖切換
+                if (_webViewHub != null)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "處理地圖資訊完成時發生錯誤");
+        }
+    }
+
+    #endregion
 }

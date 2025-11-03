@@ -3,7 +3,6 @@ using TorchLight.Statistics.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Serilog;
-using System.Security.Permissions;
 
 namespace TorchLight.Statistics.Configuration;
 
@@ -17,7 +16,7 @@ public class AppConfiguration
     /// </summary>
     public static readonly string[] CandidateLogPaths =
     [
-        @"C:\Program Files (x86)\Torchlight Infinite\Game\UE_game\TorchLight\Saved\Logs\UE_game.log",
+    @"C:\Program Files (x86)\Torchlight Infinite\Game\UE_game\TorchLight\Saved\Logs\UE_game.log",
         @"D:\Torchlight Infinite Game\UE_game\TorchLight\Saved\Logs\UE_game.log"
     ];
 
@@ -47,390 +46,208 @@ public class AppConfiguration
     public const int TimeZoneOffsetHours = 8;
 
     /// <summary>
-    /// 預設物品設定
-    /// </summary>
-    public static readonly List<ItemBaseModel> DefaultItemConfigs =
-    [
-        new() {Id = 1001, Name = "星星蛾火", Type= ItemType.DivinitySlate, PageIdType= PageIdType.Equipment },
-        new() {Id = 1009, Name = "寰空神隙", Type= ItemType.DivinitySlate, PageIdType= PageIdType.Equipment },
-        new() {Id = 1011, Name = "眾星歸所", Type= ItemType.DivinitySlate, PageIdType= PageIdType.Equipment },
-        new() {Id = 1012, Name = "蛾火燎原之刻", Type= ItemType.DivinitySlate, PageIdType= PageIdType.Equipment },
-        new() {Id = 5011, Name = "遺忘之水", Type= ItemType.Currency, PageIdType= PageIdType.Currency },
-        new() {Id = 5028, Name = "異界迴響", Type= ItemType.Currency, PageIdType= PageIdType.Currency },
-        new() {Id = 5029, Name = "逆轉發條", Type= ItemType.Currency, PageIdType= PageIdType.Currency },
-        new() {Id = 5030, Name = "孿生倒影", Type= ItemType.SpecialItem, PageIdType= PageIdType.Currency },
-        new() {Id = 5031, Name = "傳奇降生之綠芽", Type= ItemType.SpecialItem, PageIdType= PageIdType.Currency },
-        new() {Id = 5080, Name = "能量核心", Type= ItemType.EquipmentMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5140, Name = "追憶碎絮", Type= ItemType.MemoryMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5141, Name = "追憶遊絲-普通", Type= ItemType.MemoryMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5142, Name = "追憶遊絲-魔法", Type= ItemType.MemoryMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5143, Name = "追憶遊絲-稀有", Type= ItemType.MemoryMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5144, Name = "追憶遊絲-卓越", Type= ItemType.MemoryMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5201, Name = "神格殘片", Type= ItemType.CubeMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5202, Name = "神格契約-殘片", Type= ItemType.CubeMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5210, Name = "神威輝石", Type= ItemType.CubeMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5220, Name = "昇華之楔（魔法）", Type= ItemType.CubeMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5230, Name = "昇華之楔（稀有）", Type= ItemType.CubeMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5240, Name = "歸一之楔", Type= ItemType.CubeMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5250, Name = "昇華之楔（傳奇）", Type= ItemType.CubeMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5300, Name = "永恆殘頁", Type= ItemType.SpecialItem, PageIdType= PageIdType.Currency },
-        new() {Id = 5310, Name = "迷城殘響-瞬息", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 5311, Name = "迷城殘響-永恆", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 5401, Name = "神格契約-巨力之神", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5402, Name = "神格契約-勇者", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5403, Name = "神格契約-猛襲者", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5404, Name = "神格契約-督軍", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5405, Name = "神格契約-狩獵之神", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5406, Name = "神格契約-神射手", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5407, Name = "神格契約-刀鋒行者", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5408, Name = "神格契約-德魯伊", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5409, Name = "神格契約-知識之神", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5410, Name = "神格契約-魔導師", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5411, Name = "神格契約-秘術師", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5412, Name = "神格契約-元素師", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5413, Name = "神格契約-征戰之神", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5414, Name = "神格契約-影舞者", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5415, Name = "神格契約-神行武士", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5416, Name = "神格契約-遊俠", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5417, Name = "神格契約-欺詐之神", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5418, Name = "神格契約-奴影者", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5419, Name = "神格契約-異能者", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5420, Name = "神格契約-暗影術士", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5421, Name = "神格契約-機械之神", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5422, Name = "神格契約-機械師", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5423, Name = "神格契約-鋼鐵先鋒", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5424, Name = "神格契約-煉金術士", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5425, Name = "神格契約-鬥士", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5426, Name = "神格契約-刺客", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5427, Name = "神格契約-先知", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5428, Name = "神格契約-鐵衛", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5429, Name = "神格契約-巫妖", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5430, Name = "神格契約-巧匠", Type= ItemType.DivinityContract, PageIdType= PageIdType.Currency },
-        new() {Id = 5700, Name = "高塔籌碼-能量", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5701, Name = "高塔籌碼-螢光", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5702, Name = "高塔籌碼-詞綴", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5703, Name = "高塔籌碼-未定宿命", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5704, Name = "高塔籌碼-侵蝕", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 5705, Name = "高塔籌碼-珍品", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 6002, Name = "寒淵的秘密", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6003, Name = "烏鴉的悲鳴", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6004, Name = "穆得的巧技", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6006, Name = "徵兆之月", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6007, Name = "遺落的密藏", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6008, Name = "殘酷的代價", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6019, Name = "日心的奇石", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6026, Name = "安東尼奧之助", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6027, Name = "日冕的奇石", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6054, Name = "學者的奇思", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6055, Name = "安東尼奧的研究", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6111, Name = "超新星爆發", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6118, Name = "萬神的迴響", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other, Like = 6 },
-        new() {Id = 6119, Name = "離群的螢火", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6125, Name = "百倍橫財", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6127, Name = "眾火俱焚", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other, Like = 6 },
-        new() {Id = 6135, Name = "褻瀆星群", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6139, Name = "神抉超新星", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6141, Name = "空心人之吻", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6143, Name = "第二重神格", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6147, Name = "窺伺著倒影的雙瞳", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6148, Name = "未孵化的雛形", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6153, Name = "明日的航向", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6205, Name = "莫測的航向", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6216, Name = "只影的絕跡", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6217, Name = "無拘星群", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6218, Name = "前塵的終日", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6219, Name = "前塵的誕日", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6220, Name = "星羅萬象", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 6221, Name = "猶在鏡中", Type= ItemType.MemoryFirefly, PageIdType= PageIdType.Other },
-        new() {Id = 8604, Name = "精密-律己", Type= ItemType.SkillItem, PageIdType= PageIdType.Skill },
-        new() {Id = 8608, Name = "精密-貫注增效", Type= ItemType.SkillItem, PageIdType= PageIdType.Skill },
-        new() {Id = 8611, Name = "精密-超能共生", Type= ItemType.SkillItem, PageIdType= PageIdType.Skill },
-        new() {Id = 8614, Name = "精密-節流", Type= ItemType.SkillItem, PageIdType= PageIdType.Skill },
-        new() {Id = 10001, Name = "罪孽之劫掠羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10002, Name = "罪孽之劫掠羅盤（遺珍）", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10003, Name = "重罪之劫掠羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10010, Name = "珍奇羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10011, Name = "琳琅之珍奇羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10012, Name = "破軍之珍奇羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10022, Name = "士卒羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10023, Name = "眾武之士卒羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10032, Name = "精兵羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10033, Name = "克敵之精兵羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10042, Name = "勁敵羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10043, Name = "優渥的勁敵羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10044, Name = "富饒之勁敵羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10046, Name = "首領羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10050, Name = "信標羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10051, Name = "進益之信標羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10052, Name = "黃道羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10053, Name = "浩瀚之黃道羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10054, Name = "榮升之黃道羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10060, Name = "威名之利器羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10071, Name = "武裝羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10072, Name = "珍品之武裝羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10073, Name = "飾品之武裝羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10081, Name = "灰燼羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10082, Name = "倍賞之灰燼羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10083, Name = "甄選之灰燼羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10101, Name = "螢光羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10102, Name = "繽紛的螢光羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10103, Name = "聚光之螢光羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10110, Name = "繁榮之眾神羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10120, Name = "征戰羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10122, Name = "驍勇之征戰羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10130, Name = "巨力羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10131, Name = "繁榮之巨力羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10133, Name = "神武之巨力羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10134, Name = "機甲之巨力羅盤（遺珍）", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10140, Name = "狩獵羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10142, Name = "將軍之狩獵羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10150, Name = "機械羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10151, Name = "輝煌之機械羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10153, Name = "分化之機械羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10154, Name = "巡航之機械羅盤（遺珍）", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10160, Name = "黑潮羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10161, Name = "匪首之黑潮羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10162, Name = "神兵之黑潮羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10170, Name = "黑帆羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10171, Name = "複臨之黑帆羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10180, Name = "魔方羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10181, Name = "雙極之魔方羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10182, Name = "極欲之魔方羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10190, Name = "迷城羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10191, Name = "眷族之迷城羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10200, Name = "夢寐羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10210, Name = "怪談羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10211, Name = "異鄉客之怪談羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10220, Name = "玩偶羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10221, Name = "典藏之玩偶羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10222, Name = "典藏之玩偶羅盤（遺珍）", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10230, Name = "畫雪羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10231, Name = "豐收之畫雪羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10240, Name = "塔羅羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10241, Name = "底牌之塔羅羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10242, Name = "命定之塔羅羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10250, Name = "大亨羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10260, Name = "通緝羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10261, Name = "懸賞之通緝羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10262, Name = "警戒之通緝羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10270, Name = "囚籠羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 10272, Name = "黃金之囚籠羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 12000, Name = "繁榮之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12001, Name = "繁榮之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12010, Name = "裝備之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12011, Name = "裝備之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12020, Name = "灰燼之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12021, Name = "灰燼之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12030, Name = "螢光之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12031, Name = "螢光之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12040, Name = "羅盤之幽邃探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 12041, Name = "羅盤之深空探針", Type= ItemType.Probe, PageIdType= PageIdType.Other },
-        new() {Id = 100001, Name = "罪孽之劫掠羅盤", Type= ItemType.Compass, PageIdType= PageIdType.Other },
-        new() {Id = 100200, Name = "初火靈砂", Type= ItemType.Currency, PageIdType= PageIdType.Currency },
-        new() {Id = 100300, Name = "初火源質", Type= ItemType.Currency, PageIdType= PageIdType.Currency, Like = 6 },
-        new() {Id = 140004, Name = "淺白夢語-武器", Type= ItemType.DreamMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 140005, Name = "淺白夢語-防具", Type= ItemType.DreamMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 140006, Name = "淺白夢語-飾品", Type= ItemType.DreamMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 200003, Name = "優質灰燼", Type= ItemType.EquipmentMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 200021, Name = "真理化石", Type= ItemType.EquipmentMaterial, PageIdType= PageIdType.Currency, Like = 6 },
-        new() {Id = 200028, Name = "珍貴灰燼", Type= ItemType.EquipmentMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 200029, Name = "稀世灰燼", Type= ItemType.EquipmentMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 200030, Name = "至臻灰燼", Type= ItemType.EquipmentMaterial, PageIdType= PageIdType.Currency, Like = 6},
-        new() {Id = 210000, Name = "異魔之核", Type= ItemType.CorrosionMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 210001, Name = "使魔之核", Type= ItemType.CorrosionMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 210002, Name = "腐朽軸心", Type= ItemType.CorrosionMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 210003, Name = "輝煌軸心", Type= ItemType.CorrosionMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 300006, Name = "神聖化石", Type= ItemType.EquipmentMaterial, PageIdType= PageIdType.Currency, Like = 6 },
-        new() {Id = 330001, Name = "雪紙碎片", Type= ItemType.SpecialItem, PageIdType= PageIdType.Currency },
-        new() {Id = 338002, Name = "捕星網", Type= ItemType.SpecialItem, PageIdType= PageIdType.Currency },
-        new() {Id = 339001, Name = "瘋狂靈感素", Type= ItemType.SpecialItem, PageIdType= PageIdType.Currency },
-        new() {Id = 360403, Name = "基礎元件", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 360404, Name = "擴展元件-術士", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 360405, Name = "擴展元件-近衛", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 360406, Name = "擴展元件-狙擊", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 360407, Name = "擴展元件-重裝", Type= ItemType.TowerMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 370101, Name = "棱鏡校尺-稀有", Type= ItemType.OverlayMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 370201, Name = "棱鏡校尺-傳奇", Type= ItemType.OverlayMaterial, PageIdType= PageIdType.Currency },
-        new() {Id = 400006, Name = "冰封寒淵的信標（時刻7）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400007, Name = "冰封寒淵的信標（時刻8）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400008, Name = "深空信標", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400014, Name = "沸湧炎海的信標（時刻7）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400015, Name = "沸湧炎海的信標（時刻8）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400021, Name = "鋼鐵煉境的信標（時刻7）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400022, Name = "鋼鐵煉境的信標（時刻8）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400027, Name = "雷鳴廢土的信標（時刻7）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400028, Name = "雷鳴廢土的信標（時刻8）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400032, Name = "幽夜暗域的信標（時刻7）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 400033, Name = "幽夜暗域的信標（時刻8）", Type= ItemType.MapTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410101, Name = "敕令：達提", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410102, Name = "敕令：迪沃", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410103, Name = "敕令：魯因", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410104, Name = "敕令：杜姆", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410201, Name = "虛海請柬-渴求", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410202, Name = "虛海請柬-狂喜", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410203, Name = "虛海請柬-哀怮", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410301, Name = "欲念原核-記錄", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410302, Name = "欲念原核-造物", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410303, Name = "欲念原核-毀滅", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410401, Name = "王后燭芯-囚困", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410402, Name = "王后燭芯-追逐", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410403, Name = "王后燭芯-雪恨", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410501, Name = "女王恩寵-征伐", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410502, Name = "女王恩寵-權力", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 410503, Name = "女王恩寵-美欲", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 430000, Name = "原初伊始", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 430001, Name = "原初終末", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 430002, Name = "終末之初", Type= ItemType.BossTicket, PageIdType= PageIdType.Other },
-        new() {Id = 440001, Name = "神威紋章-機械", Type= ItemType.DivineCrest, PageIdType= PageIdType.Other },
-        new() {Id = 440002, Name = "神威紋章-巨力", Type= ItemType.DivineCrest, PageIdType= PageIdType.Other },
-        new() {Id = 440003, Name = "神威紋章-征戰", Type= ItemType.DivineCrest, PageIdType= PageIdType.Other },
-        new() {Id = 440004, Name = "神威紋章-狩獵", Type= ItemType.DivineCrest, PageIdType= PageIdType.Other },
-        new() {Id = 990005, Name = "迷霧的本質", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 990007, Name = "居民的眼睛", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 990091, Name = "征伐徽記", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 3000001, Name = "勇者之證I", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 3000002, Name = "勇者之證II", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 3000003, Name = "勇者之證III", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 3000004, Name = "勇者之證IV", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other },
-        new() {Id = 3000005, Name = "勇者之證V", Type= ItemType.GameplayTicket, PageIdType= PageIdType.Other }
-    ];
-
-
-    /// <summary>
     /// 地圖ID對應字典
     /// </summary>
-    /// <example>
-    /// 使用範例：
-    /// <code>
-    /// // 查詢特定地圖資訊
-    /// var mapInfo = AppConfiguration.GetMapInfo(1061000);
-    /// if (mapInfo != null)
-    /// {
-    ///  Console.WriteLine($"地圖名稱: {mapInfo.Name}, 類型: {mapInfo.Type}");
-    /// }
-    /// 
-    /// // 或直接從字典查詢
-    /// if (AppConfiguration.MapIdDictionary.TryGetValue(1061000, out var info))
-    /// {
-    ///   Console.WriteLine($"找到地圖: {info.Name}");
-    /// }
-    /// </code>
-    /// </example>
     public static Dictionary<int, MapIdConfig> MapIdDictionary { get; private set; } = [];
 
+    /// <summary>
+    /// 物品ID對應字典
+    /// </summary>
+    public static Dictionary<int, ItemBaseModel> ItemIdDictionary { get; private set; } = [];
+
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
+    /// <summary>
+    /// 設定項目描述
+    /// </summary>
+    private class ConfigDescriptor
+    {
+        public required string Name { get; init; }
+        public required string FileName { get; init; }
+        public required string SeedPath { get; init; }
+        public required string ConfigPath { get; init; }
+    }
+
+    private static ConfigDescriptor MapConfig => new()
+    {
+        Name = "地圖",
+        FileName = "MapMapper.json",
+        SeedPath = Path.Combine(AppContext.BaseDirectory, "Seed", "MapMapper.json"),
+        ConfigPath = Path.Combine(AppContext.BaseDirectory, "MapMapper.json")
+    };
+
+    private static ConfigDescriptor ItemConfig => new()
+    {
+        Name = "物品",
+        FileName = "ItemMapper.json",
+        SeedPath = Path.Combine(AppContext.BaseDirectory, "Seed", "ItemMapper.json"),
+        ConfigPath = Path.Combine(AppContext.BaseDirectory, "ItemMapper.json")
+    };
 
     public static void LoadConfigData()
     {
-        LoadConfigData<MapperItem>("Seed/MapMapper.json", (mapperItems) =>
+        // 載入地圖設定
+        LoadConfig<MapItem>(MapConfig, mapItems =>
+             {
+                 MapIdDictionary.Clear();
+                 foreach (var item in mapItems)
+                 {
+                     foreach (var id in item.MapIds)
+                     {
+                         MapIdDictionary[id] = new MapIdConfig
+                         {
+                             Id = id,
+                             Name = item.Name,
+                             Type = item.Type
+                         };
+                     }
+                 }
+                 Log.Information("已載入地圖設定: {Count} 個地圖", MapIdDictionary.Count);
+             });
+
+        // 載入物品設定
+        LoadConfig<ItemBaseModel>(ItemConfig, items =>
         {
-            // 清空現有字典
-            MapIdDictionary.Clear();
-            string prefix = string.Empty;
-            string levelStr = string.Empty;
-            // 將每個ID對應到地圖資訊
-            foreach (var item in mapperItems)
-            {                      
-                levelStr = string.Empty;
-                prefix = string.Empty;
-                foreach (var id in item.Id)
-                {                    
-                    if (item.Type == MapType.Netherrealm)
-                    {
-                        levelStr = GetLevel(int.Parse(id.ToString().Substring(2, 1)));
-                        if (id > 1120000)
-                        {
-                            prefix = "幽邃的";
-                        }
-                        else if(id > 1090000)
-                        {
-                            var idStr = id.ToString().Substring(3, 2);
-                            prefix = idStr switch
-                            {
-                                "10" => "滾燙的",
-                                "11" => "徹骨的",
-                                "12" => "柔軟的",
-                                "13" => "漆黑的",
-                                "14" => "耀眼的",
-                                _ => string.Empty,
-                            };
-                        }                        
-                    }
-                    MapIdDictionary[id] = new MapIdConfig
-                    {
-                        Id = id,
-                        Name = $"{levelStr} {prefix}{item.Name}",
-                        Type = item.Type
-                    };
+            ItemIdDictionary.Clear();
+            foreach (var item in items)
+            {
+                ItemIdDictionary[item.Id] = item;
+            }
+            Log.Information("已載入物品設定: {Count} 個物品", ItemIdDictionary.Count);
+        });
+    }
+
+    /// <summary>
+    /// 泛型設定載入方法
+    /// </summary>
+    private static void LoadConfig<T>(ConfigDescriptor descriptor, Action<List<T>> loadAction)
+    {
+        try
+        {
+            // 檢查並複製種子檔案
+            EnsureConfigFile(descriptor);
+
+            // 載入 JSON
+            if (!File.Exists(descriptor.ConfigPath))
+            {
+                Log.Error("找不到{Name}對應檔案: {Path}", descriptor.Name, descriptor.ConfigPath);
+                return;
+            }
+
+            var jsonContent = File.ReadAllText(descriptor.ConfigPath);
+            var items = JsonSerializer.Deserialize<List<T>>(jsonContent, _jsonOptions);
+
+            if (items == null)
+            {
+                Log.Warning("無法解析{Name}對應檔案: {Path}", descriptor.Name, descriptor.ConfigPath);
+                return;
+            }
+
+            loadAction(items);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "載入{Name}設定失敗: {Message}", descriptor.Name, ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// 確保設定檔存在（不存在時從 Seed 複製）
+    /// </summary>
+    private static void EnsureConfigFile(ConfigDescriptor descriptor)
+    {
+        if (!File.Exists(descriptor.ConfigPath))
+        {
+            Log.Information("執行目錄下找不到 {FileName}，嘗試從 Seed 目錄複製", descriptor.FileName);
+
+            if (File.Exists(descriptor.SeedPath))
+            {
+                try
+                {
+                    File.Copy(descriptor.SeedPath, descriptor.ConfigPath);
+                    Log.Information("已從 Seed 目錄複製 {FileName} 到執行目錄", descriptor.FileName);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "複製 {FileName} 失敗", descriptor.FileName);
                 }
             }
-        });
-        static string GetLevel(int levelNum)
-        {
-            return levelNum switch
+            else
             {
-                6 => "7-0",
-                7 => "7-1",
-                8 => "7-2",
-                9 => "8-0",
-                10 => "8-1",
-                11 => "8-2",
-                12 => "U8",
-                _ => ""
-            };
+                Log.Warning("Seed 目錄也找不到 {FileName}: {Path}", descriptor.FileName, descriptor.SeedPath);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 儲存地圖設定到 MapMapper.json
+    /// </summary>
+    public static bool SaveMapperToJson()
+    {
+        var mapperItems = MapIdDictionary.Values
+            .GroupBy(m => new { m.Name, m.Type })
+            .Select(g => new MapItem
+            {
+                MapIds = g.Select(m => m.Id).OrderBy(id => id).ToList(),
+                Name = g.Key.Name,
+                Type = g.Key.Type
+            }).OrderBy(m => m.Type).ThenBy(m => m.Name).ToList();
+
+        return SaveConfig(MapConfig, mapperItems);
+    }
+
+    /// <summary>
+    /// 儲存物品設定到 ItemMapper.json
+    /// </summary>
+    public static bool SaveItemMapperToJson()
+    {
+        var itemList = ItemIdDictionary.Values
+            .OrderBy(i => i.Type)
+            .ThenBy(i => i.Id)
+            .ToList();
+
+        return SaveConfig(ItemConfig, itemList);
+    }
+
+    /// <summary>
+    /// 泛型設定儲存方法
+    /// </summary>
+    private static bool SaveConfig<T>(ConfigDescriptor descriptor, List<T> data)
+    {
+        try
+        {
+            var jsonContent = JsonSerializer.Serialize(data, _jsonOptions);
+            File.WriteAllText(descriptor.ConfigPath, jsonContent);
+
+            Log.Information("已儲存{Name}設定至: {Path}", descriptor.Name, descriptor.ConfigPath);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "儲存{Name}設定檔失敗", descriptor.Name);
+            return false;
         }
     }
 
     /// <summary>
     /// 根據地圖ID取得地圖資訊
     /// </summary>
-    /// <param name="mapId">地圖ID</param>
-    /// <returns>地圖資訊，若找不到則回傳 null</returns>
     public static MapIdConfig GetMapInfo(int mapId)
     {
         return MapIdDictionary.TryGetValue(mapId, out var mapInfo) ? mapInfo : null;
     }
-    /// <summary>
-    /// 載入地圖ID對應字典
-    /// </summary>
-    /// <param name="jsonFilePath">JSON檔案路徑，預設為 Seed/MapMapper.json</param>
-    private static void LoadConfigData<T>(string jsonFilePath, Action<List<T>> action)
-    {
-        try
-        {
-            if (!File.Exists(jsonFilePath))
-            {
-                Log.Error("找不到地圖對應檔案: {FilePath}", jsonFilePath);
-            }
-
-            var jsonContent = File.ReadAllText(jsonFilePath);
-            var mapperItems = JsonSerializer.Deserialize<List<T>>(jsonContent);
-
-            if (mapperItems == null)
-            {
-                Log.Warning("無法解析對應檔案: {FilePath}", jsonFilePath);
-            }
-
-            action(mapperItems);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "載入地圖ID對應字典失敗: {Message}", ex.Message);
-        }
-    }
 
     /// <summary>
-    /// JSON檔案對應類別
+    /// 根據物品ID取得物品資訊
     /// </summary>
-    private class MapperItem
+    public static ItemBaseModel GetItemInfo(int itemId)
     {
-        [JsonPropertyName("id")]
-        public List<int> Id { get; set; } = [];
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonPropertyName("type")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public MapType Type { get; set; }
+        return ItemIdDictionary.TryGetValue(itemId, out var itemInfo) ? itemInfo : null;
     }
 }

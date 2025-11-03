@@ -1,9 +1,10 @@
-﻿using System.Text;
-using Serilog;
+﻿using Serilog;
+using System.Text;
 using TorchLight.Statistics.Configuration;
-using TorchLight.Statistics.UI;
-using TorchLight.Statistics.Services;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
+using TorchLight.Statistics.Services;
+using TorchLight.Statistics.UI;
 
 namespace TorchLight.Statistics
 {
@@ -45,9 +46,8 @@ namespace TorchLight.Statistics
                 var itemTable = ItemInfoMapper.GetItemTable();
                 Log.Information("已載入 {ItemCount} 個物品定義", itemTable.Count);
 
-                var lineParser = new LineParser(itemTable);
-                var itemChangeProcessor = new ItemChangeBlockProcessor();
-                var logProcessor = new GameLogProcessor(itemTable, lineParser, itemChangeProcessor);
+                var lineParser = new LineParser(itemTable);                
+                var logProcessor = new GameLogProcessor(itemTable, lineParser);
                 Log.Information("核心組件初始化完成");
 
                 // 設定日誌檔案路徑
@@ -85,16 +85,16 @@ namespace TorchLight.Statistics
                     });
                 };
 
-                tail.Start();
+                // tail.Start();
 
                 //測試用, 讀取現有日誌內容 進行處理
-                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                //using StreamReader sr = new(fs, Encoding.UTF8);
-                //string line;
-                //while ((line = sr.ReadLine()) != null)
-                //{
-                //    logProcessor.ProcessLine(line);
-                //}
+                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using StreamReader sr = new(fs, Encoding.UTF8);
+                string line;
+                while ((line = sr.ReadLine()) != null)
+                {
+                    logProcessor.ProcessLine(line);
+                }
 
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");

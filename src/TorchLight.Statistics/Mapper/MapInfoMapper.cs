@@ -12,13 +12,7 @@ namespace TorchLight.Statistics.Mapper;
 public class MapInfoMapper
 {
     private static readonly object _lock = new();
-    private static Dictionary<int, MapIdConfig> _mapIdConfig = [];
-    private static readonly JsonSerializerOptions _ops = new()
-    {
-        PropertyNameCaseInsensitive = true,
-        WriteIndented = true,
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
+    private static Dictionary<int, MapIdConfig> _mapIdConfig = []; 
 
     /// <summary>
     /// 當地圖設定更新時觸發
@@ -34,8 +28,7 @@ public class MapInfoMapper
         {
             try
             {
-                // 從 AppConfiguration 載入地圖ID字典
-                AppConfiguration.LoadConfigData();
+                // 從 AppConfiguration 載入地圖ID字典                
                 _mapIdConfig = AppConfiguration.MapIdDictionary;
 
                 Log.Information("已載入地圖設定: {MapCount} 個地圖", _mapIdConfig.Count);
@@ -65,65 +58,30 @@ public class MapInfoMapper
     }
 
     /// <summary>
-    /// 根據地圖ID獲取地圖名稱
+    /// 新增或更新地圖映射（基於名稱）
     /// </summary>
-    public static string GetMapName(int mapId)
-    {
-        lock (_lock)
-        {
-            if (_mapIdConfig.TryGetValue(mapId, out var config))
-            {
-                return config.Name;
-            }
-            return mapId.ToString();
-        }
-    }
-
-    /// <summary>
-    /// 取得地圖類型
-    /// </summary>
-    public static MapType GetMapType(int mapId)
-    {
-        lock (_lock)
-        {
-            if (_mapIdConfig.TryGetValue(mapId, out var config))
-            {
-                return config.Type;
-            }
-            return MapType.Unknown;
-        }
-    }
-
-    /// <summary>
-    /// 判斷地圖類型
-    /// </summary>
-    public static bool CheckMapType(int mapId, MapType mapType)
-    {
-        lock (_lock)
-        {
-            if (_mapIdConfig.TryGetValue(mapId, out var config))
-            {
-                return config.Type == mapType;
-            }
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// 新增或更新地圖映射
-    /// </summary>
-    public static bool AddOrUpdateMapMapping(int mapId, string mapName, MapType mapType)
+    /// <param name="mapName">地圖名稱</param>
+    /// <param name="mapIds">地圖ID列表</param>
+    /// <param name="mapType">地圖類型</param>
+    public static bool AddOrUpdateMapMappingByName(string mapName, List<int> mapIds, MapType mapType)
     {
         lock (_lock)
         {
             try
             {
-                if (_mapIdConfig.TryGetValue(mapId, out var existingConfig))
+                // 移除舊的同名地圖（但ID不在新列表中的）
+                var existingIds = _mapIdConfig
+                    .Where(kvp => kvp.Value.Name == mapName && !mapIds.Contains(kvp.Key))
+                    .Select(kvp => kvp.Key)
+                    .ToList();
+
+                foreach (var oldId in existingIds)
                 {
-                    existingConfig.Name = mapName;
-                    existingConfig.Type = mapType;
+                    _mapIdConfig.Remove(oldId);
                 }
-                else
+
+                // 新增或更新所有新的ID
+                foreach (var mapId in mapIds)
                 {
                     _mapIdConfig[mapId] = new MapIdConfig
                     {
@@ -133,7 +91,14 @@ public class MapInfoMapper
                     };
                 }
 
-                Log.Information("已更新地圖映射: {MapId} -> {MapName} ({MapType})", mapId, mapName, mapType);
+                // 儲存到 JSON 檔案
+                if (!AppConfiguration.SaveMapperToJson())
+                {
+                    Log.Warning("更新記憶體成功，但儲存檔案失敗");
+                }
+
+                Log.Information("已更新地圖映射: {MapName} ({MapType}) -> [{MapIds}]",
+                    mapName, mapType, string.Join(", ", mapIds));
                 OnConfigUpdated?.Invoke(true, "地圖設定已更新");
                 return true;
             }
@@ -146,21 +111,35 @@ public class MapInfoMapper
     }
 
     /// <summary>
-    /// 刪除地圖映射
+    /// 刪除地圖映射（基於名稱，刪除所有相同名稱的地圖）
     /// </summary>
-    public static bool DeleteMapMapping(int mapId)
+    public static bool DeleteMapMappingByName(string mapName)
     {
         lock (_lock)
         {
             try
             {
-                if (_mapIdConfig.Remove(mapId))
+                var idsToRemove = _mapIdConfig.Where(kvp => kvp.Value.Name == mapName).Select(kvp => kvp.Key).ToList();
+
+                if (idsToRemove.Count == 0)
                 {
-                    Log.Information("已刪除地圖映射: {MapId}", mapId);
-                    OnConfigUpdated?.Invoke(true, "地圖設定已刪除");
-                    return true;
+                    return false;
                 }
-                return false;
+
+                foreach (var id in idsToRemove)
+                {
+                    _mapIdConfig.Remove(id);
+                }
+
+                // 儲存到 JSON 檔案
+                if (!AppConfiguration.SaveMapperToJson())
+                {
+                    Log.Warning("刪除記憶體成功，但儲存檔案失敗");
+                }
+
+                Log.Information("已刪除地圖映射: {MapName} ({Count} 個ID)", mapName, idsToRemove.Count);
+                OnConfigUpdated?.Invoke(true, "地圖設定已刪除");
+                return true;
             }
             catch (Exception ex)
             {
@@ -171,49 +150,24 @@ public class MapInfoMapper
     }
 
     /// <summary>
-    /// 獲取所有地圖設定
+    /// 獲取所有地圖設定（按名稱分組）
     /// </summary>
-    public static List<MapIdConfig> GetAllMapConfigs()
-    {
-        lock (_lock)
-        {
-            return [.. _mapIdConfig.Values.OrderBy(m => m.Type).ThenBy(m => m.Name)];
-        }
-    }
-
-    /// <summary>
-    /// 獲取所有地圖設定（按地圖類型分類）
-    /// </summary>
-    public static Dictionary<MapType, List<MapIdConfig>> GetAllMapConfigsByType()
+    public static Dictionary<MapType, List<MapItem>> GetMapConfigsByNameGrouped()
     {
         lock (_lock)
         {
             return _mapIdConfig.Values
                 .GroupBy(m => m.Type)
-                .ToDictionary(g => g.Key, g => g.OrderBy(m => m.Name).ToList());
-        }
-    }
-
-    /// <summary>
-    /// 重新載入地圖設定
-    /// </summary>
-    public static void ReloadConfigs()
-    {
-        lock (_lock)
-        {
-            try
-            {
-                AppConfiguration.LoadConfigData();
-                _mapIdConfig = AppConfiguration.MapIdDictionary;
-
-                Log.Information("已重新載入地圖設定: {MapCount} 個地圖", _mapIdConfig.Count);
-                OnConfigUpdated?.Invoke(true, "地圖設定已重新載入");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "重新載入地圖設定失敗");
-                OnConfigUpdated?.Invoke(false, $"重新載入失敗: {ex.Message}");
-            }
+                .ToDictionary(
+                    typeGroup => typeGroup.Key,
+                    typeGroup => typeGroup.GroupBy(m => m.Name).Select(
+                            nameGroup => new MapItem
+                            {
+                                Name = nameGroup.Key,
+                                Type = nameGroup.First().Type,
+                                MapIds = nameGroup.Select(m => m.Id).OrderBy(id => id).ToList()
+                            }).OrderBy(g => g.Name).ToList()
+                );
         }
     }
 }

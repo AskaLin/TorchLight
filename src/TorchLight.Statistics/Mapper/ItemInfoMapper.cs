@@ -1,9 +1,5 @@
 ﻿using Serilog;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using TorchLight.Statistics.Configuration;
-using TorchLight.Statistics.Core;
 using TorchLight.Statistics.Enums;
 using TorchLight.Statistics.Models;
 
@@ -15,20 +11,7 @@ namespace TorchLight.Statistics.Mapper
     public class ItemInfoMapper
     {
         private static readonly object _lock = new();
-        private static List<ItemBaseModel> _itemConfigs = [];
-        private static ConfigFileWatcher<ItemBaseModel> _configWatcher;
-        private static readonly JsonSerializerOptions _ops = new()
-        {
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true,
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-        };             
-
-        /// <summary>
-        /// 設定檔路徑
-        /// </summary>
-        private static string ConfigFilePath => Path.Combine(AppContext.BaseDirectory, "ItemInfo.json");
+        private static Dictionary<int, ItemBaseModel> _itemConfigs = [];
 
         /// <summary>
         /// 當物品設定更新時觸發
@@ -36,139 +19,104 @@ namespace TorchLight.Statistics.Mapper
         public static event Action<bool, string> OnConfigUpdated;
 
         /// <summary>
-        /// 初始化物品映射器（從 JSON 載入）
+        /// 初始化物品映射器（從 AppConfiguration 載入）
         /// </summary>
         public static void Initialize()
-        {
-            LoadFromJson();
-
-            // 初始化檔案監控器
-            _configWatcher = new ConfigFileWatcher<ItemBaseModel>(ConfigFilePath, LoadConfigsFromFile, OnConfigFileUpdated);
-            _configWatcher.Initialize(_itemConfigs);
-        }
-
-        /// <summary>
-        /// 讀取 ItemInfo.json 並回傳 Dictionary&lt;int, ItemModel&gt;
-        /// </summary>
-        public static Dictionary<int, ItemModel> GetItemTable()
-        {
-            lock (_lock)
-            {
-                return _itemConfigs.ToDictionary(
-                    i => i.Id,
-                    i => new ItemModel
-                    {
-                        ConfigBaseId = i.Id,
-                        Name = i.Name,
-                        Type = i.Type
-                    });
-            }
-        }
-
-        /// <summary>
-        /// 從 JSON 檔案載入物品清單
-        /// </summary>
-        private static void LoadFromJson()
         {
             lock (_lock)
             {
                 try
                 {
-                    if (!File.Exists(ConfigFilePath))
-                    {
-                        Log.Warning("找不到物品設定檔: {Path}，使用預設設定", ConfigFilePath);
-                        LoadDefaultConfig();
-                        SaveToJson();
-                        return;
-                    }
+                    // 從 AppConfiguration 載入物品ID字典                    
+                    _itemConfigs = AppConfiguration.ItemIdDictionary;
 
-                    var json = File.ReadAllText(ConfigFilePath, Encoding.UTF8);
-                    var items = JsonSerializer.Deserialize<List<ItemBaseModel>>(json, _ops);
-
-                    if (items == null || items.Count == 0)
-                    {
-                        Log.Error("物品設定檔格式錯誤或為空，使用預設設定");
-                        LoadDefaultConfig();
-                        return;
-                    }
-
-                    _itemConfigs = items;
                     Log.Information("已載入物品設定: {ItemCount} 個物品", _itemConfigs.Count);
                     OnConfigUpdated?.Invoke(true, "物品設定已成功載入");
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "載入物品設定檔失敗，使用預設設定");
-                    LoadDefaultConfig();
+                    Log.Error(ex, "載入物品設定失敗");
                     OnConfigUpdated?.Invoke(false, $"載入失敗: {ex.Message}");
                 }
             }
         }
 
         /// <summary>
-        /// 從檔案載入設定（供 ConfigFileWatcher 使用）
+        /// 獲取物品資訊（透過 int itemId）
         /// </summary>
-        private static List<ItemBaseModel> LoadConfigsFromFile(string filePath)
+        public static ItemBaseModel GetItemInfo(int itemId)
         {
-            var json = File.ReadAllText(filePath, Encoding.UTF8);
-            var items = JsonSerializer.Deserialize<List<ItemBaseModel>>(json, _ops);
-
-            if (items == null || items.Count == 0)
-            {
-                throw new InvalidOperationException("設定檔格式錯誤或為空");
-            }
-
             lock (_lock)
             {
-                _itemConfigs = items;
+                if (_itemConfigs.TryGetValue(itemId, out var config))
+                {
+                    return config;
+                }
+                return null;
             }
-
-            return items;
         }
 
         /// <summary>
-        /// 設定檔更新回調
+        /// 新增或更新物品映射
         /// </summary>
-        private static void OnConfigFileUpdated(bool success, string message)
-        {
-            OnConfigUpdated?.Invoke(success, message);
-        }
-
-        /// <summary>
-        /// 載入預設設定
-        /// </summary>
-        private static void LoadDefaultConfig()
-        {
-            _itemConfigs = [.. AppConfiguration.DefaultItemConfigs];
-        }
-
-        /// <summary>
-        /// 儲存設定到 JSON 檔案
-        /// </summary>
-        public static bool SaveToJson()
+        /// <param name="item">物品資訊</param>
+        public static bool AddOrUpdateItem(ItemBaseModel item)
         {
             lock (_lock)
             {
                 try
                 {
-                    var json = JsonSerializer.Serialize(_itemConfigs, _ops);
+                    _itemConfigs[item.Id] = item;
 
-                    // 暫時停止檔案監控
-                    _configWatcher?.PauseWatching();
+                    // 儲存到 JSON 檔案
+                    if (!AppConfiguration.SaveItemMapperToJson())
+                    {
+                        Log.Warning("更新記憶體成功，但儲存檔案失敗");
+                    }
 
-                    File.WriteAllText(ConfigFilePath, json, Encoding.UTF8);
-
-                    // 恢復檔案監控
-                    _configWatcher?.ResumeWatching();
-
-                    Log.Information("物品設定已儲存至: {Path}", ConfigFilePath);
-                    OnConfigUpdated?.Invoke(true, "物品設定已成功儲存");
+                    Log.Information("已更新物品映射: {ItemId} - {ItemName} ({ItemType})",
+                            item.Id, item.Name, item.Type);
+                    OnConfigUpdated?.Invoke(true, "物品設定已更新");
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    Log.Error(ex, "儲存物品設定檔失敗");
-                    OnConfigUpdated?.Invoke(false, $"儲存失敗: {ex.Message}");
+                    Log.Error(ex, "新增或更新物品映射失敗");
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 刪除物品映射
+        /// </summary>
+        public static bool DeleteItem(int itemId)
+        {
+            lock (_lock)
+            {
+                try
+                {
+                    if (!_itemConfigs.ContainsKey(itemId))
+                    {
+                        return false;
+                    }
+
+                    var itemName = _itemConfigs[itemId].Name;
+                    _itemConfigs.Remove(itemId);
+
+                    // 儲存到 JSON 檔案
+                    if (!AppConfiguration.SaveItemMapperToJson())
+                    {
+                        Log.Warning("刪除記憶體成功，但儲存檔案失敗");
+                    }
+
+                    Log.Information("已刪除物品映射: {ItemId} - {ItemName}", itemId, itemName);
+                    OnConfigUpdated?.Invoke(true, "物品設定已刪除");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "刪除物品映射失敗");
                     return false;
                 }
             }
@@ -181,8 +129,11 @@ namespace TorchLight.Statistics.Mapper
         {
             lock (_lock)
             {
-                var config = _itemConfigs.FirstOrDefault(i => i.Id == itemId);
-                return config?.Enable ?? false;
+                if (_itemConfigs.TryGetValue(itemId, out var config))
+                {
+                    return config.Enable;
+                }
+                return false;
             }
         }
 
@@ -193,8 +144,11 @@ namespace TorchLight.Statistics.Mapper
         {
             lock (_lock)
             {
-                var config = _itemConfigs.FirstOrDefault(i => i.Id == itemId);
-                return config?.Name ?? $"未知物品 ({itemId})";
+                if (_itemConfigs.TryGetValue(itemId, out var config))
+                {
+                    return config.Name;
+                }
+                return $"未知物品 ({itemId})";
             }
         }
 
@@ -205,8 +159,11 @@ namespace TorchLight.Statistics.Mapper
         {
             lock (_lock)
             {
-                var config = _itemConfigs.FirstOrDefault(i => i.Id == itemId);
-                return config?.Type ?? ItemType.Unknown;
+                if (_itemConfigs.TryGetValue(itemId, out var config))
+                {
+                    return config.Type;
+                }
+                return ItemType.Unknown;
             }
         }
 
@@ -217,8 +174,27 @@ namespace TorchLight.Statistics.Mapper
         {
             lock (_lock)
             {
-                var config = _itemConfigs.FirstOrDefault(i => i.Id == itemId);
-                return config?.PageIdType ?? PageIdType.Other;
+                if (_itemConfigs.TryGetValue(itemId, out var config))
+                {
+                    return config.PageIdType;
+                }
+                return PageIdType.Other;
+            }
+        }
+
+        /// <summary>
+        /// 獲取所有物品設定（按類型分組）
+        /// </summary>
+        public static Dictionary<ItemType, List<ItemBaseModel>> GetItemConfigsByTypeGrouped()
+        {
+            lock (_lock)
+            {
+                return _itemConfigs.Values
+                       .GroupBy(i => i.Type)
+                       .ToDictionary(
+                            typeGroup => typeGroup.Key,
+                            typeGroup => typeGroup.OrderBy(i => i.Id).ToList()
+                        );
             }
         }
 
@@ -229,17 +205,26 @@ namespace TorchLight.Statistics.Mapper
         {
             lock (_lock)
             {
-                return [.. _itemConfigs.OrderBy(i => i.Type).ThenBy(i => i.Name)];
+                return [.. _itemConfigs.Values.OrderBy(i => i.Type).ThenBy(i => i.Id)];
             }
         }
 
         /// <summary>
-        /// 停止檔案監控
+        /// 獲取物品表（用於日誌處理）
         /// </summary>
-        public static void StopFileWatcher()
+        public static Dictionary<int, ItemModel> GetItemTable()
         {
-            _configWatcher?.Dispose();
-            _configWatcher = null;
+            lock (_lock)
+            {
+                return _itemConfigs.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => new ItemModel
+                    {
+                        ConfigBaseId = kvp.Value.Id,
+                        Name = kvp.Value.Name,
+                        Type = kvp.Value.Type
+                    });
+            }
         }
     }
 }

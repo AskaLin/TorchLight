@@ -35,7 +35,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         var mapIdConfig = MapInfoMapper.GetMapInfo(mapId);
         if (mapIdConfig != null)
         {
-            _currentMapRecord.Name = mapIdConfig.Name;
+            _currentMapRecord.Name = mapIdConfig.GetDisplayName();
             _currentMapRecord.Type = mapIdConfig.Type;
             Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
         }
@@ -90,8 +90,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// </summary>
     public void StartMapRecord(DateTime startTime)
     {
-        // _currentMapRecord.Id = map.Id;
-        _currentMapRecord.StartTime = startTime;       
+        _currentMapRecord.StartTime = startTime;
 
         _currentMapPickData = [];
         IsInMap = true;

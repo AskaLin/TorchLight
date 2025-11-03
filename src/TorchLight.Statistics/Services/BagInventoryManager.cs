@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
@@ -44,7 +45,7 @@ public class BagInventoryManager
     /// <summary>
     /// 更新背包物品數量
     /// </summary>
-    public ItemChangeResult UpdateBagItem(BagModEvent ev)
+    public ItemChangeResult UpdateBagItem(ItemChangeEvent ev)
     {
         var result = new ItemChangeResult
         {
@@ -115,8 +116,7 @@ public class BagInventoryManager
         Log.Debug("背包初始化明細:");
         foreach (var bagItem in _bagData)
         {
-            Log.Debug("  {ItemName}({ItemId}): {Total} 個",
-      bagItem.Value.Name, bagItem.Value.BaseId, bagItem.Value.Total);
+            Log.Debug("  {ItemName}({ItemId}): {Total} 個", bagItem.Value.Name, bagItem.Value.BaseId, bagItem.Value.Total);
         }
     }
 

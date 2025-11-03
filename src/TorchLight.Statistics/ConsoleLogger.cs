@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Services;
 
 namespace TorchLight.Statistics;
@@ -11,7 +12,7 @@ public class ConsoleLogger
     /// <summary>
     /// 記錄背包物品修改事件
     /// </summary>
-    public void LogBagModification(BagModEvent ev, ItemChangeResult result)
+    public void LogBagModification(ItemChangeEvent ev, ItemChangeResult result)
     {
         // Debug: 詳細資訊
         Log.Debug("[{Protocol}] {Action} - 物品: {ItemName}({ItemId}), Slot: {SlotId}, 數量: {Count}",

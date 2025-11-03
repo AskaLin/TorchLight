@@ -42,6 +42,9 @@
     <None Update="ItemIdTable.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Seed\ItemMapper.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="UE_game.log">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
