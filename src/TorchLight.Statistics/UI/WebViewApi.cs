@@ -247,11 +247,11 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     /// <summary>
     /// 新增或更新地圖設定
     /// </summary>
-    public string SaveMapConfig(string mapId, string mapName, string mapType)
+    public string SaveMapConfig(int mapId, string mapName, string mapType)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(mapId) || string.IsNullOrWhiteSpace(mapName))
+            if (mapId <= 0 || string.IsNullOrWhiteSpace(mapName))
             {
                 return JsonSerializer.Serialize(new { success = false, message = "地圖ID和名稱不能為空" });
             }
@@ -283,7 +283,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     /// <summary>
     /// 刪除地圖設定
     /// </summary>
-    public string DeleteMapConfig(string mapId)
+    public string DeleteMapConfig(int mapId)
     {
         try
         {

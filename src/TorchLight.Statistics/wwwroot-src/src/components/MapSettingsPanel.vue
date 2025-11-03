@@ -49,11 +49,13 @@
         <div class="modal-body">
           <div class="form-group">
             <label>地圖 ID *</label>
-            <input v-model="editingMap.mapId"
-                   type="text"
-                   placeholder="例如: GeBuLinCunLuo01"
+            <input v-model.number="editingMap.mapId"
+                   type="number"
+                   placeholder="例如: 1061000"
                    :disabled="isEditingMap"
-                   class="form-input" />
+                   class="form-input"
+                   min="1" />
+            <div class="form-hint">請輸入地圖的數字 ID（例如: 1061000）</div>
           </div>
 
           <div class="form-group">
@@ -100,7 +102,7 @@
   const notification = ref({ show: false, type: 'success', message: '' })
 
   const editingMap = ref({
-    mapId: '',
+    mapId: 0,  // 改為 number
     mapName: '',
     mapType: 'Netherrealm'
   })
@@ -139,7 +141,7 @@
     showAddMapDialog.value = false
     isEditingMap.value = false
     editingMap.value = {
-      mapId: '',
+      mapId: 0,  // 改為 number 類型
       mapName: '',
       mapType: mapTypes.value.length > 0 ? mapTypes.value[0].value : 'Netherrealm'
     }
@@ -147,15 +149,21 @@
 
   // 儲存地圖
   const saveMap = async () => {
-    if (!editingMap.value.mapId || !editingMap.value.mapName) {
-      showNotification('error', '地圖 ID 和名稱是必填的')
+    // 驗證 mapId 是否為有效的數字
+    if (!editingMap.value.mapId || editingMap.value.mapId <= 0) {
+      showNotification('error', '地圖 ID 必須是大於 0 的數字')
+      return
+    }
+
+    if (!editingMap.value.mapName) {
+      showNotification('error', '地圖名稱是必填的')
       return
     }
 
     try {
       const result = await apiCall(
         'SaveMapConfig',
-        editingMap.value.mapId,
+        parseInt(editingMap.value.mapId),  // 確保轉換為整數
         editingMap.value.mapName,
         editingMap.value.mapType
       )
@@ -227,7 +235,7 @@
     }
 
     try {
-      const result = await apiCall('DeleteMapConfig', map.mapType, map.mapId)
+      const result = await apiCall('DeleteMapConfig', parseInt(map.mapId))  // 確保轉換為整數
 
       if (result.success) {
         showNotification('success', result.message)
