@@ -801,86 +801,274 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     }
 
     /// <summary>
+    /// 🆕 獲取斬殺線設定 - 三階段
+    /// </summary>
+    public string GetExecuteLineSettings()
+    {
+        try
+        {
+            var (stage1Percentage, stage1ColorHex,
+                 stage2Percentage, stage2ColorHex,
+                 stage3Percentage, stage3ColorHex,
+                 defaultColorHex, opacity) = _mainWindow.GetExecuteLineSettings();
+
+            return JsonSerializer.Serialize(new
+            {
+                stage1Percentage,
+                stage1Color = stage1ColorHex,
+                stage2Percentage,
+                stage2Color = stage2ColorHex,
+                stage3Percentage,
+                stage3Color = stage3ColorHex,
+                defaultColor = defaultColorHex,
+                opacity
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取斬殺線設定失敗");
+            return JsonSerializer.Serialize(new { error = ex.Message }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 儲存斬殺線設定 - 三階段
+    /// </summary>
+    public string SaveExecuteLineSettings(
+        int stage1Percentage, string stage1ColorHex,
+        int stage2Percentage, string stage2ColorHex,
+        int stage3Percentage, string stage3ColorHex,
+        string defaultColorHex, double opacity)
+    {
+        try
+        {
+            var success = _mainWindow.SaveExecuteLineSettings(
+                stage1Percentage, stage1ColorHex,
+                stage2Percentage, stage2ColorHex,
+                stage3Percentage, stage3ColorHex,
+                defaultColorHex, opacity);
+
+            return JsonSerializer.Serialize(new
+            {
+                success,
+                message = success ? "斬殺線設定已儲存" : "儲存失敗：三階段百分比總和不能超過 100%"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "儲存斬殺線設定失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"儲存失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 更新斬殺線預覽 - 三階段
+    /// </summary>
+    public string UpdateExecuteLinePreview(
+        int stage1Percentage, string stage1ColorHex,
+        int stage2Percentage, string stage2ColorHex,
+        int stage3Percentage, string stage3ColorHex,
+        string defaultColorHex, double opacity)
+    {
+        try
+        {
+            _mainWindow.UpdateExecuteLineSettings(
+                stage1Percentage, stage1ColorHex,
+                stage2Percentage, stage2ColorHex,
+                stage3Percentage, stage3ColorHex,
+                defaultColorHex, opacity);
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "預覽已更新"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "更新斬殺線預覽失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"更新失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 顯示斬殺線視窗
+    /// </summary>
+    public string ShowExecuteLineWindow()
+    {
+        try
+        {
+            _mainWindow.Invoke(() =>
+            {
+                _mainWindow.ShowExecuteLineWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "斬殺線視窗已顯示"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "顯示斬殺線視窗失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"顯示失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 隱藏斬殺線視窗
+    /// </summary>
+    public string HideExecuteLineWindow()
+    {
+        try
+        {
+            _mainWindow.Invoke(() =>
+            {
+                _mainWindow.HideExecuteLineWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = "斬殺線視窗已隱藏"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "隱藏斬殺線視窗失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"隱藏失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 切換斬殺線視窗顯示狀態
+    /// </summary>
+    public string ToggleExecuteLineWindow()
+    {
+        try
+        {
+            bool isVisible = false;
+            _mainWindow.Invoke(() =>
+            {
+                isVisible = _mainWindow.ToggleExecuteLineWindow();
+            });
+
+            return JsonSerializer.Serialize(new
+            {
+                success = true,
+                message = isVisible ? "斬殺線視窗已顯示" : "斬殺線視窗已隱藏",
+                isVisible
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "切換斬殺線視窗失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"切換失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
     /// 🆕 獲取所有歷史記錄檔案列表
     /// </summary>
     public string GetHistoryRecords()
     {
-        try
+      try
         {
-            var files = MapPickRecordManager.GetSavedRecordFiles();
-            var records = new List<object>();
+        var files = MapPickRecordManager.GetSavedRecordFiles();
+        var records = new List<object>();
 
-            foreach (var file in files)
+  foreach (var file in files)
             {
-                var savedRecord = MapPickRecordManager.LoadSavedRecord(file);
-                if (savedRecord == null || savedRecord.Summary == null)
-                    continue;
+         var savedRecord = MapPickRecordManager.LoadSavedRecord(file);
+        if (savedRecord == null || savedRecord.Summary == null)
+         continue;
 
-                var fileName = Path.GetFileName(file);
-                records.Add(new
-                {
-                    fileName,
-                    filePath = file,
-                    recordTime = savedRecord.Summary.TotalMaps > 0 && savedRecord.Records.Count > 0
-              ? savedRecord.Records[0].StartTime.ToString("MM/dd HH:mm")
-                  : "未知",
-                    totalMaps = savedRecord.Summary.TotalMaps,
-                    totalItems = savedRecord.Summary.TotalItems,
-                    totalQuantity = savedRecord.Summary.TotalQuantity,
-                    totalPlayTime = savedRecord.Summary.TotalPlayTime,
-                    topItems = savedRecord.Summary.MostPickedItems.Take(10).ToArray(),
-                    savedTime = savedRecord.SavedTime
-                });
-            }
+     var fileName = Path.GetFileName(file);
+           records.Add(new
+     {
+     fileName,
+         filePath = file,
+           recordTime = savedRecord.Summary.TotalMaps > 0 && savedRecord.Records.Count > 0
+     ? savedRecord.Records[0].StartTime.ToString("MM/dd HH:mm")
+       : "未知",
+    totalMaps = savedRecord.Summary.TotalMaps,
+      totalItems = savedRecord.Summary.TotalItems,
+             totalQuantity = savedRecord.Summary.TotalQuantity,
+     totalPlayTime = savedRecord.Summary.TotalPlayTime,
+        topItems = savedRecord.Summary.MostPickedItems.Take(10).ToArray(),
+     savedTime = savedRecord.SavedTime
+         });
+ }
 
-            return JsonSerializer.Serialize(records, _ops);
-        }
+ return JsonSerializer.Serialize(records, _ops);
+  }
         catch (Exception ex)
-        {
-            Log.Error(ex, "獲取歷史記錄失敗");
+      {
+          Log.Error(ex, "獲取歷史記錄失敗");
             return JsonSerializer.Serialize(new { error = ex.Message });
         }
-    }
+}
 
     /// <summary>
     /// 🆕 獲取指定歷史記錄的詳細資料
     /// </summary>
     public string GetHistoryRecordDetail(string fileName)
     {
-        try
+     try
         {
-            Log.Information("📂 開始載入歷史記錄: {FileName}", fileName);
+  Log.Information("📂 開始載入歷史記錄: {FileName}", fileName);
 
-            var savedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
+  var savedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
             Log.Debug("  - 存檔目錄: {Directory}", savedDirectory);
 
-            var filePath = Path.Combine(savedDirectory, fileName);
-            Log.Debug("  - 完整路徑: {FilePath}", filePath);
+      var filePath = Path.Combine(savedDirectory, fileName);
+    Log.Debug("  - 完整路徑: {FilePath}", filePath);
 
             if (!File.Exists(filePath))
-            {
-                Log.Warning("❌ 檔案不存在: {FilePath}", filePath);
-                return JsonSerializer.Serialize(new { error = $"找不到檔案: {fileName}" }, _ops);
+      {
+        Log.Warning("❌ 檔案不存在: {FilePath}", filePath);
+           return JsonSerializer.Serialize(new { error = $"找不到檔案: {fileName}" }, _ops);
+    }
+
+  var savedRecord = MapPickRecordManager.LoadSavedRecord(filePath);
+    if (savedRecord == null)
+     {
+    Log.Warning("❌ 無法載入記錄: {FilePath}", filePath);
+ return JsonSerializer.Serialize(new { error = "無法讀取記錄檔案，可能檔案格式錯誤" }, _ops);
             }
 
-            var savedRecord = MapPickRecordManager.LoadSavedRecord(filePath);
-            if (savedRecord == null)
-            {
-                Log.Warning("❌ 無法載入記錄: {FilePath}", filePath);
-                return JsonSerializer.Serialize(new { error = "無法讀取記錄檔案，可能檔案格式錯誤" }, _ops);
-            }
-
-            Log.Information("✅ 成功載入歷史記錄");
+          Log.Information("✅ 成功載入歷史記錄");
             Log.Debug("  - 總地圖數: {TotalMaps}", savedRecord.Summary?.TotalMaps);
             Log.Debug("  - 記錄數量: {RecordsCount}", savedRecord.Records?.Count);
 
-            return JsonSerializer.Serialize(savedRecord, _ops);
+   return JsonSerializer.Serialize(savedRecord, _ops);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "💥 獲取歷史記錄詳情失敗: {FileName}", fileName);
-            return JsonSerializer.Serialize(new { error = $"載入失敗: {ex.Message}" }, _ops);
-        }
+Log.Error(ex, "💥 獲取歷史記錄詳情失敗: {FileName}", fileName);
+       return JsonSerializer.Serialize(new { error = $"載入失敗: {ex.Message}" }, _ops);
+     }
     }
 
     private class MapRecordDetail
@@ -888,15 +1076,15 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         public string RecordId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
-        public int MapId { get; set; }
-        public string MapTicket { get; set; }
+     public int MapId { get; set; }
+   public string MapTicket { get; set; }
         public string[] Compass { get; set; }
         public string Probe { get; set; }
         public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+    public DateTime EndTime { get; set; }
         public string UseTime { get; set; }
         public object[] Items { get; set; }
-        public int ItemCount { get; set; }
-        public int TotalQuantity { get; set; }
+     public int ItemCount { get; set; }
+     public int TotalQuantity { get; set; }
     }
 }

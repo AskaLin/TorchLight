@@ -10,6 +10,10 @@
                     @click="activeTab = 'statistics'">
                 拾取統計設定
             </button>
+            <button :class="['tab-btn', { active: activeTab === 'executeLine' }]"
+                    @click="activeTab = 'executeLine'">
+                斬殺線
+            </button>
         </div>
 
         <!-- Tab 內容 -->
@@ -21,6 +25,10 @@
             <div v-show="activeTab === 'statistics'" class="tab-panel">
                 <PickupStatisticsSettings />
             </div>
+
+            <div v-show="activeTab === 'executeLine'" class="tab-panel">
+                <ExecuteLineSettings />
+            </div>
         </div>
     </div>
 </template>
@@ -29,6 +37,7 @@
     import { ref } from 'vue'
     import MapSettingsPanel from '../components/MapSettingsPanel.vue'
     import PickupStatisticsSettings from '../components/PickupStatisticsSettings.vue'
+    import ExecuteLineSettings from '../components/ExecuteLineSettings.vue'
 
     const activeTab = ref('maps')
 </script>

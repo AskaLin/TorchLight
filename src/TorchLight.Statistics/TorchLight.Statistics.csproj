@@ -22,6 +22,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_API.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_CHECKLIST.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_IMPLEMENTATION.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_QUICK_GUIDE_V2.1.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_QUICK_REFERENCE.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_SUMMARY.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_TEST_GUIDE.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V2.1.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V2.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V3.0.md" />
+    <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V3.1.md" />
     <None Remove="Seed\MapMapper.json" />
   </ItemGroup>
   <ItemGroup>
