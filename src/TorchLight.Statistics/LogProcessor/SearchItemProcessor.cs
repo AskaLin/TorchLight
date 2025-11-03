@@ -18,7 +18,6 @@ public class SearchItemProcessor
 
         if (_inSearchBlock && line.StartsWith("+itemBaseId ["))
         {
-
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
             {

@@ -89,7 +89,7 @@ namespace TorchLight.Statistics
                     });
                 };
 
-                // tail.Start();
+                tail.Start();
 
                 //測試用, 讀取現有日誌內容 進行處理
                 using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

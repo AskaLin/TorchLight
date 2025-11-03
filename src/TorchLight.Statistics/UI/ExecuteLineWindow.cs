@@ -42,10 +42,11 @@ public class ExecuteLineWindow : Form
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_SHOWWINDOW = 0x0040;
+    private const uint SWP_NOACTIVATE = 0x0010;
 
     public ExecuteLineWindow()
     {
-      InitializeWindow();
+        InitializeWindow();
     }
 
     private void InitializeWindow()
@@ -53,28 +54,28 @@ public class ExecuteLineWindow : Form
         // 窗體基本設定
         FormBorderStyle = FormBorderStyle.None;  // 無邊框
         StartPosition = FormStartPosition.Manual;
-   TopMost = true;  // 永遠置頂
+        TopMost = true;  // 永遠置頂
         ShowInTaskbar = false;  // 不顯示在工作列
 
-      // 設定窗體大小和位置
-  Width = 1000;
-      Height = 30;
+        // 設定窗體大小和位置
+        Width = 1000;
+        Height = 30;
         Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - Width - 20, 200);
 
-    // 啟用雙緩衝以避免閃爍
-DoubleBuffered = true;
+        // 啟用雙緩衝以避免閃爍
+        DoubleBuffered = true;
 
         // 設定透明度
-  BackColor = Color.FromArgb(240, 240, 240);
-   Opacity = 0.95;
+        BackColor = Color.FromArgb(240, 240, 240);
+        Opacity = 0.95;
 
         // 註冊滑鼠事件以支援拖曳和調整大小
         MouseDown += OnMouseDown;
         MouseMove += OnMouseMove;
-     MouseUp += OnMouseUp;
+        MouseUp += OnMouseUp;
 
         // 當窗體顯示時，強制置頂
- Shown += OnShown;
+        Shown += OnShown;
 
         // 當窗體失去焦點時，確保仍然置頂
         Deactivate += OnDeactivate;
@@ -107,34 +108,35 @@ DoubleBuffered = true;
 
     // 窗體失去焦點時確保仍然置頂
     private void OnDeactivate(object sender, EventArgs e)
-{
-      EnsureTopMost();
+    {
+        EnsureTopMost();
     }
 
     // 強制窗體置頂
     private void EnsureTopMost()
     {
         if (IsHandleCreated)
-  {
-            SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        {
+            // 不使用 SWP_SHOWWINDOW，避免在視窗被 Hide 時被強制顯示
+            SetWindowPos(Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         }
     }
 
     // 覆寫 CreateParams 設定 WS_EX_TOPMOST 和 WS_EX_TOOLWINDOW
     protected override CreateParams CreateParams
     {
-   get
-      {
-        const int WS_EX_TOPMOST = 0x00000008;
-     const int WS_EX_TOOLWINDOW = 0x00000080;
+        get
+        {
+            const int WS_EX_TOPMOST = 0x00000008;
+            const int WS_EX_TOOLWINDOW = 0x00000080;
             const int WS_EX_NOACTIVATE = 0x08000000;
 
             var cp = base.CreateParams;
- cp.ExStyle |= WS_EX_TOPMOST;      // 永遠置頂
+            cp.ExStyle |= WS_EX_TOPMOST;      // 永遠置頂
             cp.ExStyle |= WS_EX_TOOLWINDOW;   // 工具窗體（不顯示在工作列）
- cp.ExStyle |= WS_EX_NOACTIVATE; // 不搶奪焦點
-  return cp;
-     }
+            cp.ExStyle |= WS_EX_NOACTIVATE; // 不搶奪焦點
+            return cp;
+        }
     }
 
     /// <summary>
@@ -146,31 +148,31 @@ DoubleBuffered = true;
         int stage3Percentage, Color stage3Color,
         Color defaultColor, double opacity)
     {
-      _stage1Percentage = Math.Max(0, Math.Min(100, stage1Percentage));
+        _stage1Percentage = Math.Max(0, Math.Min(100, stage1Percentage));
         _stage1Color = stage1Color;
         _stage2Percentage = Math.Max(0, Math.Min(100, stage2Percentage));
-    _stage2Color = stage2Color;
-  _stage3Percentage = Math.Max(0, Math.Min(100, stage3Percentage));
+        _stage2Color = stage2Color;
+        _stage3Percentage = Math.Max(0, Math.Min(100, stage3Percentage));
         _stage3Color = stage3Color;
         _defaultColor = defaultColor;
-      Opacity = Math.Max(0.0, Math.Min(1.0, opacity));
+        Opacity = Math.Max(0.0, Math.Min(1.0, opacity));
         Invalidate(); // 重新繪製
     }
 
     /// <summary>
- /// 獲取當前設定
+    /// 獲取當前設定
     /// </summary>
-    public (int stage1Percentage, Color stage1Color, 
+    public (int stage1Percentage, Color stage1Color,
          int stage2Percentage, Color stage2Color,
        int stage3Percentage, Color stage3Color,
-    Color defaultColor, double opacity, 
+    Color defaultColor, double opacity,
    Point location, Size size) GetSettings()
     {
-    return (_stage1Percentage, _stage1Color,
-    _stage2Percentage, _stage2Color,
-       _stage3Percentage, _stage3Color,
-   _defaultColor, Opacity, 
-  Location, Size);
+        return (_stage1Percentage, _stage1Color,
+        _stage2Percentage, _stage2Color,
+           _stage3Percentage, _stage3Color,
+       _defaultColor, Opacity,
+      Location, Size);
     }
 
     /// <summary>
@@ -189,31 +191,31 @@ DoubleBuffered = true;
         _stage2Color = stage2Color;
         _stage3Percentage = Math.Max(0, Math.Min(100, stage3Percentage));
         _stage3Color = stage3Color;
-   _defaultColor = defaultColor;
+        _defaultColor = defaultColor;
         Opacity = Math.Max(0.0, Math.Min(1.0, opacity));
 
         // 確保大小在範圍內
         int width = Math.Max(MinWidth, Math.Min(MaxWidth, size.Width));
-     int height = Math.Max(MinHeight, Math.Min(MaxHeight, size.Height));
+        int height = Math.Max(MinHeight, Math.Min(MaxHeight, size.Height));
 
-   Location = location;
-   Size = new Size(width, height);
+        Location = location;
+        Size = new Size(width, height);
 
-  UpdateRegion();
+        UpdateRegion();
         Invalidate();
     }
 
     protected override void OnPaint(PaintEventArgs e)
     {
-  base.OnPaint(e);
+        base.OnPaint(e);
 
         var g = e.Graphics;
-      g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
 
         // 計算各階段寬度（順序：階段3 → 階段2 → 階段1 → 預設）
         int stage3Width = (int)(Width * (_stage3Percentage / 100.0));
         int stage2Width = (int)(Width * (_stage2Percentage / 100.0));
-  int stage1Width = (int)(Width * (_stage1Percentage / 100.0));
+        int stage1Width = (int)(Width * (_stage1Percentage / 100.0));
         int defaultWidth = Width - stage3Width - stage2Width - stage1Width;
 
         // 繪製背景（使用圓角矩形）
@@ -224,48 +226,48 @@ DoubleBuffered = true;
         // 繪製第三階段（最左邊，從0開始）
         if (stage3Width > 0)
         {
-using var brush = new SolidBrush(_stage3Color);
+            using var brush = new SolidBrush(_stage3Color);
             var rect = new Rectangle(currentX, 0, stage3Width, Height);
-            var path = currentX == 0 && stage3Width == Width 
+            var path = currentX == 0 && stage3Width == Width
                 ? GetRoundedRectPath(rect, CornerRadius)
         : GetPartialRoundedRectPath(rect, CornerRadius, currentX == 0, false);
             g.FillPath(brush, path);
-    currentX += stage3Width;
+            currentX += stage3Width;
         }
 
         // 繪製第二階段（中間）
-  if (stage2Width > 0)
+        if (stage2Width > 0)
         {
- using var brush = new SolidBrush(_stage2Color);
-       var rect = new Rectangle(currentX, 0, stage2Width, Height);
-     var path = GetPartialRoundedRectPath(rect, CornerRadius, false, false);
+            using var brush = new SolidBrush(_stage2Color);
+            var rect = new Rectangle(currentX, 0, stage2Width, Height);
+            var path = GetPartialRoundedRectPath(rect, CornerRadius, false, false);
             g.FillPath(brush, path);
-         currentX += stage2Width;
+            currentX += stage2Width;
         }
 
         // 繪製第一階段（預設區段右邊）
         if (stage1Width > 0)
         {
-       using var brush = new SolidBrush(_stage1Color);
+            using var brush = new SolidBrush(_stage1Color);
             var rect = new Rectangle(currentX, 0, stage1Width, Height);
-        var path = GetPartialRoundedRectPath(rect, CornerRadius, false, false);
-       g.FillPath(brush, path);
-         currentX += stage1Width;
+            var path = GetPartialRoundedRectPath(rect, CornerRadius, false, false);
+            g.FillPath(brush, path);
+            currentX += stage1Width;
         }
 
         // 繪製預設區域（最右邊）
         if (defaultWidth > 0)
-     {
-     using var brush = new SolidBrush(_defaultColor);
+        {
+            using var brush = new SolidBrush(_defaultColor);
             var rect = new Rectangle(currentX, 0, defaultWidth, Height);
-   var path = currentX == 0
-          ? GetRoundedRectPath(rect, CornerRadius)
-    : GetPartialRoundedRectPath(rect, CornerRadius, false, true);
-        g.FillPath(brush, path);
+            var path = currentX == 0
+                   ? GetRoundedRectPath(rect, CornerRadius)
+             : GetPartialRoundedRectPath(rect, CornerRadius, false, true);
+            g.FillPath(brush, path);
         }
 
- // 繪製工具尺刻度
-     DrawRulerMarks(g);
+        // 繪製工具尺刻度
+        DrawRulerMarks(g);
 
         // 繪製邊框
         using var borderPen = new Pen(Color.FromArgb(100, 100, 100), 2);
@@ -274,71 +276,71 @@ using var brush = new SolidBrush(_stage3Color);
 
     /// <summary>
     /// 繪製工具尺刻度
- /// </summary>
+    /// </summary>
     private void DrawRulerMarks(Graphics g)
-  {
+    {
         using var markPen = new Pen(Color.FromArgb(60, 60, 60), 1);
 
         // 根據寬度決定顯示哪些刻度
         bool show1Percent = Width >= 500;  // 寬度 >= 500 顯示 1% 刻度
- bool show5Percent = Width >= 300;  // 寬度 >= 300 顯示 5% 刻度
+        bool show5Percent = Width >= 300;  // 寬度 >= 300 顯示 5% 刻度
         bool show10Percent = true;      // 總是顯示 10% 刻度
 
         for (int i = 0; i <= 100; i++)
         {
-    int x = (int)(Width * (i / 100.0));
+            int x = (int)(Width * (i / 100.0));
 
-// 跳過邊界（0 和 100）
-   if (x <= CornerRadius || x >= Width - CornerRadius)
+            // 跳過邊界（0 和 100）
+            if (x <= CornerRadius || x >= Width - CornerRadius)
                 continue;
 
-  float markHeight = 0;
+            float markHeight = 0;
 
-   // 10% 刻度（大刻度）
-     if (i % 10 == 0 && show10Percent)
-         {
-     markHeight = Height * 0.4f;
-       }
-      // 5% 刻度（中刻度）
-            else if (i % 5 == 0 && show5Percent)
-     {
-           markHeight = Height * 0.25f;
+            // 10% 刻度（大刻度）
+            if (i % 10 == 0 && show10Percent)
+            {
+                markHeight = Height * 0.4f;
             }
-   // 1% 刻度（小刻度）
+            // 5% 刻度（中刻度）
+            else if (i % 5 == 0 && show5Percent)
+            {
+                markHeight = Height * 0.25f;
+            }
+            // 1% 刻度（小刻度）
             else if (show1Percent)
-      {
-              markHeight = Height * 0.15f;
-       }
+            {
+                markHeight = Height * 0.15f;
+            }
 
             // 繪製刻度線
-     if (markHeight > 0)
+            if (markHeight > 0)
             {
-             // 上方刻度
-           g.DrawLine(markPen, x, 0, x, markHeight);
+                // 上方刻度
+                g.DrawLine(markPen, x, 0, x, markHeight);
                 // 下方刻度
-        g.DrawLine(markPen, x, Height - markHeight, x, Height);
-      }
-  }
+                g.DrawLine(markPen, x, Height - markHeight, x, Height);
+            }
+        }
 
-      // 繪製百分比數字（只在 10% 刻度上）
+        // 繪製百分比數字（只在 10% 刻度上）
         if (Width >= 500)
         {
             using var font = new Font("Arial", 7, FontStyle.Regular);
-   using var textBrush = new SolidBrush(Color.FromArgb(60, 60, 60));
+            using var textBrush = new SolidBrush(Color.FromArgb(60, 60, 60));
             var format = new StringFormat
             {
-    Alignment = StringAlignment.Center,
-   LineAlignment = StringAlignment.Center
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
             };
 
             for (int i = 10; i < 100; i += 10)
-       {
-          int x = (int)(Width * (i / 100.0));
-       if (x > CornerRadius && x < Width - CornerRadius)
-       {
-         g.DrawString($"{i}", font, textBrush, x, Height / 2, format);
-              }
-          }
+            {
+                int x = (int)(Width * (i / 100.0));
+                if (x > CornerRadius && x < Width - CornerRadius)
+                {
+                    g.DrawString($"{i}", font, textBrush, x, Height / 2, format);
+                }
+            }
         }
     }
 
@@ -348,13 +350,13 @@ using var brush = new SolidBrush(_stage3Color);
     private GraphicsPath GetRoundedRectPath(Rectangle rect, int radius)
     {
         var path = new GraphicsPath();
-      int diameter = radius * 2;
+        int diameter = radius * 2;
 
         path.AddArc(rect.X, rect.Y, diameter, diameter, 180, 90);
- path.AddArc(rect.Right - diameter, rect.Y, diameter, diameter, 270, 90);
+        path.AddArc(rect.Right - diameter, rect.Y, diameter, diameter, 270, 90);
         path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
-      path.AddArc(rect.X, rect.Bottom - diameter, diameter, diameter, 90, 90);
-   path.CloseFigure();
+        path.AddArc(rect.X, rect.Bottom - diameter, diameter, diameter, 90, 90);
+        path.CloseFigure();
 
         return path;
     }
@@ -363,24 +365,24 @@ using var brush = new SolidBrush(_stage3Color);
     /// 獲取部分圓角矩形路徑（支援只圓角左側或右側）
     /// </summary>
     private GraphicsPath GetPartialRoundedRectPath(Rectangle rect, int radius, bool roundLeft, bool roundRight)
-  {
+    {
         var path = new GraphicsPath();
-      int diameter = radius * 2;
+        int diameter = radius * 2;
 
-    // 右上角
+        // 右上角
         if (roundRight)
             path.AddArc(rect.Right - diameter, rect.Y, diameter, diameter, 270, 90);
-      else
+        else
             path.AddLine(rect.Right, rect.Y, rect.Right, rect.Y);
 
         // 右側線
-   path.AddLine(rect.Right, rect.Y, rect.Right, rect.Bottom);
+        path.AddLine(rect.Right, rect.Y, rect.Right, rect.Bottom);
 
-      // 右下角
+        // 右下角
         if (roundRight)
-    path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
-    else
-  path.AddLine(rect.Right, rect.Bottom, rect.Right, rect.Bottom);
+            path.AddArc(rect.Right - diameter, rect.Bottom - diameter, diameter, diameter, 0, 90);
+        else
+            path.AddLine(rect.Right, rect.Bottom, rect.Right, rect.Bottom);
 
         // 底部線
         path.AddLine(rect.Right, rect.Bottom, rect.X, rect.Bottom);
@@ -388,21 +390,21 @@ using var brush = new SolidBrush(_stage3Color);
         // 左下角
         if (roundLeft)
             path.AddArc(rect.X, rect.Bottom - diameter, diameter, diameter, 90, 90);
-     else
-        path.AddLine(rect.X, rect.Bottom, rect.X, rect.Bottom);
+        else
+            path.AddLine(rect.X, rect.Bottom, rect.X, rect.Bottom);
 
         // 左側線
         path.AddLine(rect.X, rect.Bottom, rect.X, rect.Y);
 
         // 左上角
-   if (roundLeft)
-    path.AddArc(rect.X, rect.Y, diameter, diameter, 180, 90);
-    else
+        if (roundLeft)
+            path.AddArc(rect.X, rect.Y, diameter, diameter, 180, 90);
+        else
             path.AddLine(rect.X, rect.Y, rect.X, rect.Y);
 
         path.CloseFigure();
 
-     return path;
+        return path;
     }
 
     #region 拖曳和調整大小功能
@@ -413,17 +415,17 @@ using var brush = new SolidBrush(_stage3Color);
         {
             var direction = GetResizeDirection(e.Location);
 
-       if (direction != ResizeDirection.None)
-   {
- _isResizing = true;
-      _resizeDirection = direction;
-    _resizeStartPoint = e.Location;
-    _resizeStartSize = Size;
-          }
+            if (direction != ResizeDirection.None)
+            {
+                _isResizing = true;
+                _resizeDirection = direction;
+                _resizeStartPoint = e.Location;
+                _resizeStartSize = Size;
+            }
             else
             {
-        _isDragging = true;
-          _dragStartPoint = e.Location;
+                _isDragging = true;
+                _dragStartPoint = e.Location;
             }
         }
     }
@@ -432,25 +434,25 @@ using var brush = new SolidBrush(_stage3Color);
     {
         if (_isResizing)
         {
-         HandleResize(e.Location);
+            HandleResize(e.Location);
         }
         else if (_isDragging)
         {
-    var newLocation = new Point(
-          Location.X + e.X - _dragStartPoint.X,
-             Location.Y + e.Y - _dragStartPoint.Y
-);
-    Location = newLocation;
-     }
-  else
+            var newLocation = new Point(
+                  Location.X + e.X - _dragStartPoint.X,
+                     Location.Y + e.Y - _dragStartPoint.Y
+        );
+            Location = newLocation;
+        }
+        else
         {
- UpdateCursor(e.Location);
+            UpdateCursor(e.Location);
         }
     }
 
     private void OnMouseUp(object sender, MouseEventArgs e)
     {
- _isDragging = false;
+        _isDragging = false;
         _isResizing = false;
         _resizeDirection = ResizeDirection.None;
         Cursor = Cursors.Default;
@@ -458,13 +460,13 @@ using var brush = new SolidBrush(_stage3Color);
 
     private ResizeDirection GetResizeDirection(Point location)
     {
-  bool onLeft = location.X <= ResizeBorderWidth;
-      bool onRight = location.X >= Width - ResizeBorderWidth;
-      bool onTop = location.Y <= ResizeBorderWidth;
+        bool onLeft = location.X <= ResizeBorderWidth;
+        bool onRight = location.X >= Width - ResizeBorderWidth;
+        bool onTop = location.Y <= ResizeBorderWidth;
         bool onBottom = location.Y >= Height - ResizeBorderWidth;
 
         if (onLeft && onTop) return ResizeDirection.TopLeft;
-if (onRight && onTop) return ResizeDirection.TopRight;
+        if (onRight && onTop) return ResizeDirection.TopRight;
         if (onLeft && onBottom) return ResizeDirection.BottomLeft;
         if (onRight && onBottom) return ResizeDirection.BottomRight;
         if (onLeft) return ResizeDirection.Left;
@@ -479,14 +481,14 @@ if (onRight && onTop) return ResizeDirection.TopRight;
     {
         var direction = GetResizeDirection(location);
 
-    Cursor = direction switch
-   {
+        Cursor = direction switch
+        {
             ResizeDirection.Left or ResizeDirection.Right => Cursors.SizeWE,
-     ResizeDirection.Top or ResizeDirection.Bottom => Cursors.SizeNS,
+            ResizeDirection.Top or ResizeDirection.Bottom => Cursors.SizeNS,
             ResizeDirection.TopLeft or ResizeDirection.BottomRight => Cursors.SizeNWSE,
             ResizeDirection.TopRight or ResizeDirection.BottomLeft => Cursors.SizeNESW,
-       _ => Cursors.Default
-   };
+            _ => Cursors.Default
+        };
     }
 
     private void HandleResize(Point currentLocation)
@@ -496,77 +498,77 @@ if (onRight && onTop) return ResizeDirection.TopRight;
 
         int newWidth = Width;
         int newHeight = Height;
-int newX = Location.X;
+        int newX = Location.X;
         int newY = Location.Y;
 
         switch (_resizeDirection)
         {
             case ResizeDirection.Right:
-        newWidth = _resizeStartSize.Width + deltaX;
-    break;
+                newWidth = _resizeStartSize.Width + deltaX;
+                break;
 
             case ResizeDirection.Left:
-     newWidth = _resizeStartSize.Width - deltaX;
-  newX = Location.X + deltaX;
-         break;
+                newWidth = _resizeStartSize.Width - deltaX;
+                newX = Location.X + deltaX;
+                break;
 
             case ResizeDirection.Bottom:
-    newHeight = _resizeStartSize.Height + deltaY;
-  break;
+                newHeight = _resizeStartSize.Height + deltaY;
+                break;
 
             case ResizeDirection.Top:
                 newHeight = _resizeStartSize.Height - deltaY;
-newY = Location.Y + deltaY;
-          break;
+                newY = Location.Y + deltaY;
+                break;
 
- case ResizeDirection.TopLeft:
-      newWidth = _resizeStartSize.Width - deltaX;
-      newHeight = _resizeStartSize.Height - deltaY;
-       newX = Location.X + deltaX;
-    newY = Location.Y + deltaY;
-        break;
+            case ResizeDirection.TopLeft:
+                newWidth = _resizeStartSize.Width - deltaX;
+                newHeight = _resizeStartSize.Height - deltaY;
+                newX = Location.X + deltaX;
+                newY = Location.Y + deltaY;
+                break;
 
             case ResizeDirection.TopRight:
-        newWidth = _resizeStartSize.Width + deltaX;
- newHeight = _resizeStartSize.Height - deltaY;
-    newY = Location.Y + deltaY;
-            break;
+                newWidth = _resizeStartSize.Width + deltaX;
+                newHeight = _resizeStartSize.Height - deltaY;
+                newY = Location.Y + deltaY;
+                break;
 
             case ResizeDirection.BottomLeft:
-            newWidth = _resizeStartSize.Width - deltaX;
-    newHeight = _resizeStartSize.Height + deltaY;
-          newX = Location.X + deltaX;
-  break;
+                newWidth = _resizeStartSize.Width - deltaX;
+                newHeight = _resizeStartSize.Height + deltaY;
+                newX = Location.X + deltaX;
+                break;
 
-        case ResizeDirection.BottomRight:
+            case ResizeDirection.BottomRight:
                 newWidth = _resizeStartSize.Width + deltaX;
-    newHeight = _resizeStartSize.Height + deltaY;
-     break;
-     }
+                newHeight = _resizeStartSize.Height + deltaY;
+                break;
+        }
 
-   // 限制寬度和高度
-     newWidth = Math.Max(MinWidth, Math.Min(MaxWidth, newWidth));
-      newHeight = Math.Max(MinHeight, Math.Min(MaxHeight, newHeight));
+        // 限制寬度和高度
+        newWidth = Math.Max(MinWidth, Math.Min(MaxWidth, newWidth));
+        newHeight = Math.Max(MinHeight, Math.Min(MaxHeight, newHeight));
 
         // 調整位置（當從左側或頂部調整大小時）
         if (_resizeDirection == ResizeDirection.Left ||
       _resizeDirection == ResizeDirection.TopLeft ||
         _resizeDirection == ResizeDirection.BottomLeft)
         {
-      int actualWidthChange = newWidth - Width;
+            int actualWidthChange = newWidth - Width;
             newX = Location.X - actualWidthChange;
         }
 
-     if (_resizeDirection == ResizeDirection.Top ||
-_resizeDirection == ResizeDirection.TopLeft ||
-     _resizeDirection == ResizeDirection.TopRight)
+        if (_resizeDirection == ResizeDirection.Top ||
+   _resizeDirection == ResizeDirection.TopLeft ||
+        _resizeDirection == ResizeDirection.TopRight)
         {
-    int actualHeightChange = newHeight - Height;
-   newY = Location.Y - actualHeightChange;
+            int actualHeightChange = newHeight - Height;
+            newY = Location.Y - actualHeightChange;
         }
 
         Location = new Point(newX, newY);
-     Size = new Size(newWidth, newHeight);
+        Size = new Size(newWidth, newHeight);
     }
 
     private enum ResizeDirection
@@ -574,10 +576,10 @@ _resizeDirection == ResizeDirection.TopLeft ||
         None,
         Left,
         Right,
-  Top,
+        Top,
         Bottom,
         TopLeft,
-  TopRight,
+        TopRight,
         BottomLeft,
         BottomRight
     }

@@ -302,129 +302,128 @@ public class MainWindow : Form
     public void UpdateExecuteLineSettings(
      int stage1Percentage, string stage1ColorHex,
      int stage2Percentage, string stage2ColorHex,
-  int stage3Percentage, string stage3ColorHex,
-   string defaultColorHex, double opacity)
+     int stage3Percentage, string stage3ColorHex,
+     string defaultColorHex, double opacity)
     {
         if (_executeLineWindow != null && !_executeLineWindow.IsDisposed)
-  {
- var stage1Color = ColorTranslator.FromHtml(stage1ColorHex);
-       var stage2Color = ColorTranslator.FromHtml(stage2ColorHex);
+        {
+            var stage1Color = ColorTranslator.FromHtml(stage1ColorHex);
+            var stage2Color = ColorTranslator.FromHtml(stage2ColorHex);
             var stage3Color = ColorTranslator.FromHtml(stage3ColorHex);
-     var defaultColor = ColorTranslator.FromHtml(defaultColorHex);
-        _executeLineWindow.UpdateSettings(
-   stage1Percentage, stage1Color,
-       stage2Percentage, stage2Color,
-    stage3Percentage, stage3Color,
-      defaultColor, opacity);
- }
+            var defaultColor = ColorTranslator.FromHtml(defaultColorHex);
+            _executeLineWindow.UpdateSettings(
+                stage1Percentage, stage1Color,
+                stage2Percentage, stage2Color,
+                stage3Percentage, stage3Color,
+                defaultColor, opacity);
+        }
     }
 
     // 🆕 儲存斬殺線設定
     public bool SaveExecuteLineSettings(
         int stage1Percentage, string stage1ColorHex,
- int stage2Percentage, string stage2ColorHex,
+        int stage2Percentage, string stage2ColorHex,
         int stage3Percentage, string stage3ColorHex,
-      string defaultColorHex, double opacity)
- {
+        string defaultColorHex, double opacity)
+    {
         try
         {
-var settings = Services.AppSettingsManager.GetSettings();
-     settings.ExecuteLine.Stage1Percentage = stage1Percentage;
+            var settings = Services.AppSettingsManager.GetSettings();
+            settings.ExecuteLine.Stage1Percentage = stage1Percentage;
             settings.ExecuteLine.Stage1Color = stage1ColorHex;
-       settings.ExecuteLine.Stage2Percentage = stage2Percentage;
-   settings.ExecuteLine.Stage2Color = stage2ColorHex;
-  settings.ExecuteLine.Stage3Percentage = stage3Percentage;
-    settings.ExecuteLine.Stage3Color = stage3ColorHex;
+            settings.ExecuteLine.Stage2Percentage = stage2Percentage;
+            settings.ExecuteLine.Stage2Color = stage2ColorHex;
+            settings.ExecuteLine.Stage3Percentage = stage3Percentage;
+            settings.ExecuteLine.Stage3Color = stage3ColorHex;
             settings.ExecuteLine.DefaultColor = defaultColorHex;
-     settings.ExecuteLine.Opacity = opacity;
+            settings.ExecuteLine.Opacity = opacity;
 
-    // 驗證百分比總和
-     if (!settings.ExecuteLine.IsValid())
-     {
-         Log.Warning("斬殺線設定驗證失敗：三階段百分比總和超過 100%");
-     return false;
- }
+            // 驗證百分比總和
+            if (!settings.ExecuteLine.IsValid())
+            {
+                Log.Warning("斬殺線設定驗證失敗：三階段百分比總和超過 100%");
+                return false;
+            }
 
-    // 同時儲存當前視窗的位置和大小
-      if (_executeLineWindow != null && !_executeLineWindow.IsDisposed)
-   {
-     var (_, _, _, _, _, _, _, _, location, size) = _executeLineWindow.GetSettings();
-   settings.ExecuteLine.LocationX = location.X;
-       settings.ExecuteLine.LocationY = location.Y;
-       settings.ExecuteLine.Width = size.Width;
-     settings.ExecuteLine.Height = size.Height;
+            // 同時儲存當前視窗的位置和大小
+            if (_executeLineWindow != null && !_executeLineWindow.IsDisposed)
+            {
+                var (_, _, _, _, _, _, _, _, location, size) = _executeLineWindow.GetSettings();
+                settings.ExecuteLine.LocationX = location.X;
+                settings.ExecuteLine.LocationY = location.Y;
+                settings.ExecuteLine.Width = size.Width;
+                settings.ExecuteLine.Height = size.Height;
 
-      // 更新視窗顯示
-        var stage1Color = ColorTranslator.FromHtml(stage1ColorHex);
-   var stage2Color = ColorTranslator.FromHtml(stage2ColorHex);
-   var stage3Color = ColorTranslator.FromHtml(stage3ColorHex);
-    var defaultColor = ColorTranslator.FromHtml(defaultColorHex);
-        _executeLineWindow.UpdateSettings(
-         stage1Percentage, stage1Color,
-   stage2Percentage, stage2Color,
-       stage3Percentage, stage3Color,
-    defaultColor, opacity);
-    }
+                // 更新視窗顯示
+                var stage1Color = ColorTranslator.FromHtml(stage1ColorHex);
+                var stage2Color = ColorTranslator.FromHtml(stage2ColorHex);
+                var stage3Color = ColorTranslator.FromHtml(stage3ColorHex);
+                var defaultColor = ColorTranslator.FromHtml(defaultColorHex);
+                _executeLineWindow.UpdateSettings(
+                    stage1Percentage, stage1Color,
+                    stage2Percentage, stage2Color,
+                    stage3Percentage, stage3Color,
+                    defaultColor, opacity);
+            }
 
             return Services.AppSettingsManager.SaveSettings(settings);
         }
         catch (Exception ex)
-  {
-    Log.Error(ex, "儲存斬殺線設定失敗");
-   return false;
-     }
+        {
+            Log.Error(ex, "儲存斬殺線設定失敗");
+            return false;
+        }
     }
 
     // 🆕 獲取斬殺線設定
     public (int stage1Percentage, string stage1ColorHex,
         int stage2Percentage, string stage2ColorHex,
-     int stage3Percentage, string stage3ColorHex,
+        int stage3Percentage, string stage3ColorHex,
         string defaultColorHex, double opacity) GetExecuteLineSettings()
- {
-     var settings = Services.AppSettingsManager.GetSettings();
- return (
-  settings.ExecuteLine.Stage1Percentage, settings.ExecuteLine.Stage1Color,
-     settings.ExecuteLine.Stage2Percentage, settings.ExecuteLine.Stage2Color,
-  settings.ExecuteLine.Stage3Percentage, settings.ExecuteLine.Stage3Color,
-            settings.ExecuteLine.DefaultColor, settings.ExecuteLine.Opacity
-        );
+    {
+        var settings = Services.AppSettingsManager.GetSettings();
+        return (
+            settings.ExecuteLine.Stage1Percentage, settings.ExecuteLine.Stage1Color,
+            settings.ExecuteLine.Stage2Percentage, settings.ExecuteLine.Stage2Color,
+            settings.ExecuteLine.Stage3Percentage, settings.ExecuteLine.Stage3Color,
+            settings.ExecuteLine.DefaultColor, settings.ExecuteLine.Opacity);
     }
 
     // 🆕 覆寫 Dispose 以確保懸浮窗體也被關閉
     protected override void Dispose(bool disposing)
     {
         if (disposing)
-   {
-    // 關閉前儲存斬殺線視窗的位置和大小
-  if (_executeLineWindow != null && !_executeLineWindow.IsDisposed)
-   {
- var (stage1Percentage, stage1Color,
-     stage2Percentage, stage2Color,
-   stage3Percentage, stage3Color,
-      defaultColor, opacity, location, size) = _executeLineWindow.GetSettings();
-       
-var settings = Services.AppSettingsManager.GetSettings();
-     settings.ExecuteLine.Stage1Percentage = stage1Percentage;
-  settings.ExecuteLine.SetStage1Color(stage1Color);
-       settings.ExecuteLine.Stage2Percentage = stage2Percentage;
-   settings.ExecuteLine.SetStage2Color(stage2Color);
-       settings.ExecuteLine.Stage3Percentage = stage3Percentage;
-    settings.ExecuteLine.SetStage3Color(stage3Color);
-  settings.ExecuteLine.SetDefaultColor(defaultColor);
-         settings.ExecuteLine.Opacity = opacity;
-settings.ExecuteLine.LocationX = location.X;
-     settings.ExecuteLine.LocationY = location.Y;
-settings.ExecuteLine.Width = size.Width;
-settings.ExecuteLine.Height = size.Height;
-         Services.AppSettingsManager.SaveSettings(settings);
-  }
+        {
+            // 關閉前儲存斬殺線視窗的位置和大小
+            if (_executeLineWindow != null && !_executeLineWindow.IsDisposed)
+            {
+                var (stage1Percentage, stage1Color,
+                    stage2Percentage, stage2Color,
+                  stage3Percentage, stage3Color,
+                     defaultColor, opacity, location, size) = _executeLineWindow.GetSettings();
 
-   _floatingStatsWindow?.Close();
-_floatingStatsWindow?.Dispose();
+                var settings = Services.AppSettingsManager.GetSettings();
+                settings.ExecuteLine.Stage1Percentage = stage1Percentage;
+                settings.ExecuteLine.SetStage1Color(stage1Color);
+                settings.ExecuteLine.Stage2Percentage = stage2Percentage;
+                settings.ExecuteLine.SetStage2Color(stage2Color);
+                settings.ExecuteLine.Stage3Percentage = stage3Percentage;
+                settings.ExecuteLine.SetStage3Color(stage3Color);
+                settings.ExecuteLine.SetDefaultColor(defaultColor);
+                settings.ExecuteLine.Opacity = opacity;
+                settings.ExecuteLine.LocationX = location.X;
+                settings.ExecuteLine.LocationY = location.Y;
+                settings.ExecuteLine.Width = size.Width;
+                settings.ExecuteLine.Height = size.Height;
+                Services.AppSettingsManager.SaveSettings(settings);
+            }
 
-     _executeLineWindow?.Close();
-   _executeLineWindow?.Dispose();
-     }
+            _floatingStatsWindow?.Close();
+            _floatingStatsWindow?.Dispose();
+
+            _executeLineWindow?.Close();
+            _executeLineWindow?.Dispose();
+        }
         base.Dispose(disposing);
     }
 
@@ -436,33 +435,33 @@ _floatingStatsWindow?.Dispose();
         // 確保斬殺線視窗不是主窗體的子窗體
         _executeLineWindow.Owner = null;
 
-      // 載入設定
-  var settings = Services.AppSettingsManager.GetSettings();
-      var executeLineSettings = settings.ExecuteLine;
+        // 載入設定
+        var settings = Services.AppSettingsManager.GetSettings();
+        var executeLineSettings = settings.ExecuteLine;
 
         // 套用設定
         _executeLineWindow.ApplySettings(
-     executeLineSettings.Stage1Percentage,
-  executeLineSettings.GetStage1Color(),
+            executeLineSettings.Stage1Percentage,
+            executeLineSettings.GetStage1Color(),
             executeLineSettings.Stage2Percentage,
             executeLineSettings.GetStage2Color(),
             executeLineSettings.Stage3Percentage,
- executeLineSettings.GetStage3Color(),
-    executeLineSettings.GetDefaultColor(),
-      executeLineSettings.Opacity,
-new Point(executeLineSettings.LocationX, executeLineSettings.LocationY),
+            executeLineSettings.GetStage3Color(),
+            executeLineSettings.GetDefaultColor(),
+            executeLineSettings.Opacity,
+            new Point(executeLineSettings.LocationX, executeLineSettings.LocationY),
             new Size(executeLineSettings.Width, executeLineSettings.Height)
         );
 
         // 根據設定決定是否顯示
         if (executeLineSettings.IsVisible)
         {
-       _executeLineWindow.Show();
-      }
+            _executeLineWindow.Show();
+        }
         else
-  {
- _executeLineWindow.Hide();
-     }
+        {
+            _executeLineWindow.Hide();
+        }
 
         // 強制將斬殺線視窗帶到前面
         _executeLineWindow.BringToFront();

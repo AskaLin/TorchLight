@@ -639,28 +639,28 @@
   {
     "Id": 8604,
     "Name": "精密-律己",
-    "Type": "SkillItem",
+    "Type": "SkillSupport",
     "PageIdType": "Skill",
     "Enable": true
   },
   {
     "Id": 8608,
     "Name": "精密-貫注增效",
-    "Type": "SkillItem",
+    "Type": "SkillSupport",
     "PageIdType": "Skill",
     "Enable": true
   },
   {
     "Id": 8611,
     "Name": "精密-超能共生",
-    "Type": "SkillItem",
+    "Type": "SkillSupport",
     "PageIdType": "Skill",
     "Enable": true
   },
   {
     "Id": 8614,
     "Name": "精密-節流",
-    "Type": "SkillItem",
+    "Type": "SkillSupport",
     "PageIdType": "Skill",
     "Enable": true
   },

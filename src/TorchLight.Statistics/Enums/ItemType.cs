@@ -8,7 +8,11 @@ public enum ItemType
     /// <summary>
     /// 未知物品
     /// </summary>
-    Unknown = 0,
+    Unknown,
+    Unknown100,
+    Unknown101,
+    Unknown102,
+    Unknown103,
 
     /// <summary>
     /// 記憶螢光
@@ -61,11 +65,6 @@ public enum ItemType
     TowerMaterial,
 
     /// <summary>
-    /// 技能道具
-    /// </summary>
-    SkillItem,
-
-    /// <summary>
     /// 羅盤
     /// </summary>
     Compass,
@@ -103,5 +102,94 @@ public enum ItemType
     /// <summary>
     /// 神威紋章
     /// </summary>
-    DivineCrest
+    DivineCrest,
+
+    // ==================== Equipment 子類型 ====================
+
+    /// <summary>
+    /// 頭部裝備
+    /// </summary>
+    EquipmentHead,
+
+    /// <summary>
+    /// 胸甲裝備
+    /// </summary>
+    EquipmentChest,
+
+    /// <summary>
+    /// 手套裝備
+    /// </summary>
+    EquipmentGloves,
+
+    /// <summary>
+    /// 鞋子裝備
+    /// </summary>
+    EquipmentBoots,
+
+    /// <summary>
+    /// 武器
+    /// </summary>
+    EquipmentWeapon,
+
+    /// <summary>
+    /// 盾牌
+    /// </summary>
+    EquipmentShield,
+
+    /// <summary>
+    /// 項鍊
+    /// </summary>
+    EquipmentNecklace,
+
+    /// <summary>
+    /// 戒指
+    /// </summary>
+    EquipmentRing,
+
+    /// <summary>
+    /// 腰帶
+    /// </summary>
+    EquipmentBelt,
+
+    /// <summary>
+    /// 宿命
+    /// </summary>
+    EquipmentFate,
+
+    /// <summary>
+    /// 棱鏡
+    /// </summary>
+    EquipmentPrism,
+
+    // ==================== Skill 子類型 ====================
+
+    /// <summary>
+    /// 主動技能
+    /// </summary>
+    SkillActive,
+
+    /// <summary>
+    /// 輔助技能
+    /// </summary>
+    SkillSupport,
+
+    /// <summary>
+    /// 被動技能
+    /// </summary>
+    SkillPassive,
+
+    /// <summary>
+    /// 觸媒技能
+    /// </summary>
+    SkillCatalyst,
+
+    /// <summary>
+    /// 華貴輔助技能
+    /// </summary>
+    SkillSupportNoble,
+
+    /// <summary>
+    /// 崇高輔助技能
+    /// </summary>
+    SkillSupportExalted
 }

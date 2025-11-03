@@ -163,7 +163,7 @@ namespace TorchLight.Statistics.Mapper
                 {
                     return config.Type;
                 }
-                return ItemType.Unknown;
+                return ItemType.Unknown100;
             }
         }
 

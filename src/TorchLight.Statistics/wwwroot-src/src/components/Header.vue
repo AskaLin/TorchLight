@@ -50,7 +50,7 @@
 </template>
 
 <script setup>
-  import { computed, ref } from 'vue'
+  import { computed, ref, onMounted } from 'vue'
   import { useMapStore } from '../stores/mapStore'
   import { apiCall } from '../utils/api'
 
@@ -130,6 +130,19 @@
       console.error('切換斬殺線時發生錯誤:', error)
     }
   }
+
+  // 啟動時向後端查詢斬殺線設定（包含 isVisible）
+  onMounted(async () => {
+    try {
+      const result = await apiCall('GetExecuteLineSettings')
+      if (result && typeof result.isVisible !== 'undefined') {
+        console.log('載入斬殺線設定', result)
+        executeLineVisible.value = result.isVisible
+      }
+    } catch (err) {
+      console.error('載入斬殺線設定失敗:', err)
+    }
+  })
 </script>
 
 <style scoped>

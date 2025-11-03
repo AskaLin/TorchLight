@@ -8,7 +8,7 @@
             </button>
             <button :class="['tab-btn', { active: activeTab === 'statistics' }]"
                     @click="activeTab = 'statistics'">
-                拾取統計設定
+                拾取物品設定
             </button>
             <button :class="['tab-btn', { active: activeTab === 'executeLine' }]"
                     @click="activeTab = 'executeLine'">

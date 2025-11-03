@@ -69,7 +69,7 @@ public class GameLogProcessor
         };
     }
 
-    
+
 
     /// <summary>
     /// 設定 WebViewHub（用於後續通知前端）
@@ -157,65 +157,6 @@ public class GameLogProcessor
                 await _webViewHub.NotifyNewMapRecordAsync();
                 await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
             });
-        }
-    }
-
-    /// <summary>
-    /// 處理背包物品修改事件
-    /// </summary>
-    private void HandleBagModification(ItemChangeEvent ev)
-    {
-        try
-        {
-            // 更新背包庫存
-            var bagResult = _bagInventoryManager.UpdateBagItem(ev);
-
-            // 記錄日誌
-            _logger.LogBagModification(ev, bagResult);
-
-            // 處理 Spv3Open 事件（開圖材料）
-            if (ev.ProtoName == "Spv3Open" && _itemTable.TryGetValue(ev.ConfigBaseId, out var item))
-            {
-                if (item.Type == ItemType.Currency)
-                {
-                    Log.Debug("[開圖材料] 使用迴響數量 {res}", Math.Abs(bagResult.QuantityChange));
-                }
-
-                // 記錄羅盤、探針和門票作為開圖材料
-                if (item.Type == ItemType.Compass || item.Type == ItemType.Probe ||
-                    item.Type == ItemType.MapTicket || item.Type == ItemType.BossTicket ||
-                    item.Type == ItemType.GameplayTicket || item.Type == ItemType.Currency)
-                {
-                    _mapPickRecordManager.RecordMapMaterial(ev.ConfigBaseId, item.Type);
-                }
-            }
-
-            // 如果是增加物品（拾取），且在異界地圖中，則記錄拾取
-            if (bagResult.QuantityChange > 0 && (ev.ProtoName == "PickItems" || ev.ProtoName == "PickItem"))
-            {
-                var mapResult = _mapPickRecordManager.RecordPickedItem(ev.ConfigBaseId, ev.SlotId, bagResult.QuantityChange);
-                if (mapResult != null)
-                {
-                    _logger.LogMapPickItem(_mapPickRecordManager.CurrentMapName, mapResult);
-
-                    // 通知前端物品拾取
-                    if (_webViewHub != null)
-                    {
-                        _ = Task.Run(async () =>
-                        {
-                            await _webViewHub.NotifyItemPickedAsync(mapResult.ItemName, mapResult.QuantityChange);
-                            await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-                        });
-                    }
-                }
-            }
-
-            // 背包同步完成事件
-            OnBagSyncCompleted?.Invoke();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "處理背包修改時發生錯誤");
         }
     }
 
@@ -313,6 +254,93 @@ public class GameLogProcessor
         OnBagSyncCompleted?.Invoke();
     }
 
+    /// <summary>
+    /// 處理背包物品修改事件
+    /// </summary>
+    private void HandleBagModification(ItemChangeEvent ev)
+    {
+        try
+        {
+            // 更新背包庫存
+            var bagResult = _bagInventoryManager.UpdateBagItem(ev);
+
+            // 記錄日誌
+            _logger.LogBagModification(ev, bagResult);
+
+            // 紀錄未知物品
+            if (!_itemTable.TryGetValue(ev.ConfigBaseId, out var unknowItem))
+            {
+                ItemBaseModel newItem = new()
+                {
+                    Id = ev.ConfigBaseId,
+                    Name = $"未知物件({ev.ConfigBaseId})",
+                    Type = ev.PageId switch
+                    {
+                        100 => ItemType.Unknown100,
+                        101 => ItemType.Unknown101,
+                        102 => ItemType.Unknown102,
+                        103 => ItemType.Unknown103,
+                        _ => ItemType.Unknown
+                    },
+                    PageIdType = ev.PageId switch
+                    {
+                        100 => PageIdType.Equipment,
+                        101 => PageIdType.Skill,
+                        102 => PageIdType.Currency,
+                        103 => PageIdType.Other,
+                        _ => PageIdType.Other
+                    }
+                };
+
+                ItemInfoMapper.AddOrUpdateItem(newItem);
+            }
+
+            // 處理 Spv3Open 事件（開圖材料）
+            if (ev.ProtoName == "Spv3Open" && _itemTable.TryGetValue(ev.ConfigBaseId, out var item))
+            {
+                if (item.Type == ItemType.Currency)
+                {
+                    Log.Debug("[開圖材料] 使用迴響數量 {res}", Math.Abs(bagResult.QuantityChange));
+                }
+
+                // 記錄羅盤、探針和門票作為開圖材料
+                if (item.Type == ItemType.Compass || item.Type == ItemType.Probe ||
+                    item.Type == ItemType.MapTicket || item.Type == ItemType.BossTicket ||
+                    item.Type == ItemType.GameplayTicket || item.Type == ItemType.Currency)
+                {
+                    _mapPickRecordManager.RecordMapMaterial(ev.ConfigBaseId, item.Type);
+                }
+            }
+
+            // 如果是增加物品（拾取），且在異界地圖中，則記錄拾取
+            if (bagResult.QuantityChange > 0 && (ev.ProtoName == "PickItems" || ev.ProtoName == "PickItem"))
+            {
+                var mapResult = _mapPickRecordManager.RecordPickedItem(ev.ConfigBaseId, ev.SlotId, bagResult.QuantityChange);
+                if (mapResult != null)
+                {
+                    _logger.LogMapPickItem(_mapPickRecordManager.CurrentMapName, mapResult);
+
+                    // 通知前端物品拾取
+                    if (_webViewHub != null)
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            await _webViewHub.NotifyItemPickedAsync(mapResult.ItemName, mapResult.QuantityChange);
+                            await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+                        });
+                    }
+                }
+            }
+
+            // 背包同步完成事件
+            OnBagSyncCompleted?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "處理背包修改時發生錯誤");
+        }
+    }
+
     private void HandleMapInfoStart(DateTime start)
     {
         _mapPickRecordManager.EndMapRecord(start);
@@ -334,15 +362,7 @@ public class GameLogProcessor
             if (_mapPickRecordManager.CurrentMapRecordInfoComplete())
             {
                 _mapPickRecordManager.StartMapRecord(context.StartTime);
-
-                // 通知前端地圖切換
-                if (_webViewHub != null)
-                {
-                    _ = Task.Run(async () =>
-                    {
-                        await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-                    });
-                }
+                NotifyCurrentMapUpdate();
             }
         }
         catch (Exception ex)
@@ -351,5 +371,22 @@ public class GameLogProcessor
         }
     }
 
+    public void UpdateItemInfo(ItemBaseModel item)
+    {
+        _mapPickRecordManager.UpdateItemInfo(item);
+        NotifyCurrentMapUpdate();
+    }
+
+    private void NotifyCurrentMapUpdate()
+    {
+        // 通知前端地圖切換
+        if (_webViewHub != null)
+        {
+            _ = Task.Run(async () =>
+            {
+                await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+            });
+        }
+    }
     #endregion
 }

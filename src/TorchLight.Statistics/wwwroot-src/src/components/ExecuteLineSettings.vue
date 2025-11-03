@@ -67,122 +67,122 @@
 
         <div class="settings-panel">
           <!-- 第一列：預設區域顏色+透明度 | 階段3 -->
-     <div class="settings-row">
- <!-- 左側：預設區域顏色 + 透明度 -->
+          <div class="settings-row">
+            <!-- 左側：預設區域顏色 + 透明度 -->
             <div class="settings-group">
-       <div class="settings-items-row">
-       <div class="setting-item">
-           <label class="setting-label">預設區域顏色</label>
-     <div class="control-group">
-    <input v-model="settings.defaultColor"
-       type="color"
- class="color-input"
-       @input="updatePreview" />
-     </div>
-       </div>
-     <div class="setting-item">
-         <label class="setting-label">透明度</label>
-        <div class="control-group">
-               <input v-model.number="settings.opacity"
-    type="range"
-                min="0"
-  max="1"
-     step="0.01"
-             class="slider-input"
-        @input="updatePreview" />
+              <div class="settings-items-row">
+                <div class="setting-item">
+                  <label class="setting-label">預設區域</label>
+                  <div class="control-group">
+                    <input v-model="settings.defaultColor"
+                           type="color"
+                           class="color-input"
+                           @input="updatePreview" />
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <label class="setting-label">透明度</label>
+                  <div class="control-group">
+                    <input v-model.number="settings.opacity"
+                           type="range"
+                           min="0"
+                           max="1"
+                           step="0.01"
+                           class="slider-input"
+                           @input="updatePreview" />
                     <span class="slider-value">{{ Math.round(settings.opacity * 100) }}%</span>
-      </div>
-       </div>
-       </div>
-          </div>
-
-         <!-- 右側：階段 3（最左邊，從0開始） -->
-            <div class="settings-group">
-       <div class="settings-items-row">
-         <div class="setting-item">
-        <label class="setting-label">階段 3</label>
-  <div class="control-group">
-<input v-model="settings.stage3Color"
-     type="color"
-  class="color-input"
-     @input="updatePreview" />
-   </div>
-      </div>
-   <div class="setting-item">
-           <label class="setting-label">百分比</label>
-    <div class="control-group">
-  <input v-model.number="settings.stage3Percentage"
-          type="range"
-         min="0"
-  max="100"
-   step="1"
-         class="slider-input"
-             @input="validateAndUpdate" />
-         <span class="slider-value">{{ settings.stage3Percentage }}%</span>
-        </div>
-    </div>
+                  </div>
+                </div>
               </div>
-    </div>
+            </div>
+
+            <!-- 右側：階段 3（最左邊，從0開始） -->
+            <div class="settings-group">
+              <div class="settings-items-row">
+                <div class="setting-item">
+                  <label class="setting-label">階段 3</label>
+                  <div class="control-group">
+                    <input v-model="settings.stage3Color"
+                           type="color"
+                           class="color-input"
+                           @input="updatePreview" />
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <label class="setting-label">百分比</label>
+                  <div class="control-group">
+                    <input v-model.number="settings.stage3Percentage"
+                           type="range"
+                           min="0"
+                           max="100"
+                           step="1"
+                           class="slider-input"
+                           @input="validateAndUpdate" />
+                    <span class="slider-value">{{ settings.stage3Percentage }}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-   <!-- 第二列：階段2 | 階段1 -->
- <div class="settings-row">
+          <!-- 第二列：階段2 | 階段1 -->
+          <div class="settings-row">
             <!-- 左側：階段 2（中間） -->
             <div class="settings-group">
-     <div class="settings-items-row">
-          <div class="setting-item">
-     <label class="setting-label">階段 2</label>
-           <div class="control-group">
-                <input v-model="settings.stage2Color"
-    type="color"
-       class="color-input"
-  @input="updatePreview" />
-  </div>
-     </div>
-      <div class="setting-item">
-         <label class="setting-label">百分比</label>
+              <div class="settings-items-row">
+                <div class="setting-item">
+                  <label class="setting-label">階段 2</label>
                   <div class="control-group">
-      <input v-model.number="settings.stage2Percentage"
-  type="range"
-    min="0"
-    max="100"
-       step="1"
-   class="slider-input"
-        @input="validateAndUpdate" />
-           <span class="slider-value">{{ settings.stage2Percentage }}%</span>
-          </div>
-     </div>
-          </div>
-  </div>
+                    <input v-model="settings.stage2Color"
+                           type="color"
+                           class="color-input"
+                           @input="updatePreview" />
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <label class="setting-label">百分比</label>
+                  <div class="control-group">
+                    <input v-model.number="settings.stage2Percentage"
+                           type="range"
+                           min="0"
+                           max="100"
+                           step="1"
+                           class="slider-input"
+                           @input="validateAndUpdate" />
+                    <span class="slider-value">{{ settings.stage2Percentage }}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      <!-- 右側：階段 1（預設區段右邊） -->
-   <div class="settings-group">
-       <div class="settings-items-row">
-        <div class="setting-item">
-       <label class="setting-label">階段 1</label>
-          <div class="control-group">
-         <input v-model="settings.stage1Color"
-           type="color"
-       class="color-input"
-       @input="updatePreview" />
- </div>
-   </div>
-      <div class="setting-item">
-    <label class="setting-label">百分比</label>
-     <div class="control-group">
-    <input v-model.number="settings.stage1Percentage"
-       type="range"
-           min="0"
-          max="100"
-          step="1"
-            class="slider-input"
-            @input="validateAndUpdate" />
-         <span class="slider-value">{{ settings.stage1Percentage }}%</span>
-     </div>
-       </div>
-      </div>
-     </div>
-    </div>
+            <!-- 右側：階段 1（預設區段右邊） -->
+            <div class="settings-group">
+              <div class="settings-items-row">
+                <div class="setting-item">
+                  <label class="setting-label">階段 1</label>
+                  <div class="control-group">
+                    <input v-model="settings.stage1Color"
+                           type="color"
+                           class="color-input"
+                           @input="updatePreview" />
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <label class="setting-label">百分比</label>
+                  <div class="control-group">
+                    <input v-model.number="settings.stage1Percentage"
+                           type="range"
+                           min="0"
+                           max="100"
+                           step="1"
+                           class="slider-input"
+                           @input="validateAndUpdate" />
+                    <span class="slider-value">{{ settings.stage1Percentage }}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- 儲存按鈕 -->
           <div class="save-button-container">
@@ -255,7 +255,7 @@
       }
     } catch (err) {
       console.error('載入斬殺線設定失敗:', err)
-      showNotification('error', '載入設定失敗: ' + err.message )
+      showNotification('error', '載入設定失敗: ' + err.message)
     }
   }
 
@@ -527,7 +527,7 @@
   /* 階段標題 */
   .stage-header {
     display: flex;
- justify-content: space-between;
+    justify-content: space-between;
     align-items: center;
     margin-bottom: 8px;
     padding-bottom: 8px;
@@ -550,7 +550,7 @@
   /* 設定項目並列容器 */
   .settings-items-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: auto 1fr;
     gap: 15px;
   }
 
@@ -564,7 +564,8 @@
   .setting-label {
     color: rgba(255, 255, 255, 0.9);
     font-size: 0.85rem;
- font-weight: 500;
+    font-weight: 500;
+    text-align: center;
   }
 
   /* 控制組 */
@@ -577,7 +578,7 @@
   /* 顏色選擇器 */
   .color-input {
     width: 60px;
- height: 36px;
+    height: 36px;
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 6px;
     cursor: pointer;
@@ -586,13 +587,13 @@
 
     .color-input:hover {
       border-color: #667eea;
-  transform: scale(1.05);
+      transform: scale(1.05);
     }
 
   .color-value {
     color: rgba(255, 255, 255, 0.8);
     font-family: 'Consolas', monospace;
-  font-size: 0.85rem;
+    font-size: 0.85rem;
     flex: 1;
   }
 
@@ -611,31 +612,31 @@
       -webkit-appearance: none;
       appearance: none;
       width: 18px;
-  height: 18px;
-    border-radius: 50%;
+      height: 18px;
+      border-radius: 50%;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       cursor: pointer;
       box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
       transition: all 0.3s;
-}
+    }
 
       .slider-input::-webkit-slider-thumb:hover {
-   transform: scale(1.2);
+        transform: scale(1.2);
         box-shadow: 0 3px 10px rgba(102, 126, 234, 0.7);
       }
 
     .slider-input::-moz-range-thumb {
       width: 18px;
       height: 18px;
-  border-radius: 50%;
+      border-radius: 50%;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       cursor: pointer;
-  border: none;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+      border: none;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
       transition: all 0.3s;
     }
 
- .slider-input::-moz-range-thumb:hover {
+      .slider-input::-moz-range-thumb:hover {
         transform: scale(1.2);
         box-shadow: 0 3px 10px rgba(102, 126, 234, 0.7);
       }
@@ -645,7 +646,7 @@
     font-family: 'Consolas', monospace;
     font-size: 0.85rem;
     min-width: 45px;
-  text-align: right;
+    text-align: right;
   }
 
   /* 儲存按鈕容器 */
@@ -656,7 +657,7 @@
     gap: 15px;
     padding-top: 10px;
     position: relative;
-  min-height: 48px;
+    min-height: 48px;
   }
 
   /* 內聯驗證警告 */
@@ -683,7 +684,7 @@
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-  transition: all 0.3s;
+    transition: all 0.3s;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     flex-shrink: 0;
   }
@@ -706,7 +707,7 @@
   @media (max-width: 768px) {
     .settings-row {
       grid-template-columns: 1fr;
-  }
+    }
 
     .settings-items-row {
       grid-template-columns: 1fr;

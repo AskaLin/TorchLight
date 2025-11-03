@@ -132,7 +132,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         {
             Log.Warning("嘗試結束地圖記錄，但當前沒有有效的地圖記錄");
             Reset();
-            Log.Warning("置地圖記錄狀態");
+            Log.Warning("重置地圖記錄狀態");
             return;
         }
 
@@ -406,6 +406,23 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
             Log.Error(ex, "讀取歷史記錄檔案失敗: {FilePath}", filePath);
             return null;
         }
+    }
+
+    public void UpdateItemInfo(ItemBaseModel item)
+    {
+        Log.Debug("更新尚未存檔的拾取物品資訊: {ItemId}", item.Id);
+        if (_currentMapPickData.TryGetValue(item.Id, out var pickedItem))
+        {
+            pickedItem.Name = item.Name;
+        }
+
+        foreach (var mapRecord in _mapRecords)
+        {
+            if (mapRecord.PickRecord != null && mapRecord.PickRecord.TryGetValue(item.Id, out var pickedItemInRecord))
+            {
+                pickedItemInRecord.Name = item.Name;
+            }
+        }        
     }
 }
 

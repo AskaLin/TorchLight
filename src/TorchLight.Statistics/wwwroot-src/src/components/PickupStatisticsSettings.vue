@@ -1,9 +1,9 @@
 ﻿<template>
   <div class="pickup-statistics-settings">
     <div class="settings-header">
-      <h2>拾取統計設定管理</h2>
+      <h2>拾取物品管理</h2>
       <button @click="showAddDialog = true" class="btn-add">
-        <span>➕ 新增統計項目</span>
+        <span>➕ 新增物品</span>
       </button>
     </div>
 
