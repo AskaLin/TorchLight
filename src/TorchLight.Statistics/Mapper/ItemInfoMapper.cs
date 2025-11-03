@@ -96,12 +96,12 @@ namespace TorchLight.Statistics.Mapper
             {
                 try
                 {
-                    if (!_itemConfigs.ContainsKey(itemId))
+                    if (!_itemConfigs.TryGetValue(itemId, out ItemBaseModel model))
                     {
                         return false;
                     }
 
-                    var itemName = _itemConfigs[itemId].Name;
+                    var itemName = model.Name;
                     _itemConfigs.Remove(itemId);
 
                     // 儲存到 JSON 檔案

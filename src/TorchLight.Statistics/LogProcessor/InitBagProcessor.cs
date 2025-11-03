@@ -18,16 +18,8 @@ public class InitBagEvent
 /// 負責處理背包初始化區塊內的物品資料
 /// </summary>
 public class InitBagProcessor
-{
-    private readonly LineParser _lineParser;
-
-    public InitBagProcessor(LineParser lineParser)
-    {
-        _lineParser = lineParser ?? throw new ArgumentNullException(nameof(lineParser));
-    }
-
+{   
     #region 事件
-
     /// <summary>
     /// 當背包初始化開始時觸發
     /// </summary>
@@ -57,7 +49,7 @@ public class InitBagProcessor
     public void HandleLine(string line)
     {
         // 檢查初始化狀態
-        var (isInitLine, shouldProcess, isComplete, isFirstInit) = _lineParser.CheckBagInitializationState(line);
+        var (isInitLine, shouldProcess, isComplete, isFirstInit) = LineParser.CheckBagInitializationState(line);
 
         // 1) 初始化開始（第一次遇到初始化行）
         if (isInitLine && shouldProcess && isFirstInit)
@@ -86,12 +78,12 @@ public class InitBagProcessor
     /// <summary>
     /// 解析初始化物品
     /// </summary>
-    private bool TryParseInitItem(string line, out ItemModel item)
+    private static bool TryParseInitItem(string line, out ItemModel item)
     {
         try
         {
             // 使用 LineParser.GetItemData 解析
-            item = _lineParser.GetItemData(line);
+            item = LineParser.GetItemData(line);
             return item != null;
         }
         catch (Exception ex)
@@ -157,7 +149,7 @@ public class InitBagProcessor
     public void Reset()
     {
         _currentInitEvent = null;
-        _lineParser.ResetInitializationState();
+        LineParser.ResetInitializationState();
         Log.Information("背包初始化處理器已重置");
     }
 

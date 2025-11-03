@@ -43,11 +43,11 @@ namespace TorchLight.Statistics
                 // 創建 WebViewHub（需要在 MainWindow 中初始化）
                 var webViewHub = new WebViewHub();
 
-                var itemTable = ItemInfoMapper.GetItemTable();
-                Log.Information("已載入 {ItemCount} 個物品定義", itemTable.Count);
+                
+                Log.Information("已載入 {ItemCount} 個物品定義", ItemInfoMapper.GetItemTable().Count);
 
-                var lineParser = new LineParser(itemTable);                
-                var logProcessor = new GameLogProcessor(itemTable, lineParser);
+                     
+                var logProcessor = new GameLogProcessor();
                 Log.Information("核心組件初始化完成");
 
                 // 設定日誌檔案路徑

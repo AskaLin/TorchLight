@@ -2,6 +2,7 @@
 using Microsoft.Web.WebView2.WinForms;
 using Serilog;
 using System.Text.Json;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Services;
 

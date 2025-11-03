@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using TorchLight.Statistics.Enums;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;

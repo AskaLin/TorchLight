@@ -15,6 +15,13 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     private MapRecordModel _currentMapRecord = new();
     private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
     private readonly Dictionary<int, ItemModel> _itemTable = itemTable;
+    private static readonly JsonSerializerOptions _ops = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
 
     // 🆕 存檔目錄
     private static readonly string SavedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
@@ -102,7 +109,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         {
             Log.Information("  使用門票: {Ticket}", _currentMapRecord.MapTicket);
         }
-        if (_currentMapRecord.Compass.Any())
+        if (_currentMapRecord.Compass.Count != 0)
         {
             Log.Information("  使用羅盤: {Compasses}", string.Join(", ", _currentMapRecord.Compass));
         }
@@ -315,15 +322,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
                 SavedTime = DateTime.Now
             };
 
-            // 序列化並寫入檔案
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-            var json = JsonSerializer.Serialize(savedRecord, options);
+            // 序列化並寫入檔案           
+            var json = JsonSerializer.Serialize(savedRecord, _ops);
             File.WriteAllText(filePath, json);
 
             Log.Information("記錄已自動保存至: {FilePath}", filePath);
@@ -398,12 +398,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
                 return null;
 
             var json = File.ReadAllText(filePath);
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
 
-            return JsonSerializer.Deserialize<SavedRecordModel>(json, options);
+            return JsonSerializer.Deserialize<SavedRecordModel>(json, _ops);
         }
         catch (Exception ex)
         {

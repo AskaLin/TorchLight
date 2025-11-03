@@ -1,17 +1,16 @@
 ﻿using Serilog;
 using TorchLight.Statistics.Enums;
+using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 using TorchLight.Statistics.Services;
-using TorchLight.Statistics.LogProcessor;
 
-namespace TorchLight.Statistics;
+namespace TorchLight.Statistics.LogProcessor;
 
 /// <summary>
 /// 遊戲日誌處理器 - 整合所有日誌處理邏輯
 /// </summary>
 public class GameLogProcessor
-{
-    private readonly LineParser _lineParser;
+{    
     private readonly BagInventoryManager _bagInventoryManager;
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly ConsoleLogger _logger;
@@ -36,19 +35,18 @@ public class GameLogProcessor
     public event Action OnBagSyncCompleted;
 
 
-    public GameLogProcessor(Dictionary<int, ItemModel> itemTable, LineParser lineParser, WebViewHub webViewHub = null)
-    {
-        _lineParser = lineParser ?? throw new ArgumentNullException(nameof(lineParser));
-        _itemTable = itemTable ?? throw new ArgumentNullException(nameof(itemTable));
+    public GameLogProcessor(WebViewHub webViewHub = null)    {
+        
+        _itemTable = ItemInfoMapper.GetItemTable();
         _webViewHub = webViewHub;
-        _bagInventoryManager = new BagInventoryManager(itemTable);
-        _mapPickRecordManager = new MapPickRecordManager(itemTable);
+        _bagInventoryManager = new BagInventoryManager(_itemTable);
+        _mapPickRecordManager = new MapPickRecordManager(_itemTable);
         _logger = new ConsoleLogger();
 
 
         _itemChangeProcessor = new ItemChangeProcessor();
         _openMapProcessor = new OpenMapProcessor();
-        _initBagProcessor = new InitBagProcessor(lineParser);
+        _initBagProcessor = new InitBagProcessor();
 
 
         // 註冊事件處理

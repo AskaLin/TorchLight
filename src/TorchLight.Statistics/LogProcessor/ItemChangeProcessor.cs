@@ -56,7 +56,7 @@ public class ItemChangeProcessor
     private bool _inBlock = false;
     private string _currentProtoName = string.Empty;
     private DateTime _blockStartTime;
-    private List<ItemChangeEvent> _eventBuffer = [];
+    private readonly List<ItemChangeEvent> _eventBuffer = [];
 
     #endregion
 
@@ -197,7 +197,7 @@ public class ItemChangeProcessor
         Log.Debug("物品變更區塊結束: {ProtoName}, 共 {Count} 個事件", endEvent.ProtoName, _eventBuffer.Count);
 
         _inBlock = false;
-        OnBlockEnded?.Invoke(endEvent.ProtoName, endEvent.Time, new List<ItemChangeEvent>(_eventBuffer));
+        OnBlockEnded?.Invoke(endEvent.ProtoName, endEvent.Time, [.. _eventBuffer]);
         _eventBuffer.Clear();
     }
 
