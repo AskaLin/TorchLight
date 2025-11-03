@@ -64,7 +64,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
             case ItemType.BossTicket:
             case ItemType.GameplayTicket:
                 _currentMapRecord.MapTicket = item.Name;
-                _currentMapRecord.MapTicketId = item.ConfigBaseId;
+                // _currentMapRecord.MapTicketId = item.ConfigBaseId;
                 Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
                 break;
 
@@ -228,10 +228,10 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         var recordCopy = new MapRecordModel
         {
             RecordId = _currentMapRecord.RecordId,
-            Id = _currentMapRecord.Id,
+            // Id = _currentMapRecord.Id,
             Name = _currentMapRecord.Name,
             MapTicket = _currentMapRecord.MapTicket,
-            MapTicketId = _currentMapRecord.MapTicketId,
+            // MapTicketId = _currentMapRecord.MapTicketId,
             Compass = _currentMapRecord.Compass,
             Probe = _currentMapRecord.Probe,
             StartTime = _currentMapRecord.StartTime,

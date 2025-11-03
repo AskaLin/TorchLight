@@ -70,7 +70,8 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         return new MapRecordDetail
         {
             RecordId = model.RecordId,
-            Id = model.Id,
+            // Id = model.Id,
+            MapId = model.MapId,
             Name = model.Name,
             MapTicket = model.MapTicket,
             Compass = [.. model.Compass.Where(c => !string.IsNullOrEmpty(c))],
@@ -886,6 +887,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         public string RecordId { get; set; }
         public string Id { get; set; }
         public string Name { get; set; }
+        public int MapId { get; set; }
         public string MapTicket { get; set; }
         public string[] Compass { get; set; }
         public string Probe { get; set; }
