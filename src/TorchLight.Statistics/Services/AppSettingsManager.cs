@@ -20,6 +20,11 @@ public class AppSettingsManager
     private static AppSettings _settings;
 
     /// <summary>
+    /// 🆕 日誌路徑變更事件
+    /// </summary>
+    public static event Action<string> OnLogPathChanged;
+
+    /// <summary>
     /// 載入設定
     /// </summary>
     public static AppSettings LoadSettings()
@@ -59,12 +64,24 @@ public class AppSettingsManager
     {
         try
         {
+            // 🆕 檢查日誌路徑是否變更
+            var oldPath = _settings?.Environment?.GameLogPath;
+            var newPath = settings?.Environment?.GameLogPath;
+
             var jsonContent = JsonSerializer.Serialize(settings, _jsonOptions);
             File.WriteAllText(_settingsFilePath, jsonContent);
 
             _settings = settings;
 
             Log.Information("已儲存應用程式設定: {Path}", _settingsFilePath);
+
+            // 🆕 如果日誌路徑變更，觸發事件
+            if (oldPath != newPath && !string.IsNullOrWhiteSpace(newPath))
+            {
+                Log.Information("日誌路徑已變更：{OldPath} -> {NewPath}", oldPath ?? "(無)", newPath);
+                OnLogPathChanged?.Invoke(newPath);
+            }
+
             return true;
         }
         catch (Exception ex)
