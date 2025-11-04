@@ -138,15 +138,35 @@ namespace TorchLight.Statistics
         /// </summary>
         static string GetLogFilePath()
         {
+            // 1. 優先從 appsettings.json 讀取使用者設定的路徑
+            var settings = Services.AppSettingsManager.GetSettings();
+            var configuredPath = settings?.Environment?.GameLogPath;
+
+            if (!string.IsNullOrWhiteSpace(configuredPath) && File.Exists(configuredPath))
+            {
+                Log.Information("使用設定檔中的日誌路徑");
+                return configuredPath;
+            }
+
+            // 2. 如果設定檔中沒有或路徑無效，嘗試從預設候選路徑中尋找
+            Log.Information("設定檔中未設定日誌路徑或路徑無效，嘗試從預設路徑搜尋...");
             foreach (var path in AppConfiguration.CandidateLogPaths)
             {
                 if (File.Exists(path))
                 {
+                    Log.Information("在預設路徑中找到日誌檔案: {Path}", path);
                     return path;
                 }
             }
 
-            // 如果都找不到，返回第一個作為預設值
+            // 3. 如果都找不到，返回設定檔中的路徑（即使無效）或第一個預設路徑
+            if (!string.IsNullOrWhiteSpace(configuredPath))
+            {
+                Log.Warning("使用設定檔中的路徑（檔案不存在）: {Path}", configuredPath);
+                return configuredPath;
+            }
+
+            Log.Warning("無法找到日誌檔案，返回預設路徑");
             return AppConfiguration.CandidateLogPaths[0];
         }
     }

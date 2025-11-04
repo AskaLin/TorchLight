@@ -491,8 +491,12 @@ public class MainWindow : Form
 
             // 載入前端頁面
             var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html");
-            
-            if (File.Exists(wwwrootPath))
+
+#if DEBUG
+            // 開發模式：使用 Vite 開發伺服器
+            _webView.CoreWebView2.Navigate("http://localhost:5173");
+#else
+             if (File.Exists(wwwrootPath))
             {
                 string loadHtml = LoadEmbeddedHtml("TorchLight.Statistics.Resources.loading.html");
                 // 在初始化完成後，先顯示暫時頁面
@@ -510,6 +514,9 @@ public class MainWindow : Form
                 // 開發模式：使用 Vite 開發伺服器
                 _webView.CoreWebView2.Navigate("http://localhost:5173");
             }
+#endif
+
+
 
             _isInitialized = true;
             Log.Information("WebView2 初始化完成");

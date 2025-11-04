@@ -1,11 +1,11 @@
-using Serilog;
+ï»¿using Serilog;
 using System.Text.Json;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
 
 /// <summary>
-/// À³¥Îµ{¦¡³]©wºŞ²z¾¹
+/// æ‡‰ç”¨ç¨‹å¼è¨­å®šç®¡ç†å™¨
 /// </summary>
 public class AppSettingsManager
 {
@@ -13,69 +13,69 @@ public class AppSettingsManager
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,
-     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     private static AppSettings _settings;
 
     /// <summary>
-    /// ¸ü¤J³]©w
+    /// è¼‰å…¥è¨­å®š
     /// </summary>
     public static AppSettings LoadSettings()
     {
-if (_settings != null)
+        if (_settings != null)
         {
             return _settings;
-      }
-
-   try
-    {
-   if (File.Exists(_settingsFilePath))
-    {
-     var jsonContent = File.ReadAllText(_settingsFilePath);
-         _settings = JsonSerializer.Deserialize<AppSettings>(jsonContent, _jsonOptions) ?? new AppSettings();
-       Log.Information("¤w¸ü¤JÀ³¥Îµ{¦¡³]©w: {Path}", _settingsFilePath);
-      }
-else
-      {
- _settings = new AppSettings();
-Log.Information("³]©wÀÉ¤£¦s¦b¡A¨Ï¥Î¹w³]³]©w");
-       }
         }
-     catch (Exception ex)
+
+        try
         {
-Log.Error(ex, "¸ü¤J³]©wÀÉ¥¢±Ñ¡A¨Ï¥Î¹w³]³]©w");
-       _settings = new AppSettings();
+            if (File.Exists(_settingsFilePath))
+            {
+                var jsonContent = File.ReadAllText(_settingsFilePath);
+                _settings = JsonSerializer.Deserialize<AppSettings>(jsonContent, _jsonOptions) ?? new AppSettings();
+                Log.Information("å·²è¼‰å…¥æ‡‰ç”¨ç¨‹å¼è¨­å®š: {Path}", _settingsFilePath);
+            }
+            else
+            {
+                _settings = new AppSettings();
+                Log.Information("è¨­å®šæª”ä¸å­˜åœ¨ï¼Œä½¿ç”¨é è¨­è¨­å®š");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "è¼‰å…¥è¨­å®šæª”å¤±æ•—ï¼Œä½¿ç”¨é è¨­è¨­å®š");
+            _settings = new AppSettings();
         }
 
-  return _settings;
+        return _settings;
     }
 
-  /// <summary>
-    /// Àx¦s³]©w
+    /// <summary>
+    /// å„²å­˜è¨­å®š
     /// </summary>
     public static bool SaveSettings(AppSettings settings)
     {
         try
         {
             var jsonContent = JsonSerializer.Serialize(settings, _jsonOptions);
-        File.WriteAllText(_settingsFilePath, jsonContent);
+            File.WriteAllText(_settingsFilePath, jsonContent);
 
-     _settings = settings;
+            _settings = settings;
 
- Log.Information("¤wÀx¦sÀ³¥Îµ{¦¡³]©w: {Path}", _settingsFilePath);
-         return true;
+            Log.Information("å·²å„²å­˜æ‡‰ç”¨ç¨‹å¼è¨­å®š: {Path}", _settingsFilePath);
+            return true;
         }
         catch (Exception ex)
-  {
-         Log.Error(ex, "Àx¦s³]©wÀÉ¥¢±Ñ");
-       return false;
+        {
+            Log.Error(ex, "å„²å­˜è¨­å®šæª”å¤±æ•—");
+            return false;
         }
     }
 
     /// <summary>
-    /// ¨ú±o·í«e³]©w
+    /// å–å¾—ç•¶å‰è¨­å®š
     /// </summary>
     public static AppSettings GetSettings()
     {
