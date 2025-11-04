@@ -179,8 +179,8 @@ public class GameLogProcessor
                 return new MapRecordViewModel
                 {
                     IsInMap = true,
-                    MapType = MapType.Netherrealm.ToString(),
-                    MapName = currentRecord.Name,
+                    MapType = currentRecord.Type.ToString(),
+                    MapName = $"{currentRecord.Name} ({currentRecord.MapId})",
                     RecordId = currentRecord.RecordId,
                     MapTicket = currentRecord.MapTicket,
                     Compass = currentRecord.Compass,

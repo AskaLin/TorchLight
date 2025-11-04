@@ -234,11 +234,12 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         // 創建一個包含當前拾取記錄的副本
         var recordCopy = new MapRecordModel
         {
+            MapId = _currentMapRecord.MapId,
+            Level = _currentMapRecord.Level,
+            Type = _currentMapRecord.Type,
             RecordId = _currentMapRecord.RecordId,
-            // Id = _currentMapRecord.Id,
             Name = _currentMapRecord.Name,
             MapTicket = _currentMapRecord.MapTicket,
-            // MapTicketId = _currentMapRecord.MapTicketId,
             Compass = _currentMapRecord.Compass,
             Probe = _currentMapRecord.Probe,
             StartTime = _currentMapRecord.StartTime,
@@ -422,7 +423,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
             {
                 pickedItemInRecord.Name = item.Name;
             }
-        }        
+        }
     }
 }
 
