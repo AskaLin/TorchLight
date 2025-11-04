@@ -20,8 +20,10 @@ public class OpenMapProcessor
 
     public void HandleLine(string line)
     {
-        if (LineParser.OpenMapStart(line, out var startTime))
+        //if (LineParser.OpenMapStart(line, "ItemChange@ ProtoName=Spv3Open start", out var startTime))
+        if(line.Contains("+worldInitArgs+levelType"))
         {
+            DateTime startTime = DateTime.Now;
             _inOpenMapBlock = true;
             currentMapEvent = new OpenMapEvent(startTime);
             OnMapStart?.Invoke(startTime);
@@ -30,24 +32,25 @@ public class OpenMapProcessor
 
         if (_inOpenMapBlock)
         {
-            if (LineParser.IsTokenLine(line, out string token))
+            if (LineParser.IsTokenLine(line, "+AreaUniqueId [", out string token))
             {
                 currentMapEvent.Token = token;
                 Log.Debug($"地圖 Token: {token}");
             }
-            else if (LineParser.IsCurrentLevelLine(line, out int level))
-            {
-                currentMapEvent.Level = level;
-                Log.Debug($"地圖 Level: {level}");
-            }
-            else if (LineParser.IsCurrentOpenMapIDLine(line, out int mapId))
+            //else if (LineParser.IsCurrentLevelLine(line, out int level))
+            //{
+            //    currentMapEvent.Level = level;
+            //    Log.Debug($"地圖 Level: {level}");
+            //}
+            else if (LineParser.IsCurrentOpenMapIDLine(line, "+mapId [", out int mapId))
             {
                 currentMapEvent.MapId = mapId;
                 Log.Debug($"地圖 ID: {mapId}");
             }
 
             // 假設區塊結束條件是遇到某個特定行
-            if (LineParser.OpenMapEnd(line, out var endTime))
+            //if (LineParser.OpenMapEnd(line, "+maptype [", out var endTime))
+            if(line.Contains("+maptype [Mystic]"))
             {
                 _inOpenMapBlock = false;
                 OnMapComplete?.Invoke(currentMapEvent);

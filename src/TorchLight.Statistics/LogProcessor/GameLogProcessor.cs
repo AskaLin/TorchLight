@@ -135,12 +135,12 @@ public class GameLogProcessor
                 NotifyNewMapRecord();
                 return;
             }
+            
+            // 4. 處理物品變更（區塊處理）
+            _itemChangeProcessor.HandleLine(line);
 
             // 🆕 處理開啟地圖區塊（在檢查地圖資訊之前）
             _openMapProcessor.HandleLine(line);
-
-            // 4. 處理物品變更（區塊處理）
-            _itemChangeProcessor.HandleLine(line);
         }
         catch (Exception ex)
         {
@@ -357,11 +357,12 @@ public class GameLogProcessor
         {
             _mapPickRecordManager.SetMapToken(context.Token);
             _mapPickRecordManager.SetMapId(context.MapId);
-            _mapPickRecordManager.SetMapLevel(context.Level);
+            // _mapPickRecordManager.SetMapLevel(context.Level);
 
             if (_mapPickRecordManager.CurrentMapRecordInfoComplete())
             {
-                _mapPickRecordManager.StartMapRecord(context.StartTime);
+                //_mapPickRecordManager.StartMapRecord(context.StartTime);
+                _mapPickRecordManager.StartMapRecord(DateTime.Now);
                 NotifyCurrentMapUpdate();
             }
         }

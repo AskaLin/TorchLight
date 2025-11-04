@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System;
 using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
@@ -62,11 +63,41 @@ public partial class LineParser()
         }
         return false;
     }
+    public static bool OpenMapStart(string line, string contains, out DateTime datetime)
+    {
+        datetime = DateTime.MinValue;
+        if (line.Contains(contains))
+        {
+            var match = LineRegex.GetDateTimeValue().Match(line);
+            if (match.Success)
+            {
+                Log.Debug("開始開新圖");
+                datetime = ParseUnrealDateTime(match.Groups[1].Value);
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static bool OpenMapEnd(string line, out DateTime datetime)
     {
         datetime = DateTime.MinValue;
         if (line.Contains("----Socket RecvMessage End----"))
+        {
+            var match = LineRegex.GetDateTimeValue().Match(line);
+            if (match.Success)
+            {
+                Log.Debug("結束開新圖");
+                datetime = ParseUnrealDateTime(match.Groups[1].Value);
+                return true;
+            }
+        }
+        return false;
+    }
+    public static bool OpenMapEnd(string line, string contains, out DateTime datetime)
+    {        
+        datetime = DateTime.MinValue;
+        if (line.Contains(contains))
         {
             var match = LineRegex.GetDateTimeValue().Match(line);
             if (match.Success)
@@ -100,6 +131,20 @@ public partial class LineParser()
         }
         return false;
     }
+    public static bool IsTokenLine(string line, string contains, out string token)
+    {
+        token = string.Empty;
+        if (line.Contains(contains))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                token = match.Groups[1].Value;
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static bool IsCurrentLevelLine(string line, out int level)
     {
@@ -120,6 +165,20 @@ public partial class LineParser()
     {
         mapId = 0;
         if (line.Contains("+CurrentOpenMapID ["))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                mapId = int.Parse(match.Groups[1].Value);
+                return true;
+            }
+        }
+        return false;
+    }
+    public static bool IsCurrentOpenMapIDLine(string line, string contains, out int mapId)
+    {
+        mapId = 0;
+        if (line.Contains(contains))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)

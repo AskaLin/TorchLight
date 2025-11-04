@@ -62,7 +62,7 @@ namespace TorchLight.Statistics
 
                 // 🆕 嘗試啟動日誌監聽器（如果路徑有效）
                 var filePath = GetLogFilePath();
-#if DEBUG
+
                 //測試用, 讀取現有日誌內容 進行處理
                 using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 using StreamReader sr = new(fs, Encoding.UTF8);
@@ -71,17 +71,17 @@ namespace TorchLight.Statistics
                 {
                     _logProcessor.ProcessLine(line);
                 }
-#else
-                if (File.Exists(filePath))
-                {
-                    StartLogWatcher(filePath);
-                }
-                else
-                {
-                    Log.Warning("找不到日誌檔案: {FilePath}", filePath);
-                    Log.Information("請在設定頁面中設定正確的日誌檔案路徑");
-                }
-#endif
+
+                //if (File.Exists(filePath))
+                //{
+                //    StartLogWatcher(filePath);
+                //}
+                //else
+                //{
+                //    Log.Warning("找不到日誌檔案: {FilePath}", filePath);
+                //    Log.Information("請在設定頁面中設定正確的日誌檔案路徑");
+                //}
+
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");
                 Log.Information("提示：進入異界地圖後會自動開始統計拾取物品");

@@ -256,10 +256,19 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     public void Reset()
     {
         _mapRecords.Clear();
-        _currentMapRecord = new();
+        // 開圖順序有改 保留開圖材料資訊
+        var recordMetail = new MapRecordModel
+        {
+            MapTicket = _currentMapRecord.MapTicket,
+            Compass = _currentMapRecord.Compass,
+            Resonance = _currentMapRecord.Resonance,
+            Probe = _currentMapRecord.Probe
+        };
+
+        _currentMapRecord = recordMetail;
         _currentMapPickData = [];
         IsInMap = false;
-        CurrentMapName = string.Empty;
+        CurrentMapName = string.Empty;        
     }
 
     /// <summary>
