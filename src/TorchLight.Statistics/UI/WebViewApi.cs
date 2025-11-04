@@ -294,7 +294,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             };
 
             var success = MapInfoMapper.AddOrUpdateMapMappingByName(mapName, mapIds, type);
-
+            _gameLogProcessor.UpdateMapInfo(mapIds);
             return JsonSerializer.Serialize(new
             {
                 success,
@@ -678,7 +678,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             // 儲存
             var success = ItemInfoMapper.AddOrUpdateItem(item);
 
-            
+
             _gameLogProcessor.UpdateItemInfo(item);
 
             return JsonSerializer.Serialize(new
@@ -771,7 +771,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             {
                 success = true,
                 message = $"地圖「{currentMapName}」已結算完成",
-                mapName = currentMapName,
+                mapName = "", // 結算後就當離開地圖了
                 endTime
             }, _ops);
         }
@@ -1148,6 +1148,160 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         {
             Log.Error(ex, "💥 獲取歷史記錄詳情失敗: {FileName}", fileName);
             return JsonSerializer.Serialize(new { error = $"載入失敗: {ex.Message}" }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 獲取環境參數設定
+    /// </summary>
+    public string GetEnvironmentSettings()
+    {
+        try
+        {
+            var settings = Services.AppSettingsManager.GetSettings();
+            var env = settings.Environment;
+
+            return JsonSerializer.Serialize(new
+            {
+                gameLogPath = env.GameLogPath,
+                isConfigured = !string.IsNullOrWhiteSpace(env.GameLogPath) && File.Exists(env.GameLogPath)
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "獲取環境參數設定失敗");
+            return JsonSerializer.Serialize(new
+            {
+                error = ex.Message,
+                gameLogPath = "",
+                isConfigured = false
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 儲存環境參數設定
+    /// </summary>
+    public string SaveEnvironmentSettings(string gameLogPath)
+    {
+        try
+        {
+            // 驗證路徑
+            if (string.IsNullOrWhiteSpace(gameLogPath))
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    success = false,
+                    message = "遊戲日誌檔案路徑不能為空"
+                }, _ops);
+            }
+
+            if (!File.Exists(gameLogPath))
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    success = false,
+                    message = "指定的日誌檔案不存在"
+                }, _ops);
+            }
+
+            // 驗證檔案是否為 .log 檔案
+            if (!gameLogPath.EndsWith(".log", StringComparison.OrdinalIgnoreCase))
+            {
+                return JsonSerializer.Serialize(new
+                {
+                    success = false,
+                    message = "請選擇有效的日誌檔案（.log）"
+                }, _ops);
+            }
+
+            // 儲存設定
+            var settings = Services.AppSettingsManager.GetSettings();
+            settings.Environment.GameLogPath = gameLogPath;
+
+            var success = Services.AppSettingsManager.SaveSettings(settings);
+
+            return JsonSerializer.Serialize(new
+            {
+                success,
+                message = success ? "環境參數已儲存" : "儲存失敗"
+            }, _ops);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "儲存環境參數設定失敗");
+            return JsonSerializer.Serialize(new
+            {
+                success = false,
+                message = $"儲存失敗: {ex.Message}"
+            }, _ops);
+        }
+    }
+
+    /// <summary>
+    /// 🆕 開啟檔案選擇對話框（用於選擇日誌檔案）
+    /// </summary>
+    public string OpenFileDialog(string initialPath)
+    {
+        try
+        {
+            string selectedPath = null;
+            string selectedFileName = null;
+            string ueGameLog = "UE_game.log";
+
+            _mainWindow.Invoke(() =>
+            {
+                using var dialog = new OpenFileDialog
+                {
+                    Title = "請選擇遊戲日誌檔案",
+                    Filter = "日誌檔案 (*.log)|*.log",
+                    FileName = ueGameLog, // ✅ 預設顯示的檔案名稱
+                    FilterIndex = 1,
+                    CheckFileExists = true,
+                    CheckPathExists = true
+                };
+
+                // 設定初始路徑
+                if (!string.IsNullOrWhiteSpace(initialPath))
+                {
+                    if (File.Exists(initialPath))
+                    {
+                        dialog.InitialDirectory = Path.GetDirectoryName(initialPath);
+                        dialog.FileName = Path.GetFileName(initialPath);
+                    }
+                    else if (Directory.Exists(initialPath))
+                    {
+                        dialog.InitialDirectory = initialPath;
+                    }
+                }
+                else
+                {
+                    dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                }
+
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    selectedPath = dialog.FileName;
+                }
+            });
+
+            selectedFileName = selectedPath.Split("\\").Last();
+            if (!string.IsNullOrWhiteSpace(selectedPath))
+            {
+
+                return selectedFileName == ueGameLog ?
+                    JsonSerializer.Serialize(new { success = true, path = selectedPath }, _ops) :
+                    JsonSerializer.Serialize(new { success = false, message = "不是正確的日誌檔案名稱" }, _ops);
+            }
+            else
+            {
+                return JsonSerializer.Serialize(new { success = false, message = "未選擇檔案" }, _ops);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "開啟檔案選擇對話框失敗");
+            return JsonSerializer.Serialize(new { success = false, message = $"開啟失敗: {ex.Message}" }, _ops);
         }
     }
 

@@ -2,18 +2,29 @@
   <div class="pickup-statistics-settings">
     <div class="settings-header">
       <h2>拾取物品管理</h2>
+      <!-- ✅ 新增搜尋欄位 -->
+      <div class="search-container">
+        <input v-model="searchQuery"
+               type="text"
+               placeholder="🔍 搜尋物品名稱..."
+               class="search-input"
+               @input="onSearchInput" />
+        <button v-if="searchQuery"
+                @click="clearSearch"
+                class="btn-clear-search"
+                title="清除搜尋">
+          ✕
+        </button>
+      </div>
       <button @click="showAddDialog = true" class="btn-add">
         <span>➕ 新增物品</span>
       </button>
     </div>
 
-    <!-- ✅ 通知訊息 - 改為浮動式 -->
-    <Transition name="notification-slide">
-      <div v-if="notification.show"
-           :class="['notification-float', notification.type]">
-        {{ notification.message }}
-      </div>
-    </Transition>
+    <!-- ✅ 通知訊息組件 -->
+    <Notification :show="notification.show"
+                  :type="notification.type"
+                  :message="notification.message" />
 
     <!-- ✅ 載入中 - 改為全螢幕 Overlay -->
     <Transition name="fade">
@@ -141,7 +152,11 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { apiCall } from '../utils/api'
+  import { useNotification } from '../composables/useNotification'
   import CollapsibleList from './CollapsibleList.vue'
+  import Notification from './Notification.vue'
+
+  const { notification, showNotification } = useNotification()
 
   const loading = ref(false)
   const statisticsConfigs = ref({})
@@ -150,7 +165,9 @@
   const pageIdItemTypeMapping = ref({})
   const showAddDialog = ref(false)
   const isEditing = ref(false)
-  const notification = ref({ show: false, type: 'success', message: '' })
+  
+  // ✅ 新增搜尋相關狀態
+  const searchQuery = ref('')
 
   const editingItem = ref({
     itemId: 0,
@@ -160,14 +177,46 @@
     enabled: true
   })
 
-  // 格式化資料給 CollapsibleList
+  // ✅ 模糊搜尋過濾函數
+  const fuzzySearch = (text, query) => {
+    if (!query) return true
+    const lowerText = text.toLowerCase()
+    const lowerQuery = query.toLowerCase()
+    return lowerText.includes(lowerQuery)
+  }
+
+  // ✅ 清除搜尋
+  const clearSearch = () => {
+    searchQuery.value = ''
+  }
+
+  // ✅ 搜尋輸入處理
+  const onSearchInput = () => {
+    // 可以在這裡添加防抖邏輯，如果需要的話
+  }
+
+  // 格式化資料給 CollapsibleList - 修改為支援搜尋過濾
   const formattedSections = computed(() => {
     return pageIdTypes.value.map(pageType => {
       const itemTypeGroups = statisticsConfigs.value[pageType.value] || {}
-      const totalCount = Object.values(itemTypeGroups).reduce((total, items) => total + items.length, 0)
+      
+      // ✅ 根據搜尋過濾項目
+      const filteredGroups = {}
+      let totalCount = 0
+      
+      Object.entries(itemTypeGroups).forEach(([itemType, items]) => {
+        const filteredItems = items.filter(item => 
+          fuzzySearch(item.itemName, searchQuery.value)
+        )
+        
+        if (filteredItems.length > 0) {
+          filteredGroups[itemType] = filteredItems
+          totalCount += filteredItems.length
+        }
+      })
 
       // 建立子分類
-      const subcategories = Object.entries(itemTypeGroups).map(([itemType, items]) => ({
+      const subcategories = Object.entries(filteredGroups).map(([itemType, items]) => ({
         key: itemType,
         name: getItemTypeName(itemType),
         items: items
@@ -179,7 +228,7 @@
         totalCount: totalCount,
         subcategories: subcategories
       }
-    })
+    }).filter(section => section.totalCount > 0) // ✅ 只顯示有結果的分類
   })
 
   // 獲取 ItemType 的顯示名稱
@@ -414,14 +463,6 @@
     }
   }
 
-  // 顯示通知
-  const showNotification = (type, message) => {
-    notification.value = { show: true, type, message }
-    setTimeout(() => {
-      notification.value.show = false
-    }, 3000)
-  }
-
   // 監聽後端的設定更新通知
   if (typeof window !== 'undefined') {
     window.addEventListener('message', (event) => {
@@ -459,11 +500,68 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
+    gap: 15px;
+    flex-wrap: wrap;
   }
 
-    .settings-header h2 {
+  .settings-header h2 {
       color: white;
       margin: 0;
+    }
+
+  /* ✅ 新增搜尋欄樣式 */
+  .search-container {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+    min-width: 200px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+  .btn-clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    width: 28px;
+    height: 28px;
+  display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+
+    .btn-clear-search:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
     }
 
   .btn-add {
@@ -475,75 +573,13 @@
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s;
+    flex-shrink: 0;
   }
 
     .btn-add:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
-
-  /* 通知訊息 */
-  /* ✅ 浮動通知 - 固定在頂部中央 */
-  .notification-float {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    padding: 15px 30px;
-    border-radius: 8px;
-    font-weight: 500;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    min-width: 300px;
-    max-width: 500px;
-    text-align: center;
-  }
-
-    .notification-float.success {
-      background: rgba(76, 175, 80, 0.95);
-      border: 1px solid #4caf50;
-      color: white;
-    }
-
-    .notification-float.error {
-      background: rgba(244, 67, 54, 0.95);
-      border: 1px solid #f44336;
-      color: white;
-    }
-
-  /* ✅ 通知動畫 - 從上方滑入 */
-  .notification-slide-enter-active {
-    animation: slideInDown 0.3s ease-out;
-  }
-
-  .notification-slide-leave-active {
-    animation: slideOutUp 0.3s ease-in;
-  }
-
-  @keyframes slideInDown {
-    from {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-  }
-
-  @keyframes slideOutUp {
-    from {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    to {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-20px);
-    }
-  }
 
   /* 載入中 */
   /* ✅ 載入中 - 全螢幕 Overlay */

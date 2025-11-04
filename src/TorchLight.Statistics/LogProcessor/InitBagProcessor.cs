@@ -46,7 +46,7 @@ public class InitBagProcessor
     /// <summary>
     /// 處理單行日誌
     /// </summary>
-    public void HandleLine(string line)
+    public bool HandleLine(string line)
     {
         // 檢查初始化狀態
         var (isInitLine, shouldProcess, isComplete, isFirstInit) = LineParser.CheckBagInitializationState(line);
@@ -55,6 +55,7 @@ public class InitBagProcessor
         if (isInitLine && shouldProcess && isFirstInit)
         {
             HandleInitStart();
+            
         }
 
         // 2) 處理初始化物品
@@ -71,6 +72,7 @@ public class InitBagProcessor
         {
             HandleInitComplete();
         }
+        return isInitLine;
     }
 
     #region 解析方法

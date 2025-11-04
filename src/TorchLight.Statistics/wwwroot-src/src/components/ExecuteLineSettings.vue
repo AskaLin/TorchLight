@@ -4,13 +4,10 @@
       <h2>斬殺線設定</h2>
     </div>
 
-    <!-- 通知訊息 -->
-    <Transition name="notification-slide">
-      <div v-if="notification.show"
-           :class="['notification-float', notification.type]">
-        {{ notification.message }}
-      </div>
-    </Transition>
+    <!-- ✅ 通知訊息組件 -->
+    <Notification :show="notification.show"
+                  :type="notification.type"
+                  :message="notification.message" />
 
     <!-- 主要內容區域 - 上下佈局 -->
     <div class="main-content">
@@ -205,6 +202,10 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { apiCall } from '../utils/api'
+  import { useNotification } from '../composables/useNotification'
+  import Notification from './Notification.vue'
+
+  const { notification, showNotification } = useNotification()
 
   const settings = ref({
     stage1Percentage: 20,
@@ -216,8 +217,6 @@
     defaultColor: '#00FF00',
     opacity: 0.95
   })
-
-  const notification = ref({ show: false, type: 'success', message: '' })
 
   // 計算剩餘百分比
   const remainingPercentage = computed(() => {
@@ -312,14 +311,6 @@
     } catch (err) {
       console.error('更新預覽失敗:', err)
     }
-  }
-
-  // 顯示通知
-  const showNotification = (type, message) => {
-    notification.value = { show: true, type, message }
-    setTimeout(() => {
-      notification.value.show = false
-    }, 3000)
   }
 
   onMounted(async () => {

@@ -33,7 +33,11 @@
     <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V2.md" />
     <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V3.0.md" />
     <None Remove="D:\SideProjects\TorchLight\docs\EXECUTE_LINE_UPDATE_V3.1.md" />
+    <None Remove="Resources\loading.html" />
     <None Remove="Seed\MapMapper.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\loading.html" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Seed\MapMapper.json">

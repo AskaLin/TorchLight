@@ -1,5 +1,7 @@
 ﻿using Serilog;
+using System;
 using TorchLight.Statistics.Configuration;
+using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 
@@ -63,10 +65,47 @@ public partial class LineParser()
         return false;
     }
 
+    /// <summary>
+    /// 比對特定字串, 並返回時間, 一般用於區域開始或結束的日誌行
+    /// </summary>
+    /// <param name="line"></param>
+    /// <param name="contains"></param>
+    /// <param name="datetime"></param>
+    /// <returns></returns>
+    public static bool GetLineDateTime(string line, string contains, out DateTime datetime)
+    {
+        datetime = DateTime.MinValue;
+        if (line.Contains(contains))
+        {
+            var match = LineRegex.GetDateTimeValue().Match(line);
+            if (match.Success)
+            {             
+                datetime = ParseUnrealDateTime(match.Groups[1].Value);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static bool OpenMapEnd(string line, out DateTime datetime)
     {
         datetime = DateTime.MinValue;
         if (line.Contains("----Socket RecvMessage End----"))
+        {
+            var match = LineRegex.GetDateTimeValue().Match(line);
+            if (match.Success)
+            {
+                Log.Debug("結束開新圖");
+                datetime = ParseUnrealDateTime(match.Groups[1].Value);
+                return true;
+            }
+        }
+        return false;
+    }
+    public static bool OpenMapEnd(string line, string contains, out DateTime datetime)
+    {        
+        datetime = DateTime.MinValue;
+        if (line.Contains(contains))
         {
             var match = LineRegex.GetDateTimeValue().Match(line);
             if (match.Success)
@@ -90,6 +129,20 @@ public partial class LineParser()
     {
         token = string.Empty;
         if (line.Contains("+TokenKey ["))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                token = match.Groups[1].Value;
+                return true;
+            }
+        }
+        return false;
+    }
+    public static bool IsTokenLine(string line, string contains, out string token)
+    {
+        token = string.Empty;
+        if (line.Contains(contains))
         {
             var match = LineRegex.GetCellValue().Match(line);
             if (match.Success)
@@ -127,6 +180,46 @@ public partial class LineParser()
                 mapId = int.Parse(match.Groups[1].Value);
                 return true;
             }
+        }
+        return false;
+    }
+    public static bool IsCurrentOpenMapIDLine(string line, string contains, out int mapId)
+    {
+        mapId = 0;
+        if (line.Contains(contains))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                mapId = int.Parse(match.Groups[1].Value);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool IsBagMgr(string line, string contains, out ItemChangeEvent itemChangeEvent)
+    {
+        itemChangeEvent = null;
+        if (line.Contains(contains))
+        {
+            var match = LineRegex.BagItemLine().Match(line);
+            if (!match.Success) return false;
+
+            var time = ParseUnrealDateTime(match.Groups["time"].Value);
+
+            itemChangeEvent = new ItemChangeEvent
+            {
+                Time = time,
+                PageId = int.Parse(match.Groups["page"].Value),
+                SlotId = int.Parse(match.Groups["slot"].Value),
+                ConfigBaseId = int.Parse(match.Groups["config"].Success ? match.Groups["config"].Value : "0"),
+                Num = int.Parse(match.Groups["num"].Success ? match.Groups["num"].Value : "0"),
+                // ProtoName = _currentProtoName,
+                Action = match.Groups["action"].Value
+            };
+            return true;
+
         }
         return false;
     }

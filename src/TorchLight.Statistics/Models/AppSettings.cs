@@ -1,90 +1,106 @@
-using System.Drawing;
+ï»¿using System.Drawing;
 
 namespace TorchLight.Statistics.Models;
 
 /// <summary>
-/// À³¥Îµ{¦¡³]©w¼Ò«¬
+/// æ‡‰ç”¨ç¨‹å¼è¨­å®šæ¨¡å‹
 /// </summary>
 public class AppSettings
 {
     /// <summary>
-    /// ±Ù±ş½u³]©w
+    /// æ–¬æ®ºç·šè¨­å®š
     /// </summary>
     public ExecuteLineSettings ExecuteLine { get; set; } = new();
+
+    /// <summary>
+    /// ç’°å¢ƒåƒæ•¸è¨­å®š
+    /// </summary>
+    public EnvironmentSettings Environment { get; set; } = new();
 }
 
 /// <summary>
-/// ±Ù±ş½u³]©w
+/// ç’°å¢ƒåƒæ•¸è¨­å®š
+/// </summary>
+public class EnvironmentSettings
+{
+    /// <summary>
+    /// éŠæˆ²æ—¥èªŒå­˜æ”¾ä½ç½®
+    /// </summary>
+    public string GameLogPath { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// æ–¬æ®ºç·šè¨­å®š
 /// </summary>
 public class ExecuteLineSettings
 {
     /// <summary>
-    /// ²Ä¤@¶¥¬q¦Ê¤À¤ñ¡]±Ù±ş¡^
+    /// ç¬¬ä¸€éšæ®µç™¾åˆ†æ¯”ï¼ˆæ–¬æ®ºï¼‰
     /// </summary>
     public int Stage1Percentage { get; set; } = 20;
 
     /// <summary>
-    /// ²Ä¤@¶¥¬qÃC¦â¡]¤Q¤»¶i¦ì®æ¦¡¡A¨Ò¦p¡G#FF0000¡^
+    /// ç¬¬ä¸€éšæ®µé¡è‰²ï¼ˆåå…­é€²ä½æ ¼å¼ï¼Œä¾‹å¦‚ï¼š#FF0000ï¼‰
     /// </summary>
     public string Stage1Color { get; set; } = "#FF0000";
 
     /// <summary>
-    /// ²Ä¤G¶¥¬q¦Ê¤À¤ñ¡]¦MÀI¡^
+    /// ç¬¬äºŒéšæ®µç™¾åˆ†æ¯”ï¼ˆå±éšªï¼‰
     /// </summary>
     public int Stage2Percentage { get; set; } = 15;
 
     /// <summary>
-    /// ²Ä¤G¶¥¬qÃC¦â¡]¤Q¤»¶i¦ì®æ¦¡¡A¨Ò¦p¡G#FFA500¡^
+    /// ç¬¬äºŒéšæ®µé¡è‰²ï¼ˆåå…­é€²ä½æ ¼å¼ï¼Œä¾‹å¦‚ï¼š#FFA500ï¼‰
     /// </summary>
     public string Stage2Color { get; set; } = "#FFA500";
 
     /// <summary>
-    /// ²Ä¤T¶¥¬q¦Ê¤À¤ñ¡]¦w¥ş¡^
+    /// ç¬¬ä¸‰éšæ®µç™¾åˆ†æ¯”ï¼ˆå®‰å…¨ï¼‰
     /// </summary>
     public int Stage3Percentage { get; set; } = 15;
 
     /// <summary>
-    /// ²Ä¤T¶¥¬qÃC¦â¡]¤Q¤»¶i¦ì®æ¦¡¡A¨Ò¦p¡G#FFFF00¡^
+    /// ç¬¬ä¸‰éšæ®µé¡è‰²ï¼ˆåå…­é€²ä½æ ¼å¼ï¼Œä¾‹å¦‚ï¼š#FFFF00ï¼‰
     /// </summary>
     public string Stage3Color { get; set; } = "#FFFF00";
 
     /// <summary>
-    /// ¹w³]°Ï°ìÃC¦â¡]¤Q¤»¶i¦ì®æ¦¡¡A¨Ò¦p¡G#00FF00¡^
+    /// é è¨­å€åŸŸé¡è‰²ï¼ˆåå…­é€²ä½æ ¼å¼ï¼Œä¾‹å¦‚ï¼š#00FF00ï¼‰
     /// </summary>
     public string DefaultColor { get; set; } = "#00FF00";
 
     /// <summary>
-    /// ³z©ú«×¡]0.0-1.0¡^
+    /// é€æ˜åº¦ï¼ˆ0.0-1.0ï¼‰
     /// </summary>
     public double Opacity { get; set; } = 0.95;
 
     /// <summary>
-    /// µøµ¡¦ì¸m X
+    /// è¦–çª—ä½ç½® X
     /// </summary>
     public int LocationX { get; set; } = 100;
 
     /// <summary>
-    /// µøµ¡¦ì¸m Y
+    /// è¦–çª—ä½ç½® Y
     /// </summary>
     public int LocationY { get; set; } = 200;
 
     /// <summary>
-    /// µøµ¡¼e«×
+    /// è¦–çª—å¯¬åº¦
     /// </summary>
     public int Width { get; set; } = 1000;
 
     /// <summary>
-    /// µøµ¡°ª«×
+    /// è¦–çª—é«˜åº¦
     /// </summary>
     public int Height { get; set; } = 30;
 
     /// <summary>
-    /// ¬O§_Åã¥Ü¡]µøµ¡ª¬ºA¡^
+    /// æ˜¯å¦é¡¯ç¤ºï¼ˆè¦–çª—ç‹€æ…‹ï¼‰
     /// </summary>
     public bool IsVisible { get; set; } = false;
 
     /// <summary>
-    /// ÅçÃÒ¦Ê¤À¤ñÁ`©M¬O§_¦³®Ä
+    /// é©—è­‰ç™¾åˆ†æ¯”ç¸½å’Œæ˜¯å¦æœ‰æ•ˆ
     /// </summary>
     public bool IsValid()
     {
@@ -92,7 +108,7 @@ public class ExecuteLineSettings
     }
 
     /// <summary>
-    /// Àò¨ú³Ñ¾l¦Ê¤À¤ñ
+    /// ç²å–å‰©é¤˜ç™¾åˆ†æ¯”
     /// </summary>
     public int GetRemainingPercentage()
     {
@@ -100,7 +116,7 @@ public class ExecuteLineSettings
     }
 
     /// <summary>
-    /// ±N¤Q¤»¶i¦ìÃC¦â¦r¦êÂà´«¬° Color ª«¥ó
+    /// å°‡åå…­é€²ä½é¡è‰²å­—ä¸²è½‰æ›ç‚º Color ç‰©ä»¶
     /// </summary>
     public Color GetStage1Color() => GetColorFromHex(Stage1Color, Color.Red);
     public Color GetStage2Color() => GetColorFromHex(Stage2Color, Color.Orange);
@@ -120,7 +136,7 @@ public class ExecuteLineSettings
     }
 
     /// <summary>
-    /// ±q Color ª«¥ó³]©wÃC¦â
+    /// å¾ Color ç‰©ä»¶è¨­å®šé¡è‰²
     /// </summary>
     public void SetStage1Color(Color color) => Stage1Color = ColorTranslator.ToHtml(color);
     public void SetStage2Color(Color color) => Stage2Color = ColorTranslator.ToHtml(color);

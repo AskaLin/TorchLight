@@ -1,6 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using Serilog;
+using System.Reflection;
 using System.Text.Json;
 using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
@@ -52,7 +53,7 @@ public class MainWindow : Form
         InitializeExecuteLineWindow();
 
         // 註冊遊戲日誌事件
-        _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
+        // _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
         _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
 
         // 註冊地圖設定更新事件
@@ -491,15 +492,31 @@ public class MainWindow : Form
             // 載入前端頁面
             var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html");
 
-            if (File.Exists(wwwrootPath))
+#if DEBUG
+            // 開發模式：使用 Vite 開發伺服器
+            _webView.CoreWebView2.Navigate("http://localhost:5173");
+#else
+             if (File.Exists(wwwrootPath))
             {
-                _webView.CoreWebView2.Navigate($"file:///{wwwrootPath.Replace("\\", "/")}");
+                string loadHtml = LoadEmbeddedHtml("TorchLight.Statistics.Resources.loading.html");
+                // 在初始化完成後，先顯示暫時頁面
+                _webView.CoreWebView2.NavigateToString(loadHtml);
+                var root = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+                _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("app", root, CoreWebView2HostResourceAccessKind.Allow);
+
+
+                await Task.Delay(200);
+
+                _webView.CoreWebView2.Navigate("https://app/index.html");
             }
             else
             {
                 // 開發模式：使用 Vite 開發伺服器
                 _webView.CoreWebView2.Navigate("http://localhost:5173");
             }
+#endif
+
+
 
             _isInitialized = true;
             Log.Information("WebView2 初始化完成");
@@ -578,15 +595,15 @@ public class MainWindow : Form
     /// <summary>
     /// 處理 "已開啟日誌" 事件
     /// </summary>
-    private async void HandleLogOpenedDetected()
-    {
-        if (_isInitialized)
-        {
-            // ❌ 移除：不再需要通知 logMonitoringStatus
-            // await _webViewHub.NotifyLogMonitoringStatusAsync("監控日誌中");
-            Log.Information("已檢測到：已開啟日誌");
-        }
-    }
+    //private async void HandleLogOpenedDetected()
+    //{
+    //    if (_isInitialized)
+    //    {
+    //        // ❌ 移除：不再需要通知 logMonitoringStatus
+    //        // await _webViewHub.NotifyLogMonitoringStatusAsync("監控日誌中");
+    //        Log.Information("已檢測到：已開啟日誌");
+    //    }
+    //}
 
     /// <summary>
     /// 處理背包同步完成事件
@@ -642,5 +659,14 @@ public class MainWindow : Form
         {
             await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
         }
+    }
+
+    // 讀取內嵌 HTML 的共用方法
+    private static string LoadEmbeddedHtml(string resourcePath)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        using Stream stream = assembly.GetManifestResourceStream(resourcePath) ?? throw new FileNotFoundException($"找不到內嵌資源檔：{resourcePath}");
+        using StreamReader reader = new(stream);
+        return reader.ReadToEnd();
     }
 }

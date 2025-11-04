@@ -3,15 +3,29 @@
     <!-- 設定標題與新增按鈕 -->
     <div class="settings-header">
       <h2>地圖設定管理</h2>
+      <!-- ✅ 新增搜尋欄位 -->
+      <div class="search-container">
+        <input v-model="searchQuery"
+  type="text"
+   placeholder="🔍 搜尋地圖名稱..."
+               class="search-input"
+      @input="onSearchInput" />
+        <button v-if="searchQuery"
+       @click="clearSearch"
+            class="btn-clear-search"
+    title="清除搜尋">
+          ✕
+        </button>
+      </div>
       <button @click="showAddMapDialog = true" class="btn-add">
         <span>➕ 新增地圖</span>
-  </button>
-    </div>
+      </button>
+  </div>
 
-    <!-- 通知訊息 -->
-    <div v-if="notification.show" :class="['notification', notification.type]">
-    {{ notification.message }}
-</div>
+    <!-- ✅ 通知訊息組件 -->
+    <Notification :show="notification.show"
+                  :type="notification.type"
+                  :message="notification.message" />
 
     <!-- 地圖列表 -->
     <CollapsibleList :sections="formattedSections">
@@ -92,43 +106,75 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { apiCall } from '../utils/api'
+  import { useNotification } from '../composables/useNotification'
   import CollapsibleList from './CollapsibleList.vue'
+  import Notification from './Notification.vue'
+
+  const { notification, showNotification } = useNotification()
 
   const maps = ref([])
   const mapTypes = ref([])
   const showAddMapDialog = ref(false)
   const isEditingMap = ref(false)
-  const notification = ref({ show: false, type: 'success', message: '' })
+  
+  // ✅ 新增搜尋相關狀態
+  const searchQuery = ref('')
 
   const editingMap = ref({
     name: '',
     mapIdsText: '',
-  type: 'Netherrealm'
+    type: 'Netherrealm'
   })
 
-  // 格式化資料給 CollapsibleList
+  // ✅ 模糊搜尋過濾函數
+  const fuzzySearch = (text, query) => {
+    if (!query) return true
+    const lowerText = text.toLowerCase()
+    const lowerQuery = query.toLowerCase()
+    return lowerText.includes(lowerQuery)
+  }
+
+  // ✅ 清除搜尋
+  const clearSearch = () => {
+    searchQuery.value = ''
+  }
+
+  // ✅ 搜尋輸入處理
+  const onSearchInput = () => {
+    // 可以在這裡添加防抖邏輯，如果需要的話
+  }
+
+  // 格式化資料給 CollapsibleList - 修改為支援搜尋過濾
   const formattedSections = computed(() => {
-  const sections = []
+    const sections = []
 
     // 已知地圖類型
     mapTypes.value.forEach(type => {
-      const items = maps.value.filter(map => map.type === type.value)
-      sections.push({
-        key: type.value,
-        name: type.name,
-        totalCount: items.length,
-        items: items
+      // ✅ 根據搜尋過濾地圖
+   const items = maps.value.filter(map => 
+        map.type === type.value && fuzzySearch(map.name, searchQuery.value)
+      )
+      
+      if (items.length > 0) {
+        sections.push({
+          key: type.value,
+          name: type.name,
+       totalCount: items.length,
+items: items
       })
+      }
     })
 
     // 未知地圖（未分類）
-    const unknownMaps = maps.value.filter(map => !map.type)
+    const unknownMaps = maps.value.filter(map => 
+      !map.type && fuzzySearch(map.name, searchQuery.value)
+    )
     if (unknownMaps.length > 0) {
       sections.push({
-        key: 'Unknown',
+ key: 'Unknown',
         name: '❓ 未分類地圖',
         totalCount: unknownMaps.length,
-  items: unknownMaps
+   items: unknownMaps
       })
     }
 
@@ -198,14 +244,6 @@
     } catch (error) {
       showNotification('error', '儲存地圖時發生錯誤: ' + error.message)
     }
-  }
-
-  // 顯示通知
-  const showNotification = (type, message) => {
-    notification.value = { show: true, type, message }
-    setTimeout(() => {
- notification.value.show = false
-    }, 3000)
   }
 
   // 載入地圖資料
@@ -299,25 +337,83 @@ if (result.success) {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
+    gap: 15px;
+    flex-wrap: wrap;
   }
 
     .settings-header h2 {
       color: white;
-      margin: 0;
+ margin: 0;
+    }
+
+  /* ✅ 新增搜尋欄樣式 */
+  .search-container {
+    position: relative;
+    flex: 1;
+max-width: 400px;
+    min-width: 200px;
   }
 
+  .search-input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+  background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+}
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+  .btn-clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+  justify-content: center;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+
+    .btn-clear-search:hover {
+      background: rgba(255, 255, 255, 0.1);
+    color: white;
+    }
+
   .btn-add {
-padding: 10px 20px;
+    padding: 10px 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    border-radius: 8px;
+ border-radius: 8px;
     color: white;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s;
+    flex-shrink: 0;
   }
 
-    .btn-add:hover {
+.btn-add:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }

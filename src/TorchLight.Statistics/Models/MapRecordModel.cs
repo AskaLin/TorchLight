@@ -53,7 +53,7 @@ namespace TorchLight.Statistics.Models
         public bool MapInfoComplete()
         {
             return !string.IsNullOrEmpty(RecordId)
-                && Level != 0
+                // && Level != 0
                 && MapId != 0;
 
         }

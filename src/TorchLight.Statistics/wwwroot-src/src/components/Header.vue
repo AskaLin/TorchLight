@@ -38,12 +38,12 @@
           <span>{{ executeLineVisible ? '⚔️' : '🗡️' }}</span>
         </button>
 
-        <button @click="minimizeWindow" class="btn-icon" title="最小化">
+        <!--<button @click="minimizeWindow" class="btn-icon" title="最小化">
           <span>-</span>
         </button>
         <button @click="closeWindow" class="btn-icon btn-close" title="關閉">
           <span>×</span>
-        </button>
+        </button>-->
       </div>
     </div>
   </header>
