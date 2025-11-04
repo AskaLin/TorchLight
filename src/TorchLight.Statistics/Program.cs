@@ -47,10 +47,10 @@ namespace TorchLight.Statistics
                 // 創建 WebViewHub（需要在 MainWindow 中初始化）
                 var webViewHub = new WebViewHub();
 
-                
+
                 Log.Information("已載入 {ItemCount} 個物品定義", ItemInfoMapper.GetItemTable().Count);
 
-                     
+
                 var logProcessor = new GameLogProcessor();
                 Log.Information("核心組件初始化完成");
 
@@ -59,9 +59,7 @@ namespace TorchLight.Statistics
                 if (!File.Exists(filePath))
                 {
                     Log.Warning("找不到日誌檔案: {FilePath}", filePath);
-                    Log.Information("請確認遊戲是否已安裝，或手動設定日誌路徑");
-                    Log.Information("按下 Enter 結束程式...");
-                    Console.ReadLine();
+                    Log.Information("請確認遊戲是否已安裝，或手動設定日誌路徑");                                        
                     return;
                 }
 
@@ -92,13 +90,13 @@ namespace TorchLight.Statistics
                 tail.Start();
 
                 //測試用, 讀取現有日誌內容 進行處理
-                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                using StreamReader sr = new(fs, Encoding.UTF8);
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    logProcessor.ProcessLine(line);
-                }
+                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                //using StreamReader sr = new(fs, Encoding.UTF8);
+                //string line;
+                //while ((line = sr.ReadLine()) != null)
+                //{
+                //    logProcessor.ProcessLine(line);
+                //}
 
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");

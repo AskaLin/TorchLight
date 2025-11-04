@@ -1,6 +1,7 @@
 ﻿using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using Serilog;
+using System.Reflection;
 using System.Text.Json;
 using TorchLight.Statistics.LogProcessor;
 using TorchLight.Statistics.Mapper;
@@ -490,10 +491,19 @@ public class MainWindow : Form
 
             // 載入前端頁面
             var wwwrootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "index.html");
-
+            
             if (File.Exists(wwwrootPath))
             {
-                _webView.CoreWebView2.Navigate($"file:///{wwwrootPath.Replace("\\", "/")}");
+                string loadHtml = LoadEmbeddedHtml("TorchLight.Statistics.Resources.loading.html");
+                // 在初始化完成後，先顯示暫時頁面
+                _webView.CoreWebView2.NavigateToString(loadHtml);
+                var root = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+                _webView.CoreWebView2.SetVirtualHostNameToFolderMapping("app", root, CoreWebView2HostResourceAccessKind.Allow);
+
+
+                await Task.Delay(200);
+
+                _webView.CoreWebView2.Navigate("https://app/index.html");
             }
             else
             {
@@ -642,5 +652,14 @@ public class MainWindow : Form
         {
             await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
         }
+    }
+
+    // 讀取內嵌 HTML 的共用方法
+    private static string LoadEmbeddedHtml(string resourcePath)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        using Stream stream = assembly.GetManifestResourceStream(resourcePath) ?? throw new FileNotFoundException($"找不到內嵌資源檔：{resourcePath}");
+        using StreamReader reader = new(stream);
+        return reader.ReadToEnd();
     }
 }
