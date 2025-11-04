@@ -2,6 +2,20 @@
   <div class="pickup-statistics-settings">
     <div class="settings-header">
       <h2>拾取物品管理</h2>
+      <!-- ✅ 新增搜尋欄位 -->
+      <div class="search-container">
+        <input v-model="searchQuery"
+               type="text"
+               placeholder="🔍 搜尋物品名稱..."
+               class="search-input"
+               @input="onSearchInput" />
+        <button v-if="searchQuery"
+                @click="clearSearch"
+                class="btn-clear-search"
+                title="清除搜尋">
+          ✕
+        </button>
+      </div>
       <button @click="showAddDialog = true" class="btn-add">
         <span>➕ 新增物品</span>
       </button>
@@ -151,6 +165,9 @@
   const pageIdItemTypeMapping = ref({})
   const showAddDialog = ref(false)
   const isEditing = ref(false)
+  
+  // ✅ 新增搜尋相關狀態
+  const searchQuery = ref('')
 
   const editingItem = ref({
     itemId: 0,
@@ -160,14 +177,46 @@
     enabled: true
   })
 
-  // 格式化資料給 CollapsibleList
+  // ✅ 模糊搜尋過濾函數
+  const fuzzySearch = (text, query) => {
+    if (!query) return true
+    const lowerText = text.toLowerCase()
+    const lowerQuery = query.toLowerCase()
+    return lowerText.includes(lowerQuery)
+  }
+
+  // ✅ 清除搜尋
+  const clearSearch = () => {
+    searchQuery.value = ''
+  }
+
+  // ✅ 搜尋輸入處理
+  const onSearchInput = () => {
+    // 可以在這裡添加防抖邏輯，如果需要的話
+  }
+
+  // 格式化資料給 CollapsibleList - 修改為支援搜尋過濾
   const formattedSections = computed(() => {
     return pageIdTypes.value.map(pageType => {
       const itemTypeGroups = statisticsConfigs.value[pageType.value] || {}
-      const totalCount = Object.values(itemTypeGroups).reduce((total, items) => total + items.length, 0)
+      
+      // ✅ 根據搜尋過濾項目
+      const filteredGroups = {}
+      let totalCount = 0
+      
+      Object.entries(itemTypeGroups).forEach(([itemType, items]) => {
+        const filteredItems = items.filter(item => 
+          fuzzySearch(item.itemName, searchQuery.value)
+        )
+        
+        if (filteredItems.length > 0) {
+          filteredGroups[itemType] = filteredItems
+          totalCount += filteredItems.length
+        }
+      })
 
       // 建立子分類
-      const subcategories = Object.entries(itemTypeGroups).map(([itemType, items]) => ({
+      const subcategories = Object.entries(filteredGroups).map(([itemType, items]) => ({
         key: itemType,
         name: getItemTypeName(itemType),
         items: items
@@ -179,7 +228,7 @@
         totalCount: totalCount,
         subcategories: subcategories
       }
-    })
+    }).filter(section => section.totalCount > 0) // ✅ 只顯示有結果的分類
   })
 
   // 獲取 ItemType 的顯示名稱
@@ -451,11 +500,68 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 25px;
+    gap: 15px;
+    flex-wrap: wrap;
   }
 
-    .settings-header h2 {
+  .settings-header h2 {
       color: white;
       margin: 0;
+    }
+
+  /* ✅ 新增搜尋欄樣式 */
+  .search-container {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+    min-width: 200px;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 40px 10px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+
+    .search-input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+  .btn-clear-search {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    width: 28px;
+    height: 28px;
+  display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+
+    .btn-clear-search:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
     }
 
   .btn-add {
@@ -467,6 +573,7 @@
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s;
+    flex-shrink: 0;
   }
 
     .btn-add:hover {
