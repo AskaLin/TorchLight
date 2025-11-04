@@ -294,7 +294,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             };
 
             var success = MapInfoMapper.AddOrUpdateMapMappingByName(mapName, mapIds, type);
-
+            _gameLogProcessor.UpdateMapInfo(mapIds);
             return JsonSerializer.Serialize(new
             {
                 success,
@@ -771,7 +771,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             {
                 success = true,
                 message = $"地圖「{currentMapName}」已結算完成",
-                mapName = currentMapName,
+                mapName = "", // 結算後就當離開地圖了
                 endTime
             }, _ops);
         }

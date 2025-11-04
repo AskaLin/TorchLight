@@ -53,7 +53,7 @@ public class MainWindow : Form
         InitializeExecuteLineWindow();
 
         // 註冊遊戲日誌事件
-        _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
+        // _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
         _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
 
         // 註冊地圖設定更新事件
@@ -595,15 +595,15 @@ public class MainWindow : Form
     /// <summary>
     /// 處理 "已開啟日誌" 事件
     /// </summary>
-    private async void HandleLogOpenedDetected()
-    {
-        if (_isInitialized)
-        {
-            // ❌ 移除：不再需要通知 logMonitoringStatus
-            // await _webViewHub.NotifyLogMonitoringStatusAsync("監控日誌中");
-            Log.Information("已檢測到：已開啟日誌");
-        }
-    }
+    //private async void HandleLogOpenedDetected()
+    //{
+    //    if (_isInitialized)
+    //    {
+    //        // ❌ 移除：不再需要通知 logMonitoringStatus
+    //        // await _webViewHub.NotifyLogMonitoringStatusAsync("監控日誌中");
+    //        Log.Information("已檢測到：已開啟日誌");
+    //    }
+    //}
 
     /// <summary>
     /// 處理背包同步完成事件

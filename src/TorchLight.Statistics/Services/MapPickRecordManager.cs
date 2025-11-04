@@ -44,8 +44,13 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         {
             _currentMapRecord.Name = mapIdConfig.GetDisplayName();
             _currentMapRecord.Type = mapIdConfig.Type;
-            Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
         }
+        else
+        {
+            _currentMapRecord.Name = "未知的地圖";
+            _currentMapRecord.Type = MapType.Netherrealm;
+        }
+        Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
     }
     public void SetMapLevel(int mapLevel)
     {
@@ -223,6 +228,25 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         return result;
     }
 
+    // 更新尚未存檔的地圖資訊
+    public void UpdateMapInfo(List<int> mapIds)
+    {
+        if (mapIds.Contains(_currentMapRecord.MapId))
+        {
+            var mapInfo = MapInfoMapper.GetMapInfo(_currentMapRecord.MapId);
+            _currentMapRecord.Name = mapInfo.GetDisplayName();
+            _currentMapRecord.Type = mapInfo.Type;
+            CurrentMapName = _currentMapRecord.Name;
+        }
+
+        foreach (var map in _mapRecords.Where(m => mapIds.Contains(m.MapId)))
+        {
+            var mapInfo = MapInfoMapper.GetMapInfo(map.MapId);
+            map.Name = mapInfo.GetDisplayName();
+            map.Type = mapInfo.Type;
+        }
+    }
+
     /// <summary>
     /// 獲取當前地圖記錄（包含完整資訊）
     /// </summary>
@@ -256,19 +280,10 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     public void Reset()
     {
         _mapRecords.Clear();
-        // 開圖順序有改 保留開圖材料資訊
-        var recordMetail = new MapRecordModel
-        {
-            MapTicket = _currentMapRecord.MapTicket,
-            Compass = _currentMapRecord.Compass,
-            Resonance = _currentMapRecord.Resonance,
-            Probe = _currentMapRecord.Probe
-        };
-
-        _currentMapRecord = recordMetail;
+        _currentMapRecord = new();
         _currentMapPickData = [];
         IsInMap = false;
-        CurrentMapName = string.Empty;        
+        CurrentMapName = string.Empty;
     }
 
     /// <summary>
@@ -418,6 +433,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         }
     }
 
+    // 更新尚未存檔的拾取物品資訊
     public void UpdateItemInfo(ItemBaseModel item)
     {
         Log.Debug("更新尚未存檔的拾取物品資訊: {ItemId}", item.Id);

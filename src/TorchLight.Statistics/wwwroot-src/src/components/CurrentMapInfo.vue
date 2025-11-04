@@ -14,7 +14,7 @@
     </div>
 
     <!-- 異界地圖 - 顯示完整資訊 -->
-    <div v-else-if="mapStore.currentMapInfo.mapType === 'Netherrealm'" class="netherrealm-info">
+    <div v-else class="netherrealm-info">
       <!-- 地圖基本資訊 -->
       <div class="map-header">
         <div class="map-name-large">{{ mapStore.currentMapInfo.mapName }}</div>

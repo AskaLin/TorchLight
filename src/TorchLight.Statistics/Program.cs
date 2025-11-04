@@ -72,15 +72,15 @@ namespace TorchLight.Statistics
                     _logProcessor.ProcessLine(line);
                 }
 
-                //if (File.Exists(filePath))
-                //{
-                //    StartLogWatcher(filePath);
-                //}
-                //else
-                //{
-                //    Log.Warning("找不到日誌檔案: {FilePath}", filePath);
-                //    Log.Information("請在設定頁面中設定正確的日誌檔案路徑");
-                //}
+                if (File.Exists(filePath))
+                {
+                    StartLogWatcher(filePath);
+                }
+                else
+                {
+                    Log.Warning("找不到日誌檔案: {FilePath}", filePath);
+                    Log.Information("請在設定頁面中設定正確的日誌檔案路徑");
+                }
 
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");

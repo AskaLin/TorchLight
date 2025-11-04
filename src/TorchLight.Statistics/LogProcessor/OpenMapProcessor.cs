@@ -14,23 +14,22 @@ public class OpenMapProcessor
 {
     public event Action<DateTime> OnMapStart;
     public event Action<OpenMapEvent> OnMapComplete;
+    public event Action<ItemChangeEvent> OnItemChangeInMapBlock;
 
     private bool _inOpenMapBlock = false;
     private OpenMapEvent currentMapEvent = null;
 
-    public void HandleLine(string line)
+    public bool HandleLine(string line)
     {
-        //if (LineParser.OpenMapStart(line, "ItemChange@ ProtoName=Spv3Open start", out var startTime))
-        if(line.Contains("+worldInitArgs+levelType"))
+        if (LineParser.GetLineDateTime(line, "ItemChange@ ProtoName=Spv3Open start", out var startTime))
         {
-            DateTime startTime = DateTime.Now;
+            Log.Debug("開始開新圖");
             _inOpenMapBlock = true;
             currentMapEvent = new OpenMapEvent(startTime);
             OnMapStart?.Invoke(startTime);
-            return;
+            return true;
         }
-
-        if (_inOpenMapBlock)
+        else if (_inOpenMapBlock)
         {
             if (LineParser.IsTokenLine(line, "+AreaUniqueId [", out string token))
             {
@@ -47,14 +46,18 @@ public class OpenMapProcessor
                 currentMapEvent.MapId = mapId;
                 Log.Debug($"地圖 ID: {mapId}");
             }
-
-            // 假設區塊結束條件是遇到某個特定行
-            //if (LineParser.OpenMapEnd(line, "+maptype [", out var endTime))
-            if(line.Contains("+maptype [Mystic]"))
+            else if (LineParser.IsBagMgr(line, "BagMgr@:Modfy BagItem", out var itemChangeEvent))
+            {
+                itemChangeEvent.ProtoName = "Spv3Open";
+                OnItemChangeInMapBlock?.Invoke(itemChangeEvent);
+            }
+            else if (line.Contains("[Game] UGameMgr::EnterLevel"))
             {
                 _inOpenMapBlock = false;
                 OnMapComplete?.Invoke(currentMapEvent);
             }
+            return true;
         }
+        return false;
     }
 }

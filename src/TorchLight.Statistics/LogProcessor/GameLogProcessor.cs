@@ -19,10 +19,11 @@ public class GameLogProcessor
     // 🆕 SafeFileTailWatcher 引用
     private SafeFileTailWatcher _fileTailWatcher;
 
-    private readonly ItemChangeProcessor _itemChangeProcessor;
+    //private readonly ItemChangeProcessor _itemChangeProcessor;
+    private readonly PickedItemProcessor _pickedItemProcessor;
     private readonly OpenMapProcessor _openMapProcessor;
     private readonly InitBagProcessor _initBagProcessor;
-    private readonly SearchItemProcessor _searchItemProcessor;
+    // private readonly SearchItemProcessor _searchItemProcessor;
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
     /// </summary>
@@ -43,10 +44,11 @@ public class GameLogProcessor
         _mapPickRecordManager = new MapPickRecordManager(_itemTable);
         _logger = new ConsoleLogger();
 
-        _itemChangeProcessor = new ItemChangeProcessor();
+        //_itemChangeProcessor = new ItemChangeProcessor();
         _openMapProcessor = new OpenMapProcessor();
         _initBagProcessor = new InitBagProcessor();
-        _searchItemProcessor = new SearchItemProcessor();
+        _pickedItemProcessor = new PickedItemProcessor();
+        //_searchItemProcessor = new SearchItemProcessor();
 
         RegisterEventHandlers();
     }
@@ -54,19 +56,22 @@ public class GameLogProcessor
     private void RegisterEventHandlers()
     {
         // 註冊事件處理
-        _itemChangeProcessor.OnItemChanged += HandleBagModification;
+        //_itemChangeProcessor.OnItemChanged += HandleBagModification;
 
         _openMapProcessor.OnMapStart += HandleMapInfoStart;
         _openMapProcessor.OnMapComplete += HandleMapInfoComplete;
+        _openMapProcessor.OnItemChangeInMapBlock += HandleBagModification;
 
         _initBagProcessor.OnInitStarted += HandleInitStart;
         _initBagProcessor.OnItemInitialized += HandleItemInitialized;
         _initBagProcessor.OnInitCompleted += HandleInitCompleted;
 
-        _searchItemProcessor.OnSerachComplete += (itemBaseId) =>
-        {
-            // 將搜到的id  發到 前端 註冊物品頁
-        };
+        _pickedItemProcessor.OnItemsPicked += HandleBagModification;
+
+        //_searchItemProcessor.OnSerachComplete += (itemBaseId) =>
+        //{
+        //    // 將搜到的id  發到 前端 註冊物品頁
+        //};
     }
 
 
@@ -85,8 +90,7 @@ public class GameLogProcessor
     public void SetFileTailWatcher(SafeFileTailWatcher fileTailWatcher)
     {
         _fileTailWatcher = fileTailWatcher;
-    }
-
+    }    
 
     /// <summary>
     /// 處理遊戲日誌
@@ -98,22 +102,35 @@ public class GameLogProcessor
 
         try
         {
-            // 0. 檢查 "已開啟日誌" 訊息
+            // 處理背包初始化（使用 InitBagProcessor）
+            if (_initBagProcessor.HandleLine(line))
+            {
+                return;
+            }
+
+            // 處理物品變更（區塊處理）
+            if (_pickedItemProcessor.HandleLine(line))
+            {
+                return;
+            }
+
+            // 🆕 處理開啟地圖區塊（在檢查地圖資訊之前）
+            if (_openMapProcessor.HandleLine(line))
+            {
+                return;
+            }
+
+            // 檢查 "已開啟日誌" 訊息
             if (LineParser.IsLogOpenedMessage(line))
             {
                 Log.Information("檢測到 '已開啟日誌' 訊息");
-
                 // 🆕 啟用檔案大小監控
                 _fileTailWatcher?.EnableLogMonitoring();
-
                 OnLogOpenedDetected?.Invoke();
                 return;
             }
 
-            // 1. 處理背包初始化（使用 InitBagProcessor）
-            _initBagProcessor.HandleLine(line);
-
-            // 2. 登入開始 - 重置所有資料
+            // 登入開始 - 重置所有資料
             if (LineParser.IsLoginStart(line))
             {
                 Log.Information("偵測到重新登入，重置所有資料");
@@ -123,24 +140,15 @@ public class GameLogProcessor
 
                 // 🆕 停用檔案大小監控（等待下次"已開啟日誌"訊息）
                 _fileTailWatcher?.DisableLogMonitoring();
-
                 return;
             }
 
-
-            // 0. 遊戲關閉
+            //  遊戲關閉
             if (LineParser.CloseGame(line))
             {
                 Log.Information("偵測到遊戲關閉, 結算關卡資料");
-                NotifyNewMapRecord();
-                return;
+                NotifyNewMapRecord();                
             }
-            
-            // 4. 處理物品變更（區塊處理）
-            _itemChangeProcessor.HandleLine(line);
-
-            // 🆕 處理開啟地圖區塊（在檢查地圖資訊之前）
-            _openMapProcessor.HandleLine(line);
         }
         catch (Exception ex)
         {
@@ -309,7 +317,7 @@ public class GameLogProcessor
                     item.Type == ItemType.GameplayTicket || item.Type == ItemType.Currency)
                 {
                     _mapPickRecordManager.RecordMapMaterial(ev.ConfigBaseId, item.Type);
-                }
+                }                
             }
 
             // 如果是增加物品（拾取），且在異界地圖中，則記錄拾取
@@ -372,6 +380,11 @@ public class GameLogProcessor
         }
     }
 
+    public void UpdateMapInfo(List<int> mapIds) 
+    {
+        _mapPickRecordManager.UpdateMapInfo(mapIds);
+        NotifyCurrentMapUpdate();
+    }
     public void UpdateItemInfo(ItemBaseModel item)
     {
         _mapPickRecordManager.UpdateItemInfo(item);
