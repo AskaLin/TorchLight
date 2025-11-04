@@ -7,13 +7,10 @@
       </button>
     </div>
 
-    <!-- ✅ 通知訊息 - 改為浮動式 -->
-    <Transition name="notification-slide">
-      <div v-if="notification.show"
-           :class="['notification-float', notification.type]">
-        {{ notification.message }}
-      </div>
-    </Transition>
+    <!-- ✅ 通知訊息組件 -->
+    <Notification :show="notification.show"
+                  :type="notification.type"
+                  :message="notification.message" />
 
     <!-- ✅ 載入中 - 改為全螢幕 Overlay -->
     <Transition name="fade">
@@ -141,7 +138,11 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { apiCall } from '../utils/api'
+  import { useNotification } from '../composables/useNotification'
   import CollapsibleList from './CollapsibleList.vue'
+  import Notification from './Notification.vue'
+
+  const { notification, showNotification } = useNotification()
 
   const loading = ref(false)
   const statisticsConfigs = ref({})
@@ -150,7 +151,6 @@
   const pageIdItemTypeMapping = ref({})
   const showAddDialog = ref(false)
   const isEditing = ref(false)
-  const notification = ref({ show: false, type: 'success', message: '' })
 
   const editingItem = ref({
     itemId: 0,
@@ -414,14 +414,6 @@
     }
   }
 
-  // 顯示通知
-  const showNotification = (type, message) => {
-    notification.value = { show: true, type, message }
-    setTimeout(() => {
-      notification.value.show = false
-    }, 3000)
-  }
-
   // 監聽後端的設定更新通知
   if (typeof window !== 'undefined') {
     window.addEventListener('message', (event) => {
@@ -481,69 +473,6 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
-
-  /* 通知訊息 */
-  /* ✅ 浮動通知 - 固定在頂部中央 */
-  .notification-float {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 9999;
-    padding: 15px 30px;
-    border-radius: 8px;
-    font-weight: 500;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(10px);
-    min-width: 300px;
-    max-width: 500px;
-    text-align: center;
-  }
-
-    .notification-float.success {
-      background: rgba(76, 175, 80, 0.95);
-      border: 1px solid #4caf50;
-      color: white;
-    }
-
-    .notification-float.error {
-      background: rgba(244, 67, 54, 0.95);
-      border: 1px solid #f44336;
-      color: white;
-    }
-
-  /* ✅ 通知動畫 - 從上方滑入 */
-  .notification-slide-enter-active {
-    animation: slideInDown 0.3s ease-out;
-  }
-
-  .notification-slide-leave-active {
-    animation: slideOutUp 0.3s ease-in;
-  }
-
-  @keyframes slideInDown {
-    from {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-  }
-
-  @keyframes slideOutUp {
-    from {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    to {
-      opacity: 0;
-      transform: translateX(-50%) translateY(-20px);
-    }
-  }
 
   /* 載入中 */
   /* ✅ 載入中 - 全螢幕 Overlay */

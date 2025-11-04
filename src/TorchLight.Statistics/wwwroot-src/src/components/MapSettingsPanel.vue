@@ -5,13 +5,13 @@
       <h2>地圖設定管理</h2>
       <button @click="showAddMapDialog = true" class="btn-add">
         <span>➕ 新增地圖</span>
-  </button>
+      </button>
     </div>
 
-    <!-- 通知訊息 -->
-    <div v-if="notification.show" :class="['notification', notification.type]">
-    {{ notification.message }}
-</div>
+    <!-- ✅ 通知訊息組件 -->
+    <Notification :show="notification.show"
+                  :type="notification.type"
+                  :message="notification.message" />
 
     <!-- 地圖列表 -->
     <CollapsibleList :sections="formattedSections">
@@ -92,18 +92,21 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { apiCall } from '../utils/api'
+  import { useNotification } from '../composables/useNotification'
   import CollapsibleList from './CollapsibleList.vue'
+  import Notification from './Notification.vue'
+
+  const { notification, showNotification } = useNotification()
 
   const maps = ref([])
   const mapTypes = ref([])
   const showAddMapDialog = ref(false)
   const isEditingMap = ref(false)
-  const notification = ref({ show: false, type: 'success', message: '' })
 
   const editingMap = ref({
     name: '',
     mapIdsText: '',
-  type: 'Netherrealm'
+    type: 'Netherrealm'
   })
 
   // 格式化資料給 CollapsibleList
@@ -198,14 +201,6 @@
     } catch (error) {
       showNotification('error', '儲存地圖時發生錯誤: ' + error.message)
     }
-  }
-
-  // 顯示通知
-  const showNotification = (type, message) => {
-    notification.value = { show: true, type, message }
-    setTimeout(() => {
- notification.value.show = false
-    }, 3000)
   }
 
   // 載入地圖資料

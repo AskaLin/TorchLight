@@ -5,6 +5,11 @@
       <p class="description">設定應用程式運行所需的環境參數</p>
     </div>
 
+    <!-- ✅ 通知訊息組件 - 移到外層 -->
+    <Notification :show="notification.show"
+                  :type="notification.type"
+                  :message="notification.message" />
+
     <div class="settings-content">
       <!-- 遊戲日誌路徑設定 -->
       <div class="setting-section">
@@ -54,11 +59,6 @@
           🔄 重置
         </button>
       </div>
-
-      <!-- 訊息提示 -->
-      <div v-if="message" :class="['message', messageType]">
-        {{ message }}
-      </div>
     </div>
   </div>
 </template>
@@ -66,12 +66,14 @@
 <script setup>
   import { ref, onMounted } from 'vue'
   import { apiCall } from '../utils/api'
+  import { useNotification } from '../composables/useNotification'
+  import Notification from './Notification.vue'
+
+  const { notification, showNotification } = useNotification()
 
   const gameLogPath = ref('')
   const isPathValid = ref(false)
   const saving = ref(false)
-  const message = ref('')
-  const messageType = ref('info') // 'success', 'error', 'info'
 
   // 載入現有設定
   onMounted(async () => {
@@ -84,7 +86,7 @@
       const data = await apiCall('GetEnvironmentSettings')
 
       if (data.error) {
-        showMessage('載入設定失敗：' + data.error, 'error')
+        showNotification('error', '載入設定失敗：' + data.error)
         return
       }
 
@@ -92,7 +94,7 @@
       isPathValid.value = data.isConfigured || false
     } catch (error) {
       console.error('載入環境設定失敗:', error)
-      showMessage('載入設定時發生錯誤', 'error')
+      showNotification('error', '載入設定時發生錯誤')
     }
   }
 
@@ -103,39 +105,38 @@
       if (data.success && data.path) {
         gameLogPath.value = data.path
         isPathValid.value = true
-        showMessage('已選擇日誌檔案', 'info')        
+        showNotification('info', '已選擇日誌檔案')
       } else {
-        showMessage(data.message, 'error')
+        showNotification('error', data.message)
       }
 
     } catch (error) {
       console.error('選擇檔案失敗:', error)
-      showMessage('選擇檔案時發生錯誤', 'error')
+      showNotification('error', '選擇檔案時發生錯誤')
     }
   }
 
   // 儲存設定
   async function saveSettings() {
     if (!gameLogPath.value) {
-      showMessage('請先選擇遊戲日誌檔案', 'error')
+      showNotification('error', '請先選擇遊戲日誌檔案')
       return
     }
 
     saving.value = true
-    message.value = ''
 
     try {
       const data = await apiCall('SaveEnvironmentSettings', gameLogPath.value)
 
       if (data.success) {
-        showMessage('✅ 設定已儲存成功！', 'success')
+        showNotification('success', '✅ 設定已儲存成功！')
         isPathValid.value = true
       } else {
-        showMessage('❌ ' + (data.message || '儲存失敗'), 'error')
+        showNotification('error', '❌ ' + (data.message || '儲存失敗'))
       }
     } catch (error) {
       console.error('儲存環境設定失敗:', error)
-      showMessage('儲存時發生錯誤', 'error')
+      showNotification('error', '儲存時發生錯誤')
     } finally {
       saving.value = false
     }
@@ -145,18 +146,6 @@
   function resetSettings() {
     gameLogPath.value = ''
     isPathValid.value = false
-    message.value = ''
-  }
-
-  // 顯示訊息
-  function showMessage(msg, type = 'info') {
-    message.value = msg
-    messageType.value = type
-
-    // 3 秒後自動清除訊息
-    setTimeout(() => {
-      message.value = ''
-    }, 3000)
   }
 </script>
 
@@ -338,42 +327,4 @@
     .reset-btn:hover {
       background: rgba(255, 255, 255, 0.15);
     }
-
-  .message {
-    margin-top: 20px;
-    padding: 15px;
-    border-radius: 8px;
-    font-size: 1rem;
-    animation: slideIn 0.3s ease-out;
-  }
-
-    .message.success {
-      background: rgba(74, 222, 128, 0.2);
-      border: 1px solid rgba(74, 222, 128, 0.4);
-      color: #4ade80;
-    }
-
-    .message.error {
-      background: rgba(248, 113, 113, 0.2);
-      border: 1px solid rgba(248, 113, 113, 0.4);
-      color: #f87171;
-    }
-
-    .message.info {
-      background: rgba(165, 180, 252, 0.2);
-      border: 1px solid rgba(165, 180, 252, 0.4);
-      color: #a5b4fc;
-    }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
 </style>
