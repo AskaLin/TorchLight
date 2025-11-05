@@ -28,5 +28,10 @@ public enum MapType
     /// <summary>
     /// 首領地圖
     /// </summary>
-    Boss
+    Boss,
+    
+    /// <summary>
+    /// 賽季地圖
+    /// </summary>
+    Season,
 }

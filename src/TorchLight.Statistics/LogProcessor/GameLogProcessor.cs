@@ -23,6 +23,7 @@ public class GameLogProcessor
     private readonly PickedItemProcessor _pickedItemProcessor;
     private readonly OpenMapProcessor _openMapProcessor;
     private readonly InitBagProcessor _initBagProcessor;
+    private readonly OpenSeasonMapProcessor _openSeasonMapProcessor;
     // private readonly SearchItemProcessor _searchItemProcessor;
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
@@ -48,6 +49,7 @@ public class GameLogProcessor
         _openMapProcessor = new OpenMapProcessor();
         _initBagProcessor = new InitBagProcessor();
         _pickedItemProcessor = new PickedItemProcessor();
+        _openSeasonMapProcessor = new OpenSeasonMapProcessor();
         //_searchItemProcessor = new SearchItemProcessor();
 
         RegisterEventHandlers();
@@ -61,6 +63,9 @@ public class GameLogProcessor
         _openMapProcessor.OnMapStart += HandleMapInfoStart;
         _openMapProcessor.OnMapComplete += HandleMapInfoComplete;
         _openMapProcessor.OnItemChangeInMapBlock += HandleBagModification;
+
+        _openSeasonMapProcessor.OnMapStart += HandleMapInfoStart;
+        _openSeasonMapProcessor.OnMapComplete += HandleMapInfoComplete;
 
         _initBagProcessor.OnInitStarted += HandleInitStart;
         _initBagProcessor.OnItemInitialized += HandleItemInitialized;
@@ -116,6 +121,12 @@ public class GameLogProcessor
 
             // 🆕 處理開啟地圖區塊（在檢查地圖資訊之前）
             if (_openMapProcessor.HandleLine(line))
+            {
+                return;
+            }
+
+            // 開啟賽季地圖處理
+            if (_openSeasonMapProcessor.HandleLine(line))
             {
                 return;
             }

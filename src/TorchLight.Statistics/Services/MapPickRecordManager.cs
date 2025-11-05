@@ -108,7 +108,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         IsInMap = true;
         CurrentMapName = _currentMapRecord.Name; // 先不動CurrentMapName，之後在處理他
 
-        Log.Information("{Time} 進入異界地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
+        Log.Information("{Time} 進入地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
 
         if (!string.IsNullOrEmpty(_currentMapRecord.MapTicket))
         {
@@ -145,7 +145,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
-        Log.Information("{Time} 離開異界地圖: {MapName}({Token}) - 用時: {Duration}", endTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId, _currentMapRecord.UseTime);
+        Log.Information("{Time} 離開地圖: {MapName}({Token}) - 用時: {Duration}", endTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId, _currentMapRecord.UseTime);
 
         // 顯示當前地圖的拾取記錄
         PrintCurrentMapRecord(_currentMapRecord);
