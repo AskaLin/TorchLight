@@ -14,7 +14,6 @@ public class GameLogProcessor
     private readonly BagInventoryManager _bagInventoryManager;
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly ConsoleLogger _logger;
-    private readonly Dictionary<int, ItemModel> _itemTable;
     private WebViewHub _webViewHub;
     private SafeFileTailWatcher _fileTailWatcher;
 
@@ -37,10 +36,9 @@ public class GameLogProcessor
 
     public GameLogProcessor(WebViewHub webViewHub = null)
     {
-        _itemTable = ItemInfoMapper.GetItemTable();
         _webViewHub = webViewHub;
-        _bagInventoryManager = new BagInventoryManager(_itemTable);
-        _mapPickRecordManager = new MapPickRecordManager(_itemTable);
+        _bagInventoryManager = new BagInventoryManager();
+        _mapPickRecordManager = new MapPickRecordManager();
         _logger = new ConsoleLogger();
 
         // 初始化處理器
@@ -202,17 +200,32 @@ public class GameLogProcessor
                     IsInMap = true,
                     MapType = currentRecord.Type.ToString(),
                     MapName = $"{currentRecord.Name} ({currentRecord.MapId})",
+                    MapId = currentRecord.MapId, // 🆕 添加 MapId
+                    Resonance = currentRecord.Resonance,
                     RecordId = currentRecord.RecordId,
                     MapTicket = currentRecord.MapTicket,
                     Compass = currentRecord.Compass,
                     Probe = currentRecord.Probe,
                     StartTime = currentRecord.StartTime,
-                    Items = currentRecord.PickRecord?.Select(p => new PickedItemViewModel
+                    Items = currentRecord.PickRecord?.Select(p =>
                     {
-                        BaseId = p.Value.BaseId,
-                        Name = p.Value.Name,
-                        Total = p.Value.Total,
-                        Slots = p.Value.Slots
+                        var itemInfo = ItemInfoMapper.GetItemInfo(p.Value.BaseId);
+                        string itemType = "Unknown";
+                        int pageId = 0;
+                        if (itemInfo != null)
+                        {
+                            itemType = itemInfo.Type.ToString();
+                            pageId = (int)itemInfo.PageIdType;
+                        }
+                        return new PickedItemViewModel
+                        {
+                            BaseId = p.Value.BaseId,
+                            Name = p.Value.Name,
+                            Total = p.Value.Total,
+                            Slots = p.Value.Slots,
+                            ItemType = itemType,
+                            PageId = pageId
+                        };
                     }).OrderByDescending(i => i.Total).ToArray() ?? []
                 };
             }
@@ -285,10 +298,10 @@ public class GameLogProcessor
             // 記錄日誌
             _logger.LogBagModification(ev, bagResult);
 
-            // 紀錄未知物品
-            if (!_itemTable.TryGetValue(ev.ConfigBaseId, out var unknowItem))
+            // 紀錄未知物品            
+            if (!ItemInfoMapper.TryGetItemInfo(ev.ConfigBaseId, out var item))
             {
-                ItemBaseModel newItem = new()
+                item = new()
                 {
                     Id = ev.ConfigBaseId,
                     Name = $"未知物件({ev.ConfigBaseId})",
@@ -310,11 +323,11 @@ public class GameLogProcessor
                     }
                 };
 
-                ItemInfoMapper.AddOrUpdateItem(newItem);
+                ItemInfoMapper.AddOrUpdateItem(item);
             }
 
             // 處理 Spv3Open 事件（開圖材料）
-            if (ev.ProtoName == "Spv3Open" && _itemTable.TryGetValue(ev.ConfigBaseId, out var item))
+            if (ev.ProtoName == "Spv3Open")
             {
                 if (item.Type == ItemType.Currency)
                 {
@@ -326,14 +339,14 @@ public class GameLogProcessor
                     item.Type == ItemType.MapTicket || item.Type == ItemType.BossTicket ||
                     item.Type == ItemType.GameplayTicket || item.Type == ItemType.Currency)
                 {
-                    _mapPickRecordManager.RecordMapMaterial(ev.ConfigBaseId, item.Type);
+                    _mapPickRecordManager.RecordMapMaterial(item, Math.Abs(bagResult.QuantityChange));
                 }
             }
 
             // 如果是增加物品（拾取），且在異界地圖中，則記錄拾取
             if (bagResult.QuantityChange > 0 && (ev.ProtoName == "PickItems" || ev.ProtoName == "PickItem"))
             {
-                var mapResult = _mapPickRecordManager.RecordPickedItem(ev.ConfigBaseId, ev.SlotId, bagResult.QuantityChange);
+                var mapResult = _mapPickRecordManager.RecordPickedItem(item.Name, ev.ConfigBaseId, ev.PageId, ev.SlotId, bagResult.QuantityChange);
                 if (mapResult != null)
                 {
                     _logger.LogMapPickItem(_mapPickRecordManager.CurrentMapName, mapResult);
@@ -377,7 +390,7 @@ public class GameLogProcessor
 
             if (_mapPickRecordManager.CurrentMapRecordInfoComplete())
             {
-                _mapPickRecordManager.StartMapRecord(DateTime.Now);
+                _mapPickRecordManager.StartMapRecord(context.StartTime);
                 NotifyCurrentMapUpdate();
             }
         }
