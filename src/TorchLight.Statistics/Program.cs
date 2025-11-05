@@ -64,7 +64,7 @@ namespace TorchLight.Statistics
                 var filePath = GetLogFilePath();
 
                 //測試用, 讀取現有日誌內容 進行處理
-                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using FileStream fs = new("C:\\Program Files (x86)\\Torchlight Infinite\\Game\\UE_game\\TorchLight\\Saved\\Logs\\UE_game-backup-2025.11.05-01.18.42.log", FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 using StreamReader sr = new(fs, Encoding.UTF8);
                 string line;
                 while ((line = sr.ReadLine()) != null)

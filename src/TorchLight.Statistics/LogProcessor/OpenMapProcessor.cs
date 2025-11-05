@@ -1,64 +1,84 @@
 ﻿using Serilog;
-using TorchLight.Statistics.Enums;
 
 namespace TorchLight.Statistics.LogProcessor;
 
+/// <summary>
+/// 開啟地圖事件
+/// </summary>
 public class OpenMapEvent(DateTime startTime)
 {
     public string Token { get; set; }
     public int MapId { get; set; }
     public int Level { get; set; }
-    public DateTime StartTime { get; set; } = startTime;    
+    public DateTime StartTime { get; set; } = startTime;
 }
 
-public class OpenMapProcessor
+/// <summary>
+/// 開啟地圖處理器 - 繼承自 BaseLogProcessor
+/// </summary>
+public class OpenMapProcessor : BaseLogProcessor
 {
     public event Action<DateTime> OnMapStart;
     public event Action<OpenMapEvent> OnMapComplete;
     public event Action<ItemChangeEvent> OnItemChangeInMapBlock;
 
-    private bool _inOpenMapBlock = false;
-    private OpenMapEvent currentMapEvent = null;
+    private OpenMapEvent _currentMapEvent = null;
 
-    public bool HandleLine(string line)
+    protected override bool IsBlockStart(string line)
+    {
+        return LineParser.GetLineDateTime(line, "ItemChange@ ProtoName=Spv3Open start", out _);
+    }
+
+    protected override bool IsBlockEnd(string line)
+    {
+        return line.Contains("[Game] UGameMgr::EnterLevel");
+    }
+
+    protected override void OnBlockStart(string line)
     {
         if (LineParser.GetLineDateTime(line, "ItemChange@ ProtoName=Spv3Open start", out var startTime))
         {
             Log.Debug("開始開新圖");
-            _inOpenMapBlock = true;
-            currentMapEvent = new OpenMapEvent(startTime);
+            _currentMapEvent = new OpenMapEvent(startTime);
             OnMapStart?.Invoke(startTime);
-            return true;
         }
-        else if (_inOpenMapBlock)
+    }
+
+    protected override void OnBlockEnd(string line)
+    {
+        Log.Debug("地圖開啟完成");
+        OnMapComplete?.Invoke(_currentMapEvent);
+        _currentMapEvent = null;
+    }
+
+    protected override void ProcessBlockLine(string line)
+    {
+        if (_currentMapEvent == null)
+            return;
+
+        // 解析地圖 Token
+        if (LineParser.IsTokenLine(line, "+AreaUniqueId [", out string token))
         {
-            if (LineParser.IsTokenLine(line, "+AreaUniqueId [", out string token))
-            {
-                currentMapEvent.Token = token;
-                Log.Debug($"地圖 Token: {token}");
-            }
-            //else if (LineParser.IsCurrentLevelLine(line, out int level))
-            //{
-            //    currentMapEvent.Level = level;
-            //    Log.Debug($"地圖 Level: {level}");
-            //}
-            else if (LineParser.IsCurrentOpenMapIDLine(line, "+mapId [", out int mapId))
-            {
-                currentMapEvent.MapId = mapId;
-                Log.Debug($"地圖 ID: {mapId}");
-            }
-            else if (LineParser.IsBagMgr(line, "BagMgr@:Modfy BagItem", out var itemChangeEvent))
-            {
-                itemChangeEvent.ProtoName = "Spv3Open";
-                OnItemChangeInMapBlock?.Invoke(itemChangeEvent);
-            }
-            else if (line.Contains("[Game] UGameMgr::EnterLevel"))
-            {
-                _inOpenMapBlock = false;
-                OnMapComplete?.Invoke(currentMapEvent);
-            }
-            return true;
+            _currentMapEvent.Token = token;
+            Log.Debug("地圖 Token: {Token}", token);
         }
-        return false;
+        // 解析地圖 ID
+        else if (LineParser.IsCurrentOpenMapIDLine(line, "+mapId [", out int mapId))
+        {
+            _currentMapEvent.MapId = mapId;
+            Log.Debug("地圖 ID: {MapId}", mapId);
+        }
+        // 處理開圖材料消耗
+        else if (LineParser.IsBagMgr(line, "BagMgr@:Modfy BagItem", out var itemChangeEvent))
+        {
+            itemChangeEvent.ProtoName = "Spv3Open";
+            OnItemChangeInMapBlock?.Invoke(itemChangeEvent);
+        }
+    }
+
+    public override void Reset()
+    {
+        base.Reset();
+        _currentMapEvent = null;
     }
 }
