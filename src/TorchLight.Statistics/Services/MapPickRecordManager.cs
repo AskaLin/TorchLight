@@ -260,6 +260,7 @@ public class MapPickRecordManager
             RecordId = _currentMapRecord.RecordId,
             Name = _currentMapRecord.Name,
             MapTicket = _currentMapRecord.MapTicket,
+            Resonance = _currentMapRecord.Resonance,
             Compass = _currentMapRecord.Compass,
             Probe = _currentMapRecord.Probe,
             StartTime = _currentMapRecord.StartTime,

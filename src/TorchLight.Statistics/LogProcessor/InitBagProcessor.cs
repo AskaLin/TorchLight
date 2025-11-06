@@ -40,7 +40,17 @@ public class InitBagProcessor : BaseLogProcessor
     protected override bool IsBlockStart(string line)
     {
         var (isInitLine, shouldProcess, _, isFirstInit) = LineParser.CheckBagInitializationState(line);
-        return isInitLine && shouldProcess && isFirstInit;
+        var result = isInitLine && shouldProcess && isFirstInit;
+        if (result)
+        {
+            // 初始化背包的第一行也要計算            
+            _currentInitEvent = new InitBagEvent
+            {
+                StartTime = DateTime.Now
+            };
+            TryParseInitItem(line);
+        }
+        return result;
     }
 
     protected override bool IsBlockEnd(string line)
@@ -51,14 +61,8 @@ public class InitBagProcessor : BaseLogProcessor
 
     protected override void OnBlockStart(string line)
     {
-        var startTime = DateTime.Now;
-        _currentInitEvent = new InitBagEvent
-        {
-            StartTime = startTime
-        };
-
         Log.Information("背包初始化開始");
-        OnInitStarted?.Invoke(startTime);
+        OnInitStarted?.Invoke(_currentInitEvent.StartTime);
     }
 
     protected override void OnBlockEnd(string line)
@@ -80,17 +84,21 @@ public class InitBagProcessor : BaseLogProcessor
         
         if (isInitLine && shouldProcess)
         {
-            if (TryParseInitItem(line, out var item))
-            {
-                // 即時模式：立即通知
-                OnItemInitialized?.Invoke(item);
-
-                // 彙整模式：緩存到事件
-                _currentInitEvent?.Items.Add(item);
-            }
+            TryParseInitItem(line);
         }
     }
 
+    private void TryParseInitItem(string line)
+    {
+        if (TryParseInitItem(line, out var item))
+        {
+            // 即時模式：立即通知
+            OnItemInitialized?.Invoke(item);
+
+            // 彙整模式：緩存到事件
+            _currentInitEvent?.Items.Add(item);
+        }
+    }
     /// <summary>
     /// 解析初始化物品
     /// </summary>
