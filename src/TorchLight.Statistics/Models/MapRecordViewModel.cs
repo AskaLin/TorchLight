@@ -35,6 +35,11 @@ public class MapRecordViewModel
     public string MapName { get; set; } = string.Empty;    
 
     /// <summary>
+    /// 🆕 地圖 ID
+    /// </summary>
+    public int MapId { get; set; }
+
+    /// <summary>
     /// 記錄唯一識別碼
     /// </summary>
     public string RecordId { get; set; } = string.Empty;
@@ -44,6 +49,10 @@ public class MapRecordViewModel
     /// </summary>
     public string MapTicket { get; set; } = string.Empty;
 
+    /// <summary>
+    /// 迴響
+    /// </summary>
+    public int Resonance { get; set; } = 0;
     /// <summary>
     /// 使用羅盤列表
     /// </summary>
@@ -88,5 +97,15 @@ public class PickedItemViewModel
     /// <summary>
     /// 欄位數量分布
     /// </summary>
-    public Dictionary<int, int> Slots { get; set; }
+    public Dictionary<int, int> Slots { get; set; } = new();
+
+    /// <summary>
+    /// 🆕 物品類型（用於判斷是否為未知物品）
+    /// </summary>
+    public string ItemType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// 🆕 PageId 類型
+    /// </summary>
+    public int PageId { get; set; } = 0;
 }

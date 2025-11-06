@@ -75,6 +75,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             MapId = model.MapId,
             Name = model.Name,
             MapTicket = model.MapTicket,
+            Resonance = model.Resonance,
             Compass = [.. model.Compass.Where(c => !string.IsNullOrEmpty(c))],
             Probe = model.Probe,
             StartTime = model.StartTime,
@@ -1312,6 +1313,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         public string Name { get; set; }
         public int MapId { get; set; }
         public string MapTicket { get; set; }
+        public int Resonance { get; set; }
         public string[] Compass { get; set; }
         public string Probe { get; set; }
         public DateTime StartTime { get; set; }

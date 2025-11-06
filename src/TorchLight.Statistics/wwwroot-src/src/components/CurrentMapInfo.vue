@@ -17,7 +17,16 @@
     <div v-else class="netherrealm-info">
       <!-- 地圖基本資訊 -->
       <div class="map-header">
-        <div class="map-name-large">{{ mapStore.currentMapInfo.mapName }}</div>
+        <div class="map-name-row">
+          <div class="map-name-large">{{ mapStore.currentMapInfo.mapName }}</div>
+          <!-- 🆕 未知地圖編輯按鈕 -->
+          <button v-if="isUnknownMap" 
+                  @click="openMapEdit" 
+                  class="btn-edit"
+                  title="編輯地圖資訊">
+            ✏️ 編輯
+          </button>
+        </div>
         <div class="map-time" v-if="mapStore.currentMapInfo.startTime">
           <span class="time-label">進圖時間</span>
           <span class="time-value">{{ formatStartTime }}</span>
@@ -34,6 +43,17 @@
               <span class="material-label">門票</span>
             </div>
             <span class="material-value">{{ mapStore.currentMapInfo.mapTicket }}</span>
+          </div>
+        </div>
+
+        <!-- 迴響 -->
+        <div class="material-item" v-if="mapStore.currentMapInfo.resonance > 0">
+          <div class="material-content">
+            <div class="material-header">
+              <span class="material-icon">🎟️</span>
+              <span class="material-label">異界迴響</span>
+            </div>
+            <span class="material-value">{{ resonance }}</span>
           </div>
         </div>
 
@@ -69,7 +89,16 @@
         <h4 class="items-title">拾取物品</h4>
         <div class="items-grid">
           <div v-for="item in items" :key="item.baseId" class="item-card">
-            <div class="item-name">{{ item.name }}</div>
+            <div class="item-name-row">
+              <div class="item-name">{{ item.name }}</div>
+              <!-- 🆕 未知物品編輯按鈕 - 使用 ItemType 判斷 -->
+              <button v-if="isUnknownItem(item)" 
+                      @click="openItemEdit(item)" 
+                      class="btn-edit-small"
+                      title="編輯物品資訊">
+                ✏️
+              </button>
+            </div>
             <div class="item-quantity">x{{ item.total }}</div>
           </div>
         </div>
@@ -88,13 +117,28 @@
     <span class="no-map-icon">🌍</span>
     <span>目前不在任何地圖中</span>
   </div>
+
+  <!-- 🆕 編輯對話框 -->
+  <EditDialog 
+    :show="showEditDialog"
+    :editType="editType"
+    :editData="editData"
+    @close="closeEditDialog"
+    @saved="handleEditSaved"
+  />
 </template>
 
 <script setup>
-  import { computed } from 'vue'
+  import { ref, computed } from 'vue'
   import { useMapStore } from '../stores/mapStore'
+  import EditDialog from './EditDialog.vue'
 
   const mapStore = useMapStore()
+  
+  // 編輯對話框狀態
+  const showEditDialog = ref(false)
+  const editType = ref('') // 'map' or 'item'
+  const editData = ref({})
 
   // 格式化進圖時間
   const formatStartTime = computed(() => {
@@ -122,6 +166,65 @@
   const items = computed(() => {
     return mapStore.currentMapInfo.items || []
   })
+
+  // 🆕 檢查是否為未知地圖
+  const isUnknownMap = computed(() => {
+    const mapType = mapStore.currentMapInfo.mapType
+    return mapType === 'Unknown'
+  })
+
+  const resonance = computed(() => {
+    return `${mapStore.currentMapInfo.resonance} 個迴響，額外 ${Math.log2(mapStore.currentMapInfo.resonance + 1)} 條詞綴 `
+  })
+
+  // 🆕 檢查是否為未知物品（使用 ItemType）
+  const isUnknownItem = (item) => {
+    if (!item || !item.itemType) return false
+    
+    // 檢查 ItemType 是否為 Unknown 開頭（Unknown, Unknown100, Unknown101, Unknown102, Unknown103）
+    return item.itemType.startsWith('Unknown')
+  }
+
+  // 🆕 開啟地圖編輯
+  const openMapEdit = () => {
+    const mapId = mapStore.currentMapInfo.mapId || ''
+    
+    editType.value = 'map'
+    editData.value = {
+      mapName: '',
+      mapId: mapId,
+      mapType: 'Netherrealm'
+    }
+    showEditDialog.value = true
+  }
+
+  // 🆕 開啟物品編輯
+  const openItemEdit = (item) => {
+    console.log(item)
+    editType.value = 'item'
+    editData.value = {
+      itemName: '',
+      itemId: item.baseId,
+      pageId: item.pageId || 102, // 🆕 使用實際的 PageId
+      itemType: item.itemType || 'Currency',
+      enabled: true,
+      watch: false
+    }
+    showEditDialog.value = true
+  }
+
+  // 🆕 關閉編輯對話框
+  const closeEditDialog = () => {
+    showEditDialog.value = false
+    editType.value = ''
+    editData.value = {}
+  }
+
+  // 🆕 編輯儲存完成
+  const handleEditSaved = () => {
+    // 刷新當前地圖資訊（後端會自動更新並推送）
+    console.log('編輯已儲存，等待後端更新...')
+  }
 
   // 移除最後兩個字
   const removeLastTwoChars = (str) => {
@@ -192,11 +295,39 @@
     border: 1px solid rgba(156, 39, 176, 0.3);
   }
 
+  /* 🆕 地圖名稱行（包含編輯按鈕） */
+  .map-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
   .map-name-large {
     color: white;
     font-size: 1.8rem;
     font-weight: bold;
-    margin-bottom: 10px;
+    flex: 1;
+  }
+
+  /* 🆕 編輯按鈕 */
+  .btn-edit {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+
+  .btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
   }
 
   .map-time {
@@ -333,11 +464,39 @@
       box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
     }
 
+  /* 🆕 物品名稱行（包含編輯按鈕） */
+  .item-name-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+  }
+
   .item-name {
     color: white;
     font-size: 0.95rem;
     text-align: center;
     word-break: break-word;
+    flex: 1;
+  }
+
+  /* 🆕 小型編輯按鈕 */
+  .btn-edit-small {
+    padding: 4px 6px;
+    background: rgba(102, 126, 234, 0.3);
+    color: white;
+    border: 1px solid rgba(102, 126, 234, 0.5);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .btn-edit-small:hover {
+    background: rgba(102, 126, 234, 0.5);
+    transform: scale(1.1);
   }
 
   .item-quantity {

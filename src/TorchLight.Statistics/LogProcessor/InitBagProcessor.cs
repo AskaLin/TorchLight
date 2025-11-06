@@ -14,10 +14,9 @@ public class InitBagEvent
 }
 
 /// <summary>
-/// 背包初始化處理器（簡化版，單線程）
-/// 負責處理背包初始化區塊內的物品資料
+/// 背包初始化處理器 - 繼承自 BaseLogProcessor
 /// </summary>
-public class InitBagProcessor
+public class InitBagProcessor : BaseLogProcessor
 {   
     #region 事件
     /// <summary>
@@ -34,96 +33,39 @@ public class InitBagProcessor
     /// 當背包初始化完成時觸發（彙整模式）
     /// </summary>
     public event Action<InitBagEvent> OnInitCompleted;
-
     #endregion
-
-    #region 私有欄位
 
     private InitBagEvent _currentInitEvent = null;
 
-    #endregion
-
-    /// <summary>
-    /// 處理單行日誌
-    /// </summary>
-    public bool HandleLine(string line)
+    protected override bool IsBlockStart(string line)
     {
-        // 檢查初始化狀態
-        var (isInitLine, shouldProcess, isComplete, isFirstInit) = LineParser.CheckBagInitializationState(line);
-
-        // 1) 初始化開始（第一次遇到初始化行）
-        if (isInitLine && shouldProcess && isFirstInit)
+        var (isInitLine, shouldProcess, _, isFirstInit) = LineParser.CheckBagInitializationState(line);
+        var result = isInitLine && shouldProcess && isFirstInit;
+        if (result)
         {
-            HandleInitStart();
-            
-        }
-
-        // 2) 處理初始化物品
-        if (isInitLine && shouldProcess)
-        {
-            if (TryParseInitItem(line, out var item))
+            // 初始化背包的第一行也要計算            
+            _currentInitEvent = new InitBagEvent
             {
-                HandleItemInit(item);
-            }
+                StartTime = DateTime.Now
+            };
+            TryParseInitItem(line);
         }
-
-        // 3) 初始化完成
-        if (isComplete)
-        {
-            HandleInitComplete();
-        }
-        return isInitLine;
+        return result;
     }
 
-    #region 解析方法
-
-    /// <summary>
-    /// 解析初始化物品
-    /// </summary>
-    private static bool TryParseInitItem(string line, out ItemModel item)
+    protected override bool IsBlockEnd(string line)
     {
-        try
-        {
-            // 使用 LineParser.GetItemData 解析
-            item = LineParser.GetItemData(line);
-            return item != null;
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "解析初始化物品失敗");
-            item = null;
-            return false;
-        }
+        var (_, _, isComplete, _) = LineParser.CheckBagInitializationState(line);
+        return isComplete;
     }
 
-    #endregion
-
-    #region 事件處理
-
-    private void HandleInitStart()
+    protected override void OnBlockStart(string line)
     {
-        var startTime = DateTime.Now;
-        _currentInitEvent = new InitBagEvent
-        {
-            StartTime = startTime
-        };
-
         Log.Information("背包初始化開始");
-        OnInitStarted?.Invoke(startTime);
+        OnInitStarted?.Invoke(_currentInitEvent.StartTime);
     }
 
-    private void HandleItemInit(ItemModel item)
-    {
-        // 即時模式：立即通知
-        OnItemInitialized?.Invoke(item);
-
-        // 彙整模式：緩存到事件
-        _currentInitEvent?.Items.Add(item);
-
-        // Log.Debug("初始化背包物品: {ItemName} x{Count}", item.Name, item.Num);
-    }
-
-    private void HandleInitComplete()
+    protected override void OnBlockEnd(string line)
     {
         if (_currentInitEvent == null)
             return;
@@ -136,9 +78,44 @@ public class InitBagProcessor
         _currentInitEvent = null;
     }
 
-    #endregion
+    protected override void ProcessBlockLine(string line)
+    {
+        var (isInitLine, shouldProcess, _, _) = LineParser.CheckBagInitializationState(line);
+        
+        if (isInitLine && shouldProcess)
+        {
+            TryParseInitItem(line);
+        }
+    }
 
-    #region 公開方法
+    private void TryParseInitItem(string line)
+    {
+        if (TryParseInitItem(line, out var item))
+        {
+            // 即時模式：立即通知
+            OnItemInitialized?.Invoke(item);
+
+            // 彙整模式：緩存到事件
+            _currentInitEvent?.Items.Add(item);
+        }
+    }
+    /// <summary>
+    /// 解析初始化物品
+    /// </summary>
+    private static bool TryParseInitItem(string line, out ItemModel item)
+    {
+        try
+        {
+            item = LineParser.GetItemData(line);
+            return item != null;
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "解析初始化物品失敗");
+            item = null;
+            return false;
+        }
+    }
 
     /// <summary>
     /// 取得當前已初始化的物品數量
@@ -148,12 +125,11 @@ public class InitBagProcessor
     /// <summary>
     /// 重置初始化狀態（登入時使用）
     /// </summary>
-    public void Reset()
+    public override void Reset()
     {
+        base.Reset();
         _currentInitEvent = null;
         LineParser.ResetInitializationState();
         Log.Information("背包初始化處理器已重置");
     }
-
-    #endregion
 }

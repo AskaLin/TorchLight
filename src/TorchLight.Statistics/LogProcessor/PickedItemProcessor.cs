@@ -1,31 +1,42 @@
-﻿namespace TorchLight.Statistics.LogProcessor;
+﻿using Serilog;
 
-public class PickedItemProcessor
+namespace TorchLight.Statistics.LogProcessor;
+
+/// <summary>
+/// 拾取物品處理器 - 繼承自 BaseLogProcessor
+/// </summary>
+public class PickedItemProcessor : BaseLogProcessor
 {
     public event Action<ItemChangeEvent> OnItemsPicked;
 
-    private bool _inPickItemBlock = false;
-
-    public bool HandleLine(string line)
+    protected override bool IsBlockStart(string line)
     {
-        if (line.Contains("ItemChange@ ProtoName=PickItems start") || line.Contains("ItemChange@ ProtoName=PickItem start"))
+        return line.Contains("ItemChange@ ProtoName=PickItems start") || 
+               line.Contains("ItemChange@ ProtoName=PickItem start");
+    }
+
+    protected override bool IsBlockEnd(string line)
+    {
+        return line.Contains("ItemChange@ ProtoName=PickItems end") || 
+               line.Contains("ItemChange@ ProtoName=PickItem end");
+    }
+
+    protected override void OnBlockStart(string line)
+    {
+        Log.Debug("開始拾取物品區塊");
+    }
+
+    protected override void OnBlockEnd(string line)
+    {
+        Log.Debug("結束拾取物品區塊");
+    }
+
+    protected override void ProcessBlockLine(string line)
+    {
+        if (LineParser.IsBagMgr(line, "BagMgr@:Modfy BagItem", out var itemChangeEvent))
         {
-            _inPickItemBlock = true;
-            return true;
+            itemChangeEvent.ProtoName = "PickItems";
+            OnItemsPicked?.Invoke(itemChangeEvent);
         }
-        else if (_inPickItemBlock)
-        {
-            if (LineParser.IsBagMgr(line, "BagMgr@:Modfy BagItem", out var itemChangeEvent))
-            {
-                itemChangeEvent.ProtoName = "PickItems";
-                OnItemsPicked?.Invoke(itemChangeEvent);
-            }
-            else if (line.Contains("ItemChange@ ProtoName=PickItems end") || line.Contains("ItemChange@ ProtoName=PickItem end"))
-            {
-                _inPickItemBlock = false;
-            }
-            return true;
-        }
-        return false;
     }
 }

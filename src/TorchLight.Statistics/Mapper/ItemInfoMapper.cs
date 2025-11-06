@@ -55,6 +55,13 @@ namespace TorchLight.Statistics.Mapper
                 return null;
             }
         }
+        public static bool TryGetItemInfo(int itemId, out ItemBaseModel model)
+        {
+            lock (_lock)
+            {
+                return _itemConfigs.TryGetValue(itemId, out model);                
+            }
+        }
 
         /// <summary>
         /// 新增或更新物品映射
@@ -148,7 +155,7 @@ namespace TorchLight.Statistics.Mapper
                 {
                     return config.Name;
                 }
-                return $"未知物品 ({itemId})";
+                return $"未知的物品({itemId})";
             }
         }
 

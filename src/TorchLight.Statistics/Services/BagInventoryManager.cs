@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using TorchLight.Statistics.LogProcessor;
+using TorchLight.Statistics.Mapper;
 using TorchLight.Statistics.Models;
 
 namespace TorchLight.Statistics.Services;
@@ -10,12 +11,6 @@ namespace TorchLight.Statistics.Services;
 public class BagInventoryManager
 {
     private readonly Dictionary<int, PickedItemDataModel> _bagData = [];
-    private readonly Dictionary<int, ItemModel> _itemTable;
-
-    public BagInventoryManager(Dictionary<int, ItemModel> itemTable)
-    {
-        _itemTable = itemTable;
-    }
 
     public IReadOnlyDictionary<int, PickedItemDataModel> BagData => _bagData;
 
@@ -34,7 +29,7 @@ public class BagInventoryManager
         var bagData = new PickedItemDataModel
         {
             BaseId = item.ConfigBaseId,
-            Name = GetItemName(item.ConfigBaseId),
+            Name = ItemInfoMapper.GetItemName(item.ConfigBaseId),
             Total = item.Num
         };
 
@@ -49,7 +44,7 @@ public class BagInventoryManager
     {
         var result = new ItemChangeResult
         {
-            ItemName = GetItemName(ev.ConfigBaseId),
+            ItemName = ItemInfoMapper.GetItemName(ev.ConfigBaseId),
             ConfigBaseId = ev.ConfigBaseId,
             SlotId = ev.SlotId,
             NewSlotCount = ev.Num
@@ -118,11 +113,6 @@ public class BagInventoryManager
         {
             Log.Debug("  {ItemName}({ItemId}): {Total} 個", bagItem.Value.Name, bagItem.Value.BaseId, bagItem.Value.Total);
         }
-    }
-
-    private string GetItemName(int configBaseId)
-    {
-        return _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})";
     }
 }
 

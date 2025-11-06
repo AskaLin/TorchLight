@@ -9,12 +9,11 @@ namespace TorchLight.Statistics.Services;
 /// <summary>
 /// 管理異界地圖的拾取記錄
 /// </summary>
-public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
+public class MapPickRecordManager
 {
     private readonly List<MapRecordModel> _mapRecords = [];
     private MapRecordModel _currentMapRecord = new();
-    private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
-    private readonly Dictionary<int, ItemModel> _itemTable = itemTable;
+    private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];    
     private static readonly JsonSerializerOptions _ops = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -48,7 +47,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         else
         {
             _currentMapRecord.Name = "未知的地圖";
-            _currentMapRecord.Type = MapType.Netherrealm;
+            _currentMapRecord.Type = MapType.Unknown;
         }
         Log.Debug("設定 Map ID {id} Name {name} ", _currentMapRecord.MapId, _currentMapRecord.Name);
     }
@@ -65,18 +64,14 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// <summary>
     /// 記錄開圖材料（從 Spv3Open 事件）
     /// </summary>
-    public void RecordMapMaterial(int configBaseId, ItemType itemType)
+    public void RecordMapMaterial(ItemBaseModel item, int num)
     {
-        if (!_itemTable.TryGetValue(configBaseId, out var item))
-            return;
-
-        switch (itemType)
+        switch (item.Type)
         {
             case ItemType.MapTicket:
             case ItemType.BossTicket:
             case ItemType.GameplayTicket:
-                _currentMapRecord.MapTicket = item.Name;
-                // _currentMapRecord.MapTicketId = item.ConfigBaseId;
+                _currentMapRecord.MapTicket = item.Name;                
                 Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
                 break;
 
@@ -91,8 +86,8 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
                 break;
 
             case ItemType.Currency:
-                _currentMapRecord.Resonance = item.Num;
-                Log.Debug("[開圖材料] 迴響: {count}", item.Num);
+                _currentMapRecord.Resonance = num;
+                Log.Debug("[開圖材料] 迴響: {count}", num);
                 break;
         }
     }
@@ -108,7 +103,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         IsInMap = true;
         CurrentMapName = _currentMapRecord.Name; // 先不動CurrentMapName，之後在處理他
 
-        Log.Information("{Time} 進入異界地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
+        Log.Information("{Time} 進入地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
 
         if (!string.IsNullOrEmpty(_currentMapRecord.MapTicket))
         {
@@ -145,7 +140,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
-        Log.Information("{Time} 離開異界地圖: {MapName}({Token}) - 用時: {Duration}", endTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId, _currentMapRecord.UseTime);
+        Log.Information("{Time} 離開地圖: {MapName}({Token}) - 用時: {Duration}", endTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId, _currentMapRecord.UseTime);
 
         // 顯示當前地圖的拾取記錄
         PrintCurrentMapRecord(_currentMapRecord);
@@ -162,7 +157,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
     /// <summary>
     /// 記錄拾取物品
     /// </summary>
-    public MapPickResult RecordPickedItem(int configBaseId, int slotId, int quantityChange)
+    public MapPickResult RecordPickedItem(string itemName, int configBaseId, int pageId, int slotId, int quantityChange)
     {
         if (!IsInMap)
         {
@@ -174,12 +169,13 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
         {
             Log.Debug("[拾取統計] 物品 {ItemId} 已停用，跳過記錄", configBaseId);
             return null;
-        }
+        }     
 
         var result = new MapPickResult
         {
-            ItemName = _itemTable.TryGetValue(configBaseId, out var item) ? item.Name : $"未知的物品({configBaseId})",
+            ItemName = itemName,
             ConfigBaseId = configBaseId,
+            PageId = pageId,
             SlotId = slotId,
             QuantityChange = quantityChange
         };
@@ -214,7 +210,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
             var newItem = new PickedItemDataModel
             {
                 BaseId = configBaseId,
-                Name = result.ItemName,
+                Name = itemName,
                 Total = quantityChange
             };
             newItem.Slots[slotId] = quantityChange;
@@ -264,6 +260,7 @@ public class MapPickRecordManager(Dictionary<int, ItemModel> itemTable)
             RecordId = _currentMapRecord.RecordId,
             Name = _currentMapRecord.Name,
             MapTicket = _currentMapRecord.MapTicket,
+            Resonance = _currentMapRecord.Resonance,
             Compass = _currentMapRecord.Compass,
             Probe = _currentMapRecord.Probe,
             StartTime = _currentMapRecord.StartTime,
@@ -459,6 +456,7 @@ public class MapPickResult
 {
     public string ItemName { get; set; }
     public int ConfigBaseId { get; set; }
+    public int PageId { get; set; }
     public int SlotId { get; set; }
     public int QuantityChange { get; set; }
     public int PreviousSlotCount { get; set; }
