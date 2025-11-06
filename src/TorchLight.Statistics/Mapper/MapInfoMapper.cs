@@ -63,6 +63,25 @@ public class MapInfoMapper
     /// <param name="mapName">地圖名稱</param>
     /// <param name="mapIds">地圖ID列表</param>
     /// <param name="mapType">地圖類型</param>
+    public static bool AddMapMappingByName(string mapName,int mapId, MapType mapType)
+    {
+        try
+        {
+            _mapIdConfig[mapId] = new MapIdConfig
+            {
+                Id = mapId,
+                Name = mapName,
+                Type = mapType
+            };
+            SaveMapper(mapName, [mapId], mapType);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "新增或更新地圖映射失敗");
+            return false;
+        }
+    }
     public static bool AddOrUpdateMapMappingByName(string mapName, List<int> mapIds, MapType mapType)
     {
         lock (_lock)
@@ -91,15 +110,8 @@ public class MapInfoMapper
                     };
                 }
 
-                // 儲存到 JSON 檔案
-                if (!AppConfiguration.SaveMapperToJson())
-                {
-                    Log.Warning("更新記憶體成功，但儲存檔案失敗");
-                }
+                SaveMapper(mapName, mapIds, mapType);
 
-                Log.Information("已更新地圖映射: {MapName} ({MapType}) -> [{MapIds}]",
-                    mapName, mapType, string.Join(", ", mapIds));
-                OnConfigUpdated?.Invoke(true, "地圖設定已更新");
                 return true;
             }
             catch (Exception ex)
@@ -108,6 +120,19 @@ public class MapInfoMapper
                 return false;
             }
         }
+    }
+
+    private static void SaveMapper(string mapName, List<int> mapIds, MapType mapType)
+    {
+        // 儲存到 JSON 檔案
+        if (!AppConfiguration.SaveMapperToJson())
+        {
+            Log.Warning("更新記憶體成功，但儲存檔案失敗");
+        }
+
+        Log.Information("已更新地圖映射: {MapName} ({MapType}) -> [{MapIds}]",
+            mapName, mapType, string.Join(", ", mapIds));
+        OnConfigUpdated?.Invoke(true, "地圖設定已更新");
     }
 
     /// <summary>

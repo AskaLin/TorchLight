@@ -6,21 +6,21 @@
       <!-- ✅ 新增搜尋欄位 -->
       <div class="search-container">
         <input v-model="searchQuery"
-  type="text"
-   placeholder="🔍 搜尋地圖名稱..."
+               type="text"
+               placeholder="🔍 搜尋地圖名稱..."
                class="search-input"
-      @input="onSearchInput" />
+               @input="onSearchInput" />
         <button v-if="searchQuery"
-       @click="clearSearch"
-            class="btn-clear-search"
-    title="清除搜尋">
+                @click="clearSearch"
+                class="btn-clear-search"
+                title="清除搜尋">
           ✕
         </button>
       </div>
       <button @click="showAddMapDialog = true" class="btn-add">
         <span>➕ 新增地圖</span>
       </button>
-  </div>
+    </div>
 
     <!-- ✅ 通知訊息組件 -->
     <Notification :show="notification.show"
@@ -29,24 +29,24 @@
 
     <!-- 地圖列表 -->
     <CollapsibleList :sections="formattedSections">
-    <!-- 項目卡片 slot -->
+      <!-- 項目卡片 slot -->
       <template #item="{ items }">
         <div v-for="map in items"
              :key="map.name"
              :class="['map-card', getTypeClass(map.type)]">
-        <div class="card-header">
+          <div class="card-header">
             <div class="map-name">{{ map.name }}</div>
             <div class="card-actions">
-          <button @click.stop="editMap(map)" class="btn-icon" title="編輯">
- ✏️
-        </button>
+              <button @click.stop="editMap(map)" class="btn-icon" title="編輯">
+                ✏️
+              </button>
               <button @click.stop="deleteMap(map)" class="btn-icon" title="刪除">
-            🗑️
-      </button>
-  </div>
+                🗑️
+              </button>
+            </div>
           </div>
           <div class="card-footer">
-       <span class="map-ids">{{ formatMapIds(map.mapIds) }}</span>
+            <span class="map-ids">{{ formatMapIds(map.mapIds) }}</span>
           </div>
         </div>
       </template>
@@ -56,48 +56,49 @@
     <div v-if="showAddMapDialog" class="modal-overlay" @click.self="closeMapDialog">
       <div class="modal-content">
         <div class="modal-header">
-   <h3>{{ isEditingMap ? '編輯地圖' : '新增地圖' }}</h3>
+          <h3>{{ isEditingMap ? '編輯地圖' : '新增地圖' }}</h3>
           <button @click="closeMapDialog" class="btn-close">✕</button>
         </div>
 
         <div class="modal-body">
- <div class="form-group">
-    <label>地圖名稱 *</label>
-            <input v-model="editingMap.name"
-     type="text"
-    placeholder="例如: 雜蕪街區"
-      class="form-input" />
-            <div class="form-hint">輸入地圖名稱（不包含等級前綴）</div>
-        </div>
-
           <div class="form-group">
-            <label>地圖 ID 列表 *</label>
-<textarea v-model="editingMap.mapIdsText"
-      placeholder="輸入地圖 ID，每行一個&#10;例如:&#10;1061000&#10;1071000&#10;1081000"
-           class="form-textarea"
-            rows="6"></textarea>
-       <div class="form-hint">每行輸入一個地圖 ID，系統會自動為這些 ID 套用相同名稱</div>
+            <label>地圖名稱 *</label>
+            <input v-model="editingMap.name"
+                   type="text"
+                   placeholder="例如: 雜蕪街區"
+                   class="form-input" />
+            <div class="form-hint">輸入地圖名稱（不包含等級前綴）</div>
           </div>
 
           <div class="form-group">
-       <label>地圖類型 *</label>
-  <select v-model="editingMap.type" class="form-select">
-         <option v-for="type in mapTypes"
-          :key="type.value"
-:value="type.value">
-      {{ type.name }}
-      </option>
-   </select>
-       <div v-if="mapTypes.length === 0" class="form-hint">
-        載入地圖類型中...
-     </div>
-  </div>
-      </div>
+            <label>地圖 ID 列表 *</label>
+            <textarea v-model="editingMap.mapIdsText"
+              placeholder="輸入地圖 ID，每行一個&#10;例如:&#10;1061000&#10;1071000&#10;1081000"
+              class="form-textarea"
+              rows="6">
+            </textarea>
+            <div class="form-hint">每行輸入一個地圖 ID，系統會自動為這些 ID 套用相同名稱</div>
+          </div>
 
-      <div class="modal-footer">
-       <button @click="closeMapDialog" class="btn-cancel">取消</button>
-       <button @click="saveMap" class="btn-save">儲存</button>
-</div>
+          <div class="form-group">
+            <label>地圖類型 *</label>
+            <select v-model="editingMap.type" class="form-select">
+              <option v-for="type in mapTypes"
+                      :key="type.value"
+                      :value="type.value">
+                {{ type.name }}
+              </option>
+            </select>
+            <div v-if="mapTypes.length === 0" class="form-hint">
+              載入地圖類型中...
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button @click="closeMapDialog" class="btn-cancel">取消</button>
+          <button @click="saveMap" class="btn-save">儲存</button>
+        </div>
       </div>
     </div>
   </div>
@@ -116,7 +117,7 @@
   const mapTypes = ref([])
   const showAddMapDialog = ref(false)
   const isEditingMap = ref(false)
-  
+
   // ✅ 新增搜尋相關狀態
   const searchQuery = ref('')
 
@@ -151,30 +152,30 @@
     // 已知地圖類型
     mapTypes.value.forEach(type => {
       // ✅ 根據搜尋過濾地圖
-   const items = maps.value.filter(map => 
+      const items = maps.value.filter(map =>
         map.type === type.value && fuzzySearch(map.name, searchQuery.value)
       )
-      
+
       if (items.length > 0) {
         sections.push({
           key: type.value,
           name: type.name,
-       totalCount: items.length,
-items: items
-      })
+          totalCount: items.length,
+          items: items
+        })
       }
     })
 
     // 未知地圖（未分類）
-    const unknownMaps = maps.value.filter(map => 
+    const unknownMaps = maps.value.filter(map =>
       !map.type && fuzzySearch(map.name, searchQuery.value)
     )
     if (unknownMaps.length > 0) {
       sections.push({
- key: 'Unknown',
+        key: 'Unknown',
         name: '❓ 未分類地圖',
         totalCount: unknownMaps.length,
-   items: unknownMaps
+        items: unknownMaps
       })
     }
 
@@ -185,14 +186,14 @@ items: items
   const formatMapIds = (mapIds) => {
     if (!mapIds || mapIds.length === 0) return ''
     if (mapIds.length <= 3) {
-   return `ID: ${mapIds.join(', ')}`
+      return `ID: ${mapIds.join(', ')}`
     }
     return `ID: ${mapIds.slice(0, 3).join(', ')}... (共 ${mapIds.length} 個)`
   }
 
   // 關閉對話框
   const closeMapDialog = () => {
- showAddMapDialog.value = false
+    showAddMapDialog.value = false
     isEditingMap.value = false
     editingMap.value = {
       name: '',
@@ -218,7 +219,7 @@ items: items
       .split('\n')
       .map(line => line.trim())
       .filter(line => line !== '')
- .map(line => parseInt(line))
+      .map(line => parseInt(line))
       .filter(id => !isNaN(id) && id > 0)
 
     if (mapIds.length === 0) {
@@ -228,16 +229,16 @@ items: items
 
     try {
       const result = await apiCall(
-     'SaveMapConfig',
+        'SaveMapConfig',
         editingMap.value.name,
-  JSON.stringify(mapIds),
+        JSON.stringify(mapIds),
         editingMap.value.type
       )
 
       if (result.success) {
-    showNotification('success', result.message)
-    closeMapDialog()
-    await loadMaps()
+        showNotification('success', result.message)
+        closeMapDialog()
+        await loadMaps()
       } else {
         showNotification('error', result.message)
       }
@@ -249,18 +250,18 @@ items: items
   // 載入地圖資料
   const loadMaps = async () => {
     try {
-   await loadMapTypes()
+      await loadMapTypes()
 
-    const configs = await apiCall('GetMapConfigs')
+      const configs = await apiCall('GetMapConfigs')
 
-maps.value = []
+      maps.value = []
       for (const [mapType, mapList] of Object.entries(configs)) {
         for (const map of mapList) {
           maps.value.push({
             name: map.name,
             mapIds: map.mapIds || [],
             type: map.type
-   })
+          })
         }
       }
     } catch (error) {
@@ -274,7 +275,7 @@ maps.value = []
       const types = await apiCall('GetMapTypes')
       mapTypes.value = types
     } catch (error) {
-    console.error('載入地圖類型失敗:', error)
+      console.error('載入地圖類型失敗:', error)
       showNotification('error', '載入地圖類型失敗: ' + error.message)
     }
   }
@@ -299,11 +300,11 @@ maps.value = []
     try {
       const result = await apiCall('DeleteMapConfig', map.name)
 
-if (result.success) {
+      if (result.success) {
         showNotification('success', result.message)
-    await loadMaps()
+        await loadMaps()
       } else {
-     showNotification('error', result.message)
+        showNotification('error', result.message)
       }
     } catch (error) {
       showNotification('error', '刪除地圖時發生錯誤: ' + error.message)
@@ -343,21 +344,21 @@ if (result.success) {
 
     .settings-header h2 {
       color: white;
- margin: 0;
+      margin: 0;
     }
 
   /* ✅ 新增搜尋欄樣式 */
   .search-container {
     position: relative;
     flex: 1;
-max-width: 400px;
+    max-width: 400px;
     min-width: 200px;
   }
 
   .search-input {
     width: 100%;
     padding: 10px 40px 10px 15px;
-  background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     color: white;
@@ -367,7 +368,7 @@ max-width: 400px;
 
     .search-input::placeholder {
       color: rgba(255, 255, 255, 0.5);
-}
+    }
 
     .search-input:focus {
       outline: none;
@@ -391,21 +392,21 @@ max-width: 400px;
     height: 28px;
     display: flex;
     align-items: center;
-  justify-content: center;
+    justify-content: center;
     border-radius: 4px;
     transition: all 0.3s;
   }
 
     .btn-clear-search:hover {
       background: rgba(255, 255, 255, 0.1);
-    color: white;
+      color: white;
     }
 
   .btn-add {
     padding: 10px 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
- border-radius: 8px;
+    border-radius: 8px;
     color: white;
     font-size: 1rem;
     cursor: pointer;
@@ -413,7 +414,7 @@ max-width: 400px;
     flex-shrink: 0;
   }
 
-.btn-add:hover {
+    .btn-add:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
@@ -442,11 +443,11 @@ max-width: 400px;
   .notification.success {
     background: rgba(76, 175, 80, 0.2);
     border: 1px solid #4caf50;
-  color: #4caf50;
+    color: #4caf50;
   }
 
   .notification.error {
-  background: rgba(244, 67, 54, 0.2);
+    background: rgba(244, 67, 54, 0.2);
     border: 1px solid #f44336;
     color: #f44336;
   }
@@ -468,7 +469,7 @@ max-width: 400px;
       border-color: rgba(255, 255, 255, 0.3);
       transform: translateY(-5px);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
+    }
 
   /* 卡片頭部 */
   .card-header {
@@ -523,7 +524,7 @@ max-width: 400px;
 
   /* 地圖類型顏色 */
   .map-card.netherrealm {
- border-left: 4px solid #9c27b0;
+    border-left: 4px solid #9c27b0;
   }
 
   .map-card.hideout {
@@ -531,14 +532,14 @@ max-width: 400px;
   }
 
   .map-card.secret-realm {
-  border-left: 4px solid #ff9800;
+    border-left: 4px solid #ff9800;
   }
 
   .map-card.boss {
     border-left: 4px solid #f44336;
   }
 
-.map-card.unknown {
+  .map-card.unknown {
     border-left: 4px solid #757575;
   }
 
@@ -566,7 +567,7 @@ max-width: 400px;
 
   .modal-header {
     display: flex;
-  justify-content: space-between;
+    justify-content: space-between;
     align-items: center;
     padding: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -580,13 +581,13 @@ max-width: 400px;
   .btn-close {
     background: none;
     border: none;
-color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 1.5rem;
     cursor: pointer;
     padding: 0;
     width: 30px;
     height: 30px;
- display: flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
@@ -603,7 +604,7 @@ color: rgba(255, 255, 255, 0.6);
   }
 
   .form-group {
- margin-bottom: 20px;
+    margin-bottom: 20px;
   }
 
     .form-group label {
@@ -628,28 +629,28 @@ color: rgba(255, 255, 255, 0.6);
   }
 
   .form-textarea {
-  resize: vertical;
+    resize: vertical;
     min-height: 100px;
   }
 
-    .form-select option {
-      background: #1a1a2e;
-      color: white;
-      padding: 10px;
-    }
+  .form-select option {
+    background: #1a1a2e;
+    color: white;
+    padding: 10px;
+  }
 
-    .form-input:focus,
-    .form-textarea:focus,
-    .form-select:focus {
-      outline: none;
-      border-color: #667eea;
-      background: rgba(255, 255, 255, 0.08);
-    }
+  .form-input:focus,
+  .form-textarea:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.08);
+  }
 
-    .form-input:disabled {
-      opacity: 0.5;
-  cursor: not-allowed;
-    }
+  .form-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   .form-hint {
     margin-top: 5px;
@@ -691,7 +692,7 @@ color: rgba(255, 255, 255, 0.6);
   }
 
     .btn-save:hover {
- transform: translateY(-2px);
+      transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
     }
 </style>

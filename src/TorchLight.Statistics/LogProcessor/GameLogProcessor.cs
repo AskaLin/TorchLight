@@ -21,6 +21,7 @@ public class GameLogProcessor
     private readonly List<BaseLogProcessor> _processorChain;
     private readonly InitBagProcessor _initBagProcessor;
     private readonly PickedItemProcessor _pickedItemProcessor;
+    private readonly PushItemProcessor _pushItemProcessor;
     private readonly OpenMapProcessor _openMapProcessor;
     private readonly OpenSeasonMapProcessor _openSeasonMapProcessor;
 
@@ -44,6 +45,8 @@ public class GameLogProcessor
         // 初始化處理器
         _initBagProcessor = new InitBagProcessor();
         _pickedItemProcessor = new PickedItemProcessor();
+        _pushItemProcessor = new PushItemProcessor();
+
         _openMapProcessor = new OpenMapProcessor();
         _openSeasonMapProcessor = new OpenSeasonMapProcessor();
 
@@ -52,8 +55,9 @@ public class GameLogProcessor
         [
             _initBagProcessor,           // 1. 背包初始化（最高優先級）
             _pickedItemProcessor,        // 2. 拾取物品
-            _openMapProcessor,           // 3. 開啟地圖
-            _openSeasonMapProcessor      // 4. 開啟賽季地圖
+            _pushItemProcessor,          // 3. 推送物品
+            _openMapProcessor,           // 4. 開啟地圖
+            _openSeasonMapProcessor      // 5. 開啟賽季地圖
         ];
 
         RegisterEventHandlers();
@@ -68,6 +72,12 @@ public class GameLogProcessor
 
         // 拾取物品事件
         _pickedItemProcessor.OnItemsPicked += HandleBagModification;
+
+        _pushItemProcessor.OnItemsPushed += (ev) =>
+        {
+            // 更新背包庫存
+            var bagResult = UpdateBagInventory(ev);
+        };
 
         // 開啟地圖事件
         _openMapProcessor.OnMapStart += HandleMapInfoStart;
@@ -191,7 +201,7 @@ public class GameLogProcessor
 
             if (!_mapPickRecordManager.IsInMap)
             {
-                return new MapRecordViewModel(false, MapType.Hideout, _mapPickRecordManager.CurrentMapName);
+                return new MapRecordViewModel(false, MapType.Hideout, "避難所");
             }
             else if (currentRecord != null)
             {
@@ -285,6 +295,17 @@ public class GameLogProcessor
         OnBagSyncCompleted?.Invoke();
     }
 
+    private ItemChangeResult UpdateBagInventory(ItemChangeEvent ev)
+    {
+        // 更新背包庫存
+        ItemChangeResult bagResult = _bagInventoryManager.UpdateBagItem(ev);
+
+        // 記錄日誌
+        _logger.LogBagModification(ev, bagResult);
+        
+        return bagResult;
+    }
+
     /// <summary>
     /// 處理背包物品修改事件
     /// </summary>
@@ -293,10 +314,7 @@ public class GameLogProcessor
         try
         {
             // 更新背包庫存
-            var bagResult = _bagInventoryManager.UpdateBagItem(ev);
-
-            // 記錄日誌
-            _logger.LogBagModification(ev, bagResult);
+            var bagResult = UpdateBagInventory(ev);            
 
             // 紀錄未知物品            
             if (!ItemInfoMapper.TryGetItemInfo(ev.ConfigBaseId, out var item))

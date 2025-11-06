@@ -236,9 +236,9 @@ async function saveChanges() {
     if (isMapEdit.value) {
       // 儲存地圖
       result = await apiCall(
-        'SaveMapConfig',
+        'AddMapConfig',
         formData.value.mapName,
-        JSON.stringify([parseInt(formData.value.mapId)]),
+        parseInt(formData.value.mapId),
         formData.value.mapType
       )
     } else {

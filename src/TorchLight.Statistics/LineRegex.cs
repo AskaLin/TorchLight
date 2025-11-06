@@ -22,7 +22,7 @@ public static partial class LineRegex
     [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*?BagMgr@:\s*InitBagData\s+PageId\s*=\s*(?<page>\d+)\s+SlotId\s*=\s*(?<slot>\d+)\s+ConfigBaseId\s*=\s*(?<config>\d+)\s+Num\s*=\s*(?<num>\d+)", RegexOptions.Singleline)]
     public static partial Regex BagInitLine();
 
-    [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*BagMgr@:(?<action>Modfy\s+BagItem|InitBagData)\s+PageId\s*=\s*(?<page>\d+)\s+SlotId\s*=\s*(?<slot>\d+)(?:\s+ConfigBaseId\s*=\s*(?<config>\d+)\s+Num\s*=\s*(?<num>\d+))?", RegexOptions.Singleline)]
+    [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*BagMgr@:(?<action>Modfy\s+BagItem|InitBagData|RemoveBagItem)\s+PageId\s*=\s*(?<page>\d+)\s+SlotId\s*=\s*(?<slot>\d+)(?:\s+ConfigBaseId\s*=\s*(?<config>\d+)\s+Num\s*=\s*(?<num>\d+))?", RegexOptions.Singleline)]
     public static partial Regex BagItemLine();
 
     [GeneratedRegex(@"\[" + UnrealTime + @"\]" + ThreadId + @".*?ItemChange@\s+Delete\s+Id=(?<config>\d+)_\S+\s+in\s+PageId=(?<page>\d+)\s+SlotId=(?<slot>\d+)")]

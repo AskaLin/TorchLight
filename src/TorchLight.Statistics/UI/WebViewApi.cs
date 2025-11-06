@@ -257,10 +257,19 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
         }
     }
 
+    public string AddMapConfig(string mapName, string mapIdsJson, string mapType)
+    {
+        return ModifyMapConfig(mapName, mapIdsJson, mapType, true);
+    }
     /// <summary>
     /// 新增或更新地圖設定（支援多個MapId對應一個名稱）
     /// </summary>
     public string SaveMapConfig(string mapName, string mapIdsJson, string mapType)
+    {
+        return ModifyMapConfig(mapName, mapIdsJson, mapType);
+    }
+
+    private string ModifyMapConfig(string mapName, string mapIdsJson, string mapType, bool isAdd = false)
     {
         try
         {
@@ -269,32 +278,39 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 return JsonSerializer.Serialize(new { success = false, message = "地圖名稱不能為空" });
             }
 
+            if (!Enum.TryParse(mapType, ignoreCase: true, out MapType type))
+            {
+                type = MapType.Unknown;
+            }
+
+            bool success;
             // 解析 MapIds JSON 字串
             List<int> mapIds;
-            try
+
+            if (isAdd)
             {
-                mapIds = JsonSerializer.Deserialize<List<int>>(mapIdsJson) ?? new List<int>();
+                var mapId = int.Parse(mapIdsJson);
+                mapIds = [mapId];
+                success = MapInfoMapper.AddMapMappingByName(mapName, mapId, type);
             }
-            catch
+            else
             {
-                return JsonSerializer.Serialize(new { success = false, message = "地圖 ID 格式錯誤" });
+                try
+                {
+                    mapIds = JsonSerializer.Deserialize<List<int>>(mapIdsJson) ?? new List<int>();
+                }
+                catch
+                {
+                    return JsonSerializer.Serialize(new { success = false, message = "地圖 ID 格式錯誤" });
+                }
+
+                if (mapIds.Count == 0)
+                {
+                    return JsonSerializer.Serialize(new { success = false, message = "至少需要一個地圖 ID" });
+                }
+                success = MapInfoMapper.AddOrUpdateMapMappingByName(mapName, mapIds, type);
             }
 
-            if (mapIds.Count == 0)
-            {
-                return JsonSerializer.Serialize(new { success = false, message = "至少需要一個地圖 ID" });
-            }
-
-            MapType type = mapType switch
-            {
-                "Hideout" => MapType.Hideout,
-                "Netherrealm" => MapType.Netherrealm,
-                "SecretRealm" => MapType.SecretRealm,
-                "Boss" => MapType.Boss,
-                _ => MapType.Unknown
-            };
-
-            var success = MapInfoMapper.AddOrUpdateMapMappingByName(mapName, mapIds, type);
             _gameLogProcessor.UpdateMapInfo(mapIds);
             return JsonSerializer.Serialize(new
             {
@@ -772,7 +788,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
             {
                 success = true,
                 message = $"地圖「{currentMapName}」已結算完成",
-                mapName = "", // 結算後就當離開地圖了
+                mapName = currentMapName, // 結算後就當離開地圖了
                 endTime
             }, _ops);
         }
