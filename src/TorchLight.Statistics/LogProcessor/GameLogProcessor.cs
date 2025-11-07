@@ -15,6 +15,7 @@ public class GameLogProcessor
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly ConsoleLogger _logger;
     private WebViewHub _webViewHub;
+    private WebViewNotificationThrottle _notificationThrottle; // 🆕 通知節流器
     private SafeFileTailWatcher _fileTailWatcher;
 
     // 🆕 處理器鏈（按優先級排序）
@@ -41,6 +42,12 @@ public class GameLogProcessor
         _bagInventoryManager = new BagInventoryManager();
         _mapPickRecordManager = new MapPickRecordManager();
         _logger = new ConsoleLogger();
+
+        // 🆕 初始化通知節流器
+        if (_webViewHub != null)
+        {
+            _notificationThrottle = new WebViewNotificationThrottle(_webViewHub);
+        }
 
         // 初始化處理器
         _initBagProcessor = new InitBagProcessor();
@@ -95,6 +102,10 @@ public class GameLogProcessor
     public void SetWebViewHub(WebViewHub webViewHub)
     {
         _webViewHub = webViewHub;
+        
+        // 🆕 初始化通知節流器
+        _notificationThrottle?.Dispose();
+        _notificationThrottle = new WebViewNotificationThrottle(_webViewHub);
     }
 
     /// <summary>
@@ -194,12 +205,15 @@ public class GameLogProcessor
 
     private void NotifyNewMapRecord()
     {
-        if (_webViewHub != null)
+        if (_notificationThrottle != null)
         {
             _ = Task.Run(async () =>
             {
-                await _webViewHub.NotifyNewMapRecordAsync();
-                await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
+                // 新地圖記錄立即發送（不節流）
+                await _notificationThrottle.NotifyNewMapRecordAsync();
+                
+                // 地圖更新使用節流
+                _notificationThrottle.NotifyCurrentMapUpdate(GetCurrentMapData());
             });
         }
     }
@@ -318,6 +332,13 @@ public class GameLogProcessor
         }
 
         _bagInventoryManager.PrintInitializedBag();
+        
+        // 🆕 使用節流器發送背包同步通知（防抖動）
+        if (_notificationThrottle != null)
+        {
+            _notificationThrottle.NotifyBagSync();
+        }
+        
         OnBagSyncCompleted?.Invoke();
     }
 
@@ -395,15 +416,26 @@ public class GameLogProcessor
                 {
                     _logger.LogMapPickItem(_mapPickRecordManager.CurrentMapName, mapResult);
 
-                    // 通知前端物品拾取
-                    if (_webViewHub != null)
+                    // 🆕 使用節流器發送通知（批次處理 + 防抖動）
+                    if (_notificationThrottle != null)
                     {
-                        _ = Task.Run(async () =>
-                        {
-                            await _webViewHub.NotifyItemPickedAsync(mapResult.ItemName, mapResult.QuantityChange);
-                            await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-                        });
+                        // 物品拾取通知（批次處理）
+                        _notificationThrottle.NotifyItemPicked(mapResult.ItemName, mapResult.QuantityChange);
+                        
+                        // 地圖更新通知（防抖動）
+                        _notificationThrottle.NotifyCurrentMapUpdate(GetCurrentMapData());
+                        
+                        // 🆕 背包同步通知（防抖動）
+                        _notificationThrottle.NotifyBagSync();
                     }
+                }
+            }
+            else
+            {
+                // 🆕 非拾取事件（如使用、丟棄等）也觸發背包同步
+                if (_notificationThrottle != null)
+                {
+                    _notificationThrottle.NotifyBagSync();
                 }
             }
 
@@ -471,12 +503,10 @@ public class GameLogProcessor
 
     private void NotifyCurrentMapUpdate()
     {
-        if (_webViewHub != null)
+        if (_notificationThrottle != null)
         {
-            _ = Task.Run(async () =>
-            {
-                await _webViewHub.NotifyCurrentMapUpdateAsync(GetCurrentMapData());
-            });
+            // 🆕 使用防抖動
+            _notificationThrottle.NotifyCurrentMapUpdate(GetCurrentMapData());
         }
     }
     #endregion

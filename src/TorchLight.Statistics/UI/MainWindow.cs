@@ -54,7 +54,8 @@ public class MainWindow : Form
 
         // 註冊遊戲日誌事件
         // _gameLogProcessor.OnLogOpenedDetected += HandleLogOpenedDetected;
-        _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
+        // ❌ 移除：GameLogProcessor 已經內部處理背包同步通知，不需要在這裡重複發送
+        // _gameLogProcessor.OnBagSyncCompleted += HandleBagSyncCompleted;
 
         // 註冊地圖設定更新事件
         MapInfoMapper.OnConfigUpdated += HandleMapConfigUpdated;
@@ -605,17 +606,18 @@ public class MainWindow : Form
     //    }
     //}
 
-    /// <summary>
-    /// 處理背包同步完成事件
-    /// </summary>
-    private async void HandleBagSyncCompleted()
-    {
-        if (_isInitialized)
-        {
-            await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
-            Log.Information("已通知前端：背包同步完成");
-        }
-    }
+    ///// <summary>
+    ///// ❌ 已移除：處理背包同步完成事件
+    ///// GameLogProcessor 已經內部使用節流器處理背包同步通知，不需要在這裡重複發送
+    ///// </summary>
+    //private async void HandleBagSyncCompleted()
+    //{
+    //    if (_isInitialized)
+    //    {
+    //        await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
+    //        Log.Information("已通知前端：背包同步完成");
+    //    }
+    //}
 
     /// <summary>
     /// 處理地圖設定更新事件
@@ -650,16 +652,17 @@ public class MainWindow : Form
         }
     }
 
-    /// <summary>
-    /// 通知前端背包同步狀態
-    /// </summary>
-    public async Task NotifyBagSyncAsync()
-    {
-        if (_isInitialized)
-        {
-            await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
-        }
-    }
+    ///// <summary>
+    ///// ❌ 已移除：通知前端背包同步狀態
+    ///// 應該使用 GameLogProcessor 內部的節流器，不要直接呼叫 WebViewHub
+    ///// </summary>
+    //public async Task NotifyBagSyncAsync()
+    //{
+    //    if (_isInitialized)
+    //    {
+    //        await _webViewHub.NotifyBagSyncStatusAsync(DateTime.Now);
+    //    }
+    //}
 
     // 讀取內嵌 HTML 的共用方法
     private static string LoadEmbeddedHtml(string resourcePath)

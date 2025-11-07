@@ -66,9 +66,26 @@ export const useMapStore = defineStore('map', () => {
         break
 
       case 'itemPicked':
-        // 可以在這裡更新即時拾取資訊
+        // 🔄 保留舊版單一物品拾取（向後相容）
         console.log('Item picked:', message.data)
         refreshCurrentMap()
+        break
+
+      // 🆕 批次物品拾取通知（優先處理）
+      case 'itemsPickedBatch':
+        if (message.data && message.data.items) {
+          const items = message.data.items
+          const count = message.data.count
+          console.log(`📦 批次拾取通知：${count} 種物品`, items)
+          
+          // 批次顯示拾取的物品（可選：顯示通知或更新 UI）
+          // items.forEach(item => {
+          //   console.log(`  - ${item.itemName} x${item.quantity}`)
+          // })
+          
+          // 🎯 只重新載入一次當前地圖資訊
+          refreshCurrentMap()
+        }
         break
 
       case 'currentMapUpdate':

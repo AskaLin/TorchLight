@@ -761,15 +761,6 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            //if (!_mapPickRecordManager.IsInMap)
-            //{
-            //    return JsonSerializer.Serialize(new
-            //    {
-            //        success = false,
-            //        message = "當前未在異界地圖中"
-            //    }, _ops);
-            //}
-
             var currentMapName = _mapPickRecordManager.CurrentMapName;
             var endTime = DateTime.Now;
 
@@ -778,17 +769,14 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
 
             Log.Information("手動結算地圖: {MapName} 於 {Time}", currentMapName, endTime.ToString("yyyy/MM/dd HH:mm:ss"));
 
-            // 通知前端更新當前地圖資訊
-            _mainWindow.Invoke(async () =>
-            {
-                await _mainWindow.NotifyBagSyncAsync();
-            });
+            // ✅ 不需要手動通知，GameLogProcessor 會自動處理
+            // _mainWindow.NotifyBagSyncAsync() 已移除，改由 GameLogProcessor 內部的節流器統一處理
 
             return JsonSerializer.Serialize(new
             {
                 success = true,
                 message = $"地圖「{currentMapName}」已結算完成",
-                mapName = currentMapName, // 結算後就當離開地圖了
+                mapName = currentMapName,
                 endTime
             }, _ops);
         }

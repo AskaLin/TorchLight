@@ -98,6 +98,17 @@ public class WebViewHub
     }
 
     /// <summary>
+    /// 🆕 通知前端：背包同步完成（簡化版，不帶時間）
+    /// </summary>
+    public Task NotifyBagSyncAsync()
+    {
+        return SendMessageAsync("bagSyncStatus", new
+        {
+            syncTime = DateTime.Now
+        });
+    }
+
+    /// <summary>
     /// 通知前端：新地圖記錄
     /// </summary>
     public Task NotifyNewMapRecordAsync()
@@ -114,6 +125,18 @@ public class WebViewHub
         {
             itemName,
             quantity
+        });
+    }
+
+    /// <summary>
+    /// 🆕 通知前端：批次物品拾取（一次發送多個物品）
+    /// </summary>
+    public Task NotifyItemsPickedBatchAsync(object[] items)
+    {
+        return SendMessageAsync("itemsPickedBatch", new
+        {
+            items,
+            count = items.Length
         });
     }
 
