@@ -10,7 +10,7 @@ namespace TorchLight.Statistics.LogProcessor;
 /// 遊戲日誌處理器 - 整合所有日誌處理邏輯（責任鏈模式）
 /// </summary>
 public class GameLogProcessor
-{
+{  
     private readonly BagInventoryManager _bagInventoryManager;
     private readonly MapPickRecordManager _mapPickRecordManager;
     private readonly ConsoleLogger _logger;
@@ -138,6 +138,16 @@ public class GameLogProcessor
     /// </summary>
     private void ProcessGlobalEvents(string line)
     {
+        // 回到避難所
+        if (line.Contains("[Game] UGameMgr::EnterLevel(110) mode=1 reload=0."))
+        {
+            // 記錄回來的時間, 可能是中離也可能是完成            
+            _mapPickRecordManager.ReturnTime = LineParser.GetLineDateTime(line);
+            Log.Information($"偵測到返回避難所, 紀錄返回時間 {_mapPickRecordManager.ReturnTime:HH:mm:ss.fff}");
+            // 不需要調用 SetIsInMap，因為在 EndMapRecord 時會自動設定 IsInMap = false
+            NotifyCurrentMapUpdate();
+        }
+
         // 檢查 "已開啟日誌" 訊息
         if (LineParser.IsLogOpenedMessage(line))
         {
@@ -156,10 +166,14 @@ public class GameLogProcessor
             return;
         }
 
-        // 遊戲關閉
+        // 遊戲關閉 - 標記當前地圖為未完成
         if (LineParser.CloseGame(line))
         {
-            Log.Information("偵測到遊戲關閉, 結算關卡資料");
+            Log.Information("偵測到遊戲關閉");
+            if (_mapPickRecordManager.IsInMap)
+            {
+                _mapPickRecordManager.MarkCurrentMapAsIncomplete();
+            }
             NotifyNewMapRecord();
         }
     }
@@ -199,45 +213,57 @@ public class GameLogProcessor
         {
             var currentRecord = _mapPickRecordManager.GetCurrentMapRecord();
 
+            MapRecordViewModel mapRecord = currentRecord != null ? new MapRecordViewModel
+            {
+                IsInMap = _mapPickRecordManager.IsInMap,
+                MapType = currentRecord.Type.ToString(),
+                MapName = $"{currentRecord.Name} ({currentRecord.MapId})",
+                MapId = currentRecord.MapId, // 🆕 添加 MapId
+                Resonance = currentRecord.Resonance,
+                RecordId = currentRecord.RecordId,
+                MapTicket = currentRecord.MapTicket,
+                Compass = currentRecord.Compass,
+                Probe = currentRecord.Probe,
+                StartTime = currentRecord.StartTime,
+                Items = currentRecord.PickRecord?.Select(p =>
+                {
+                    var itemInfo = ItemInfoMapper.GetItemInfo(p.Value.BaseId);
+                    string itemType = "Unknown";
+                    int pageId = 0;
+                    if (itemInfo != null)
+                    {
+                        itemType = itemInfo.Type.ToString();
+                        pageId = (int)itemInfo.PageIdType;
+                    }
+                    return new PickedItemViewModel
+                    {
+                        BaseId = p.Value.BaseId,
+                        Name = p.Value.Name,
+                        Total = p.Value.Total,
+                        Slots = p.Value.Slots,
+                        ItemType = itemType,
+                        PageId = pageId
+                    };
+                }).OrderByDescending(i => i.Total).ToArray() ?? []
+            } : null;
+
+
             if (!_mapPickRecordManager.IsInMap)
             {
-                return new MapRecordViewModel(false, MapType.Hideout, "避難所");
-            }
-            else if (currentRecord != null)
-            {
-                return new MapRecordViewModel
+                if(mapRecord == null)
                 {
-                    IsInMap = true,
-                    MapType = currentRecord.Type.ToString(),
-                    MapName = $"{currentRecord.Name} ({currentRecord.MapId})",
-                    MapId = currentRecord.MapId, // 🆕 添加 MapId
-                    Resonance = currentRecord.Resonance,
-                    RecordId = currentRecord.RecordId,
-                    MapTicket = currentRecord.MapTicket,
-                    Compass = currentRecord.Compass,
-                    Probe = currentRecord.Probe,
-                    StartTime = currentRecord.StartTime,
-                    Items = currentRecord.PickRecord?.Select(p =>
-                    {
-                        var itemInfo = ItemInfoMapper.GetItemInfo(p.Value.BaseId);
-                        string itemType = "Unknown";
-                        int pageId = 0;
-                        if (itemInfo != null)
-                        {
-                            itemType = itemInfo.Type.ToString();
-                            pageId = (int)itemInfo.PageIdType;
-                        }
-                        return new PickedItemViewModel
-                        {
-                            BaseId = p.Value.BaseId,
-                            Name = p.Value.Name,
-                            Total = p.Value.Total,
-                            Slots = p.Value.Slots,
-                            ItemType = itemType,
-                            PageId = pageId
-                        };
-                    }).OrderByDescending(i => i.Total).ToArray() ?? []
-                };
+                    return new MapRecordViewModel(false, MapType.Hideout, "");
+                }
+                else
+                {
+                    mapRecord.IsIncomplete = true;
+                    return mapRecord;
+                }
+                
+            }
+            else if (mapRecord != null)
+            {
+                return mapRecord;
             }
             else
             {
@@ -302,7 +328,7 @@ public class GameLogProcessor
 
         // 記錄日誌
         _logger.LogBagModification(ev, bagResult);
-        
+
         return bagResult;
     }
 
@@ -314,7 +340,7 @@ public class GameLogProcessor
         try
         {
             // 更新背包庫存
-            var bagResult = UpdateBagInventory(ev);            
+            var bagResult = UpdateBagInventory(ev);
 
             // 紀錄未知物品            
             if (!ItemInfoMapper.TryGetItemInfo(ev.ConfigBaseId, out var item))
@@ -392,8 +418,21 @@ public class GameLogProcessor
 
     private void HandleMapInfoStart(DateTime start)
     {
-        _mapPickRecordManager.EndMapRecord(start);
+        DateTime newMapStartTime = start;
+        // 開始新的地圖記錄, 用返回避難所的時間做為結束時間
+        if (_mapPickRecordManager.ReturnTime != DateTime.MinValue)
+        {
+            Log.Information($"使用返回避難所時間 {_mapPickRecordManager.ReturnTime:HH:mm:ss.fff} 作為上一張地圖的結束時間");
+            newMapStartTime = _mapPickRecordManager.ReturnTime;
+        }
+        else
+        {
+            Log.Information("沒有返回避難所時間, 使用新地圖開始時間作為上一張地圖的結束時間");
+        }
+
+        _mapPickRecordManager.EndMapRecord(newMapStartTime);
         NotifyNewMapRecord();
+        _mapPickRecordManager.ReturnTime = DateTime.MinValue;
     }
 
     /// <summary>

@@ -25,8 +25,23 @@ public class MapPickRecordManager
     // 🆕 存檔目錄
     private static readonly string SavedDirectory = Path.Combine(AppContext.BaseDirectory, "Saved");
 
+    /// <summary>
+    /// 是否在地圖中 (正常開始的地圖記錄)
+    /// </summary>
     public bool IsInMap { get; private set; }
+    
+    /// <summary>
+    /// 是否有未完成的地圖記錄 (異常結束：遊戲關閉、斷線等)
+    /// 此狀態表示玩家在地圖中但未正常返回藏身處
+    /// </summary>
+    public bool IsIncomplete { get; private set; }
+    
     public string CurrentMapName { get; private set; } = string.Empty;
+    
+    /// <summary>
+    /// 返回避難所時間
+    /// </summary>
+    public DateTime ReturnTime { get; set; } = DateTime.MinValue;
 
     public IReadOnlyList<MapRecordModel> MapRecords => _mapRecords;
 
@@ -101,7 +116,8 @@ public class MapPickRecordManager
 
         _currentMapPickData = [];
         IsInMap = true;
-        CurrentMapName = _currentMapRecord.Name; // 先不動CurrentMapName，之後在處理他
+        IsIncomplete = false; // 剛開始記錄時不是未完成狀態
+        CurrentMapName = _currentMapRecord.Name;
 
         Log.Information("{Time} 進入地圖: {MapName}({Token})", startTime.ToString("yyyy/MM/dd HH:mm:ss"), _currentMapRecord.Name, _currentMapRecord.RecordId);
 
@@ -136,7 +152,7 @@ public class MapPickRecordManager
             return;
         }
 
-        _currentMapRecord.EndTime = endTime;
+        _currentMapRecord.EndTime = ReturnTime;
         _currentMapRecord.PickRecord = _currentMapPickData;
         _mapRecords.Add(_currentMapRecord);
 
@@ -152,6 +168,19 @@ public class MapPickRecordManager
         _currentMapRecord = new();
         _currentMapPickData = [];
         IsInMap = false;
+        IsIncomplete = false; // 正常結束，不是未完成狀態
+    }
+
+    /// <summary>
+    /// 標記當前地圖為未完成狀態 (用於遊戲異常關閉、斷線等情況)
+    /// </summary>
+    public void MarkCurrentMapAsIncomplete()
+    {
+        if (IsInMap && _currentMapRecord.StartTime != DateTime.MinValue)
+        {
+            IsIncomplete = true;
+            Log.Warning("當前地圖標記為未完成狀態: {MapName}({Token})", _currentMapRecord.Name, _currentMapRecord.RecordId);
+        }
     }
 
     /// <summary>
@@ -248,7 +277,7 @@ public class MapPickRecordManager
     /// </summary>
     public MapRecordModel GetCurrentMapRecord()
     {
-        if (!IsInMap || _currentMapRecord == null)
+        if ((!IsInMap && !IsIncomplete) || _currentMapRecord == null)
             return null;
 
         // 創建一個包含當前拾取記錄的副本
@@ -280,6 +309,7 @@ public class MapPickRecordManager
         _currentMapRecord = new();
         _currentMapPickData = [];
         IsInMap = false;
+        IsIncomplete = false;
         CurrentMapName = string.Empty;
     }
 

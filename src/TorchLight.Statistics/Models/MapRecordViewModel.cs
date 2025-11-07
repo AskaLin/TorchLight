@@ -4,6 +4,7 @@ namespace TorchLight.Statistics.Models;
 
 /// <summary>
 /// 地圖記錄視圖模型 - 用於前端顯示
+/// 此類別的 IsInMap 和 IsIncomplete 屬性會從 MapPickRecordManager 同步過來
 /// </summary>
 public class MapRecordViewModel
 {
@@ -17,12 +18,21 @@ public class MapRecordViewModel
         IsInMap = isInMap;
         MapType = mapType.ToString();
         MapName = mapName;
-    }    
+    }   
 
     /// <summary>
-    /// 是否在地圖中
+    /// 是否在地圖中（從 MapPickRecordManager.IsInMap 同步）
+    /// true: 玩家正常進入地圖並開始記錄
+    /// false: 不在地圖中或已離開
     /// </summary>
     public bool IsInMap { get; set; } = false;
+
+    /// <summary>
+    /// 關卡未完成（從 MapPickRecordManager.IsIncomplete 同步）
+    /// true: 地圖記錄因異常結束（如遊戲關閉、斷線）而未完成
+    /// false: 正常狀態（未開始或已正常結束）
+    /// </summary>
+    public bool IsIncomplete { get; set; }
 
     /// <summary>
     /// 地圖類型
@@ -67,7 +77,7 @@ public class MapRecordViewModel
     /// 開始時間
     /// </summary>
     public DateTime? StartTime { get; set; } = null;
-
+    
     /// <summary>
     /// 拾取物品列表
     /// </summary>

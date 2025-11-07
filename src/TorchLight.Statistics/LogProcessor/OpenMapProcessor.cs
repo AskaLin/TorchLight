@@ -9,7 +9,7 @@ public class OpenMapEvent(DateTime startTime)
 {
     public string Token { get; set; }
     public int MapId { get; set; }
-    public int Level { get; set; }
+    public int LevelId { get; set; }
     public DateTime StartTime { get; set; } = startTime;
 }
 
@@ -31,7 +31,7 @@ public class OpenMapProcessor : BaseLogProcessor
 
     protected override bool IsBlockEnd(string line)
     {
-        return line.Contains("[Game] UGameMgr::EnterLevel");
+        return line.Contains($"[Game] UGameMgr::EnterLevel({_currentMapEvent.LevelId})");
     }
 
     protected override void OnBlockStart(string line)
@@ -46,7 +46,7 @@ public class OpenMapProcessor : BaseLogProcessor
 
     protected override void OnBlockEnd(string line)
     {
-        Log.Debug("地圖開啟完成");
+        Log.Debug("地圖開啟完成, 並進入");
         OnMapComplete?.Invoke(_currentMapEvent);
         _currentMapEvent = null;
     }
@@ -57,13 +57,19 @@ public class OpenMapProcessor : BaseLogProcessor
             return;
 
         // 解析地圖 Token
-        if (LineParser.IsTokenLine(line, "+AreaUniqueId [", out string token))
+        if (LineParser.GetCellValue(line, "+AreaUniqueId [", out string token))
         {
             _currentMapEvent.Token = token;
             Log.Debug("地圖 Token: {Token}", token);
         }
+        // 解析地圖 levelId
+        else if (LineParser.GetCellValue(line, "+levelId [", out int levelId))
+        {
+            _currentMapEvent.LevelId = levelId;
+            Log.Debug("地圖 等級: {Level}", levelId);
+        }
         // 解析地圖 ID
-        else if (LineParser.IsCurrentOpenMapIDLine(line, "+mapId [", out int mapId))
+        else if (LineParser.GetCellValue(line, "+mapId [", out int mapId))
         {
             _currentMapEvent.MapId = mapId;
             Log.Debug("地圖 ID: {MapId}", mapId);

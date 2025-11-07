@@ -9,7 +9,7 @@
     <div v-if="mapStore.currentMapInfo.mapType === 'Hideout'" class="hideout-info">
       <div class="map-name-card">
         <span class="map-label">地圖名稱</span>
-        <span class="map-value">{{ mapStore.currentMapInfo.mapName || '避難所' }}</span>
+        <span class="map-value">避難所</span>
       </div>
     </div>
 

@@ -79,7 +79,7 @@ public partial class LineParser()
         {
             var match = LineRegex.GetDateTimeValue().Match(line);
             if (match.Success)
-            {             
+            {
                 datetime = ParseUnrealDateTime(match.Groups[1].Value);
                 return true;
             }
@@ -103,7 +103,7 @@ public partial class LineParser()
         return false;
     }
     public static bool OpenMapEnd(string line, string contains, out DateTime datetime)
-    {        
+    {
         datetime = DateTime.MinValue;
         if (line.Contains(contains))
         {
@@ -148,6 +148,20 @@ public partial class LineParser()
             if (match.Success)
             {
                 token = match.Groups[1].Value;
+                return true;
+            }
+        }
+        return false;
+    }
+    public static bool GetCellValue<T>(string line, string contains, out T value)
+    {
+        value = default;
+        if (line.Contains(contains))
+        {
+            var match = LineRegex.GetCellValue().Match(line);
+            if (match.Success)
+            {
+                value = (T)Convert.ChangeType(match.Groups[1].Value, typeof(T));
                 return true;
             }
         }
@@ -228,8 +242,7 @@ public partial class LineParser()
     {
         var match = LineRegex.GetDateTimeValue().Match(line);
         if (match.Success)
-        {
-            Log.Debug("開始開新圖");
+        {            
             return ParseUnrealDateTime(match.Groups[1].Value);
         }
         return DateTime.MinValue;

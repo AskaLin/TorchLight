@@ -761,14 +761,14 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
     {
         try
         {
-            if (!_mapPickRecordManager.IsInMap)
-            {
-                return JsonSerializer.Serialize(new
-                {
-                    success = false,
-                    message = "當前未在異界地圖中"
-                }, _ops);
-            }
+            //if (!_mapPickRecordManager.IsInMap)
+            //{
+            //    return JsonSerializer.Serialize(new
+            //    {
+            //        success = false,
+            //        message = "當前未在異界地圖中"
+            //    }, _ops);
+            //}
 
             var currentMapName = _mapPickRecordManager.CurrentMapName;
             var endTime = DateTime.Now;

@@ -56,7 +56,7 @@ namespace TorchLight.Statistics
                 Log.Information("已載入 {ItemCount} 個物品定義", ItemInfoMapper.GetItemTable().Count);
 
 
-                _logProcessor = new GameLogProcessor();
+                _logProcessor = new GameLogProcessor(_webViewHub);
                 Log.Information("核心組件初始化完成");
 
 
@@ -94,7 +94,7 @@ namespace TorchLight.Statistics
 
 
                 // 設定 GameLogProcessor 使用 WebViewHub
-                _logProcessor.SetWebViewHub(_webViewHub);
+                // _logProcessor.SetWebViewHub(_webViewHub);
 
                 // 創建 MainWindow 並傳入 WebViewHub
                 var mainWindow = new MainWindow(_logProcessor.MapPickRecordManager, _logProcessor, _webViewHub);

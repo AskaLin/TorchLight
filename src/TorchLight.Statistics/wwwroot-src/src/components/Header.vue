@@ -14,7 +14,7 @@
       </nav>
 
       <div class="status">
-        <div v-if="currentMapInfo.isInMap" class="status-indicator online">
+        <div v-if="currentMapInfo.isInMap || currentMapInfo.isIncomplete " class="status-indicator online">
           <span class="dot"></span>
           <span class="status-text">進行中: {{ currentMapInfo.mapName }}</span>
           <button @click="settleMap" class="btn-settle" title="結算地圖" :disabled="isSettling">
