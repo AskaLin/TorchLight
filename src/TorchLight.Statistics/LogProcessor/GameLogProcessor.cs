@@ -239,26 +239,23 @@ public class GameLogProcessor
                 Compass = currentRecord.Compass,
                 Probe = currentRecord.Probe,
                 StartTime = currentRecord.StartTime,
+                // ✅ 修正：包含 Like 值並按 Like => Total 排序
                 Items = currentRecord.PickRecord?.Select(p =>
                 {
-                    var itemInfo = ItemInfoMapper.GetItemInfo(p.Value.BaseId);
-                    string itemType = "Unknown";
-                    int pageId = 0;
-                    if (itemInfo != null)
-                    {
-                        itemType = itemInfo.Type.ToString();
-                        pageId = (int)itemInfo.PageIdType;
-                    }
                     return new PickedItemViewModel
                     {
                         BaseId = p.Value.BaseId,
                         Name = p.Value.Name,
                         Total = p.Value.Total,
                         Slots = p.Value.Slots,
-                        ItemType = itemType,
-                        PageId = pageId
+                        Like = p.Value.Like,    // ✅ 包含 Like 值
+                        ItemType = p.Value.ItemType, // ✅ 包含 ItemType
+                        PageId = p.Value.PageId      // ✅ 包含 PageId
                     };
-                }).OrderByDescending(i => i.Total).ToArray() ?? []
+                })
+                .OrderByDescending(i => i.Like)  // ✅ 先按 Like 排序
+                .ThenByDescending(i => i.Total)    // ✅ 再按數量排序
+                .ToArray() ?? []
             } : null;
 
 

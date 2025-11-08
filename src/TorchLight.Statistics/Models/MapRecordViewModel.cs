@@ -90,7 +90,7 @@ public class MapRecordViewModel
 public class PickedItemViewModel
 {
     /// <summary>
-    /// 物品 BaseId
+  /// 物品 BaseId
     /// </summary>
     public int BaseId { get; set; }
 
@@ -101,13 +101,18 @@ public class PickedItemViewModel
 
     /// <summary>
     /// 總數量
-    /// </summary>
+/// </summary>
     public int Total { get; set; }
 
     /// <summary>
-    /// 欄位數量分布
+  /// 欄位數量分布
     /// </summary>
     public Dictionary<int, int> Slots { get; set; } = new();
+
+  /// <summary>
+    /// ✅ 物品的 Like 值 (0-6)
+    /// </summary>
+    public int Like { get; set; }
 
     /// <summary>
     /// 🆕 物品類型（用於判斷是否為未知物品）

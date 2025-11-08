@@ -90,7 +90,10 @@
         <div class="items-grid">
           <div v-for="item in items" :key="item.baseId" class="item-card">
             <div class="item-name-row">
-              <div class="item-name">{{ item.name }}</div>
+              <div class="item-name">
+                <ItemStarIcon :like="item.like" />
+                {{ item.name }}
+              </div>
               <!-- 🆕 未知物品編輯按鈕 - 使用 ItemType 判斷 -->
               <button v-if="isUnknownItem(item)" 
                       @click="openItemEdit(item)" 
@@ -132,6 +135,7 @@
   import { ref, computed } from 'vue'
   import { useMapStore } from '../stores/mapStore'
   import EditDialog from './EditDialog.vue'
+  import ItemStarIcon from './ItemStarIcon.vue'
 
   const mapStore = useMapStore()
   
@@ -164,7 +168,16 @@
 
   // 拾取物品列表
   const items = computed(() => {
-    return mapStore.currentMapInfo.items || []
+    const itemsList = mapStore.currentMapInfo.items || []
+    // ✅ 排序：Like => Quantity
+    return [...itemsList].sort((a, b) => {
+      // 先按 like 降序排序
+      if ((b.like || 0) !== (a.like || 0)) {
+        return (b.like || 0) - (a.like || 0)
+      }
+      // like 相同時，按 total 降序排序
+      return b.total - a.total
+    })
   })
 
   // 🆕 檢查是否為未知地圖
@@ -479,6 +492,10 @@
     text-align: center;
     word-break: break-word;
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
   }
 
   /* 🆕 小型編輯按鈕 */

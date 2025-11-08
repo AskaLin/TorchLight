@@ -11,7 +11,7 @@
     </div>
 
     <div v-else class="records-list">
-      <div v-for="record in records" :key="record.fileName" class="record-card">
+      <div v-for="record in sortedRecords" :key="record.fileName" class="record-card">
         <div class="record-header">
           <h3>🗓️ {{ record.recordTime }}</h3>
           <span class="map-count">{{ record.totalMaps }} 張地圖</span>
@@ -32,9 +32,11 @@
           <h4>前 10 名拾取物品</h4>
           <div class="items-grid">
             <div v-for="item in record.topItems" :key="item.baseId" class="item-chip">
-              <span class="item-name">{{ item.name }}</span>
+              <span class="item-name">
+                <ItemStarIcon :like="item.like" />
+                {{ item.name }}
+              </span>
               <span class="item-quantity">{{ item.totalQuantity }}</span>
-              <span v-if="item.like > 0" class="item-like">❤️ {{ item.like }}</span>
             </div>
           </div>
         </div>
@@ -48,14 +50,34 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { apiCall } from '../utils/api'
+  import ItemStarIcon from '../components/ItemStarIcon.vue'
 
   const router = useRouter()
   const records = ref([])
   const loading = ref(true)
   const error = ref(null)
+
+  // ✅ 為每個記錄的 topItems 排序
+  const sortedRecords = computed(() => {
+    return records.value.map(record => {
+      const sortedTopItems = record.topItems ? [...record.topItems].sort((a, b) => {
+  // 先按 like 降序排序
+        if ((b.like || 0) !== (a.like || 0)) {
+          return (b.like || 0) - (a.like || 0)
+        }
+    // like 相同時，按 totalQuantity 降序排序
+        return b.totalQuantity - a.totalQuantity
+    }) : []
+    
+      return {
+     ...record,
+   topItems: sortedTopItems
+      }
+    })
+  })
 
   onMounted(async () => {
     await loadHistoryRecords()
@@ -65,9 +87,9 @@
     loading.value = true
     error.value = null
     try {
-      const data = await apiCall('GetHistoryRecords')
+    const data = await apiCall('GetHistoryRecords')
       if (data && !data.error) {
-        records.value = data
+records.value = data
       } else {
         error.value = data?.error || '載入失敗'
       }
@@ -214,6 +236,9 @@
 
   .item-name {
     color: white;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .item-quantity {

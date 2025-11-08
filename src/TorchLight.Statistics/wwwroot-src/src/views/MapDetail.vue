@@ -59,8 +59,11 @@
 
         <div v-if="detail.items && detail.items.length > 0" class="detail-section">
           <div class="items-grid">
-            <div v-for="item in detail.items" :key="item.baseId" class="item-card">
-              <div class="item-name">{{ item.name }}</div>
+            <div v-for="item in sortedItems" :key="item.baseId" class="item-card">
+              <div class="item-name">
+                <ItemStarIcon :like="item.like" />
+                {{ item.name }}
+              </div>
               <div class="item-quantity">x{{ item.total }}</div>
             </div>
           </div>
@@ -75,9 +78,10 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from 'vue'
+  import { ref, computed, onMounted } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { useMapStore } from '../stores/mapStore'
+  import ItemStarIcon from '../components/ItemStarIcon.vue'
 
   const router = useRouter()
   const route = useRoute()
@@ -86,6 +90,19 @@
   const detail = ref(null)
   const loading = ref(true)
   const fromHistory = ref(false)
+
+  // ✅ 排序：Like => Quantity
+  const sortedItems = computed(() => {
+    if (!detail.value?.items) return []
+    return [...detail.value.items].sort((a, b) => {
+      // 先按 like 降序排序
+      if ((b.like || 0) !== (a.like || 0)) {
+        return (b.like || 0) - (a.like || 0)
+      }
+      // like 相同時，按 total 降序排序
+      return b.total - a.total
+    })
+  })
 
   onMounted(async () => {
     fromHistory.value = route.query.fromHistory === 'true'
@@ -317,6 +334,10 @@
     max-width: 100%;
     width: 100%;
     padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
   }
 
   .item-quantity {

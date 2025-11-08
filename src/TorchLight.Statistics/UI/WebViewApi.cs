@@ -88,8 +88,13 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 p.Value.BaseId,
                 p.Value.Name,
                 p.Value.Total,
-                p.Value.Slots
-            }).OrderByDescending(i => i.Total).ToArray() ?? Array.Empty<object>()
+                p.Value.Slots,
+                p.Value.Like,      // ✅ 新增
+                p.Value.ItemType,  // ✅ 新增
+                p.Value.PageId     // ✅ 新增
+            }).OrderByDescending(i => i.Like)  // ✅ 先按 Like 排序
+              .ThenByDescending(i => i.Total)   // ✅ 再按數量排序
+              .ToArray() ?? Array.Empty<object>()
         };
     }
 
@@ -117,14 +122,18 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                 TotalItems = records.Sum(r => r.PickRecord?.Count ?? 0),
                 TotalQuantity = records.Select(r => r.PickRecord?.Sum(p => p.Value.Total) ?? 0).Sum(),
                 TotalPlayTime = TimeSpan.FromSeconds(records.Sum(r => (r.EndTime - r.StartTime).TotalSeconds)).ToString(@"hh\:mm\:ss"),
+                // ✅ 在最常拾取物品中包含 Like 值並排序
                 MostPickedItems = records.SelectMany(r => r.PickRecord?.Values ?? Enumerable.Empty<PickedItemDataModel>())
                                          .GroupBy(p => p.BaseId)
                                          .Select(g => new
                                          {
                                              BaseId = g.Key,
                                              g.First().Name,
-                                             TotalQuantity = g.Sum(p => p.Total)
-                                         }).OrderByDescending(i => i.TotalQuantity)
+                                             TotalQuantity = g.Sum(p => p.Total),
+                                             g.First().Like  // ✅ 包含 Like 值
+                                         })
+                                         .OrderByDescending(i => i.Like)        // ✅ 先按 Like 排序
+                                         .ThenByDescending(i => i.TotalQuantity) // ✅ 再按數量排序
                                          .Take(10).ToArray()
             };
 
@@ -153,7 +162,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
 
                 // 更新並儲存
                 var success = ItemInfoMapper.AddOrUpdateItem(item);
-
+                _gameLogProcessor.UpdateItemInfo(item);
                 return JsonSerializer.Serialize(new
                 {
                     success,

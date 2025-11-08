@@ -62,24 +62,30 @@ namespace TorchLight.Statistics
 
                 // 🆕 嘗試啟動日誌監聽器（如果路徑有效）
                 var filePath = GetLogFilePath();
-
+                var isTest = true;
                 //測試用, 讀取現有日誌內容 進行處理
-                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                //using StreamReader sr = new(fs, Encoding.UTF8);
-                //string line;
-                //while ((line = sr.ReadLine()) != null)
-                //{
-                //    _logProcessor.ProcessLine(line);
-                //}
-
-                if (File.Exists(filePath))
+                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using StreamReader sr = new(fs, Encoding.UTF8);
+                string line;
+                while ((line = sr.ReadLine()) != null)
                 {
-                    StartLogWatcher(filePath);
+                    _logProcessor.ProcessLine(line);
                 }
-                else
+                isTest = true;
+
+                if (isTest)
                 {
-                    Log.Warning("找不到日誌檔案: {FilePath}", filePath);
-                    Log.Information("請在設定頁面中設定正確的日誌檔案路徑");
+                    Log.Information("測試模式結束");
+
+                    if (File.Exists(filePath))
+                    {
+                        StartLogWatcher(filePath);
+                    }
+                    else
+                    {
+                        Log.Warning("找不到日誌檔案: {FilePath}", filePath);
+                        Log.Information("請在設定頁面中設定正確的日誌檔案路徑");
+                    }
                 }
 
                 Log.Information("════════════════════════════════════════");

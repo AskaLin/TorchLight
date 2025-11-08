@@ -42,14 +42,16 @@
         </div>
 
         <div v-if="historyData.summary.mostPickedItems && historyData.summary.mostPickedItems.length > 0" class="top-items">
-          <h4>最常拾取物品 Top 10</h4>
-          <div class="items-grid">
-            <div v-for="item in historyData.summary.mostPickedItems" :key="item.baseId" class="item-chip">
-              <span class="item-name">{{ item.name }}</span>
-              <span class="item-quantity">{{ item.totalQuantity }}</span>
-              <span v-if="item.like > 0" class="item-like">❤️ {{ item.like }}</span>
-            </div>
-          </div>
+<h4>最常拾取物品 Top 10</h4>
+  <div class="items-grid">
+            <div v-for="item in sortedSummaryItems" :key="item.baseId" class="item-chip">
+    <span class="item-name">
+    <ItemStarIcon :like="item.like" />
+                {{ item.name }}
+   </span>
+   <span class="item-quantity">{{ item.totalQuantity }}</span>
+   </div>
+    </div>
         </div>
       </div>
 
@@ -108,6 +110,7 @@
   import { ref, computed, onMounted } from 'vue'
   import { useRouter, useRoute } from 'vue-router'
   import { apiCall } from '../utils/api'
+  import ItemStarIcon from '../components/ItemStarIcon.vue'
 
   const router = useRouter()
   const route = useRoute()
@@ -122,7 +125,20 @@
     }
     const firstRecord = historyData.value.records[0]
     const date = new Date(firstRecord.startTime)
-    return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} 的記錄`
+  return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} 的記錄`
+  })
+
+  // ✅ 排序摘要中的最常拾取物品
+  const sortedSummaryItems = computed(() => {
+    if (!historyData.value?.summary?.mostPickedItems) return []
+  return [...historyData.value.summary.mostPickedItems].sort((a, b) => {
+    // 先按 like 降序排序
+      if ((b.like || 0) !== (a.like || 0)) {
+    return (b.like || 0) - (a.like || 0)
+      }
+      // like 相同時，按 totalQuantity 降序排序
+      return b.totalQuantity - a.totalQuantity
+    })
   })
 
   const sortedRecords = computed(() => {
@@ -341,16 +357,14 @@
 
   .item-name {
     color: white;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .item-quantity {
     color: #4caf50;
     font-weight: 600;
-  }
-
-  .item-like {
-    color: #ff9800;
-    font-size: 0.85rem;
   }
 
   .maps-section {

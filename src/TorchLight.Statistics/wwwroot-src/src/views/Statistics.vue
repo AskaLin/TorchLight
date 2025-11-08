@@ -48,7 +48,10 @@
                  :key="item.baseId"
                  class="item-row">
               <div class="rank">{{ index + 1 }}</div>
-              <div class="item-name">{{ item.name }}</div>
+              <div class="item-name">
+                <ItemStarIcon :like="item.like" />
+                {{ item.name }}
+              </div>
               <div class="item-quantity">{{ item.totalQuantity }}</div>
             </div>
           </div>
@@ -59,7 +62,10 @@
                  :key="item.baseId"
                  class="item-row">
               <div class="rank">{{ index + 6 }}</div>
-              <div class="item-name">{{ item.name }}</div>
+              <div class="item-name">
+                <ItemStarIcon :like="item.like" />
+                {{ item.name }}
+              </div>
               <div class="item-quantity">{{ item.totalQuantity }}</div>
             </div>
           </div>
@@ -72,20 +78,32 @@
 <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { apiCall } from '../utils/api'
+  import ItemStarIcon from '../components/ItemStarIcon.vue'
 
   const stats = ref(null)
   const loading = ref(true)
 
+  // ✅ 排序：Like => Quantity
+  const sortedMostPickedItems = computed(() => {
+    if (!stats.value?.mostPickedItems) return []
+    return [...stats.value.mostPickedItems].sort((a, b) => {
+      // 先按 like 降序排序
+      if ((b.like || 0) !== (a.like || 0)) {
+        return (b.like || 0) - (a.like || 0)
+      }
+      // like 相同時，按 totalQuantity 降序排序
+      return b.totalQuantity - a.totalQuantity
+    })
+  })
+
   // 左列：1-5 名
   const leftColumnItems = computed(() => {
-    if (!stats.value?.mostPickedItems) return []
-    return stats.value.mostPickedItems.slice(0, 5)
+    return sortedMostPickedItems.value.slice(0, 5)
   })
 
   // 右列：6-10 名
   const rightColumnItems = computed(() => {
-    if (!stats.value?.mostPickedItems) return []
-    return stats.value.mostPickedItems.slice(5, 10)
+    return sortedMostPickedItems.value.slice(5, 10)
   })
 
   onMounted(async () => {
@@ -227,6 +245,8 @@
     color: white;
     font-size: 1.1rem;
     padding: 0 15px;
+    display: flex;
+    align-items: center;
   }
 
   .item-quantity {

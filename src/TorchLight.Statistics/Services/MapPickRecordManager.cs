@@ -200,6 +200,9 @@ public class MapPickRecordManager
             return null;
         }     
 
+        // ✅ 取得物品資訊（包含 Like 值和 ItemType）
+        var itemInfo = ItemInfoMapper.GetItemInfo(configBaseId);
+
         var result = new MapPickResult
         {
             ItemName = itemName,
@@ -240,7 +243,11 @@ public class MapPickRecordManager
             {
                 BaseId = configBaseId,
                 Name = itemName,
-                Total = quantityChange
+                Total = quantityChange,
+                // ✅ 新增：設定 Like、ItemType 和 PageId 值
+                Like = itemInfo?.Like ?? 0,
+                ItemType = itemInfo?.Type.ToString() ?? "Unknown",
+                PageId = pageId
             };
             newItem.Slots[slotId] = quantityChange;
             _currentMapPickData[configBaseId] = newItem;
@@ -361,7 +368,7 @@ public class MapPickRecordManager
                 Directory.CreateDirectory(SavedDirectory);
             }
 
-            // 生成檔案名稱：TorchPickRecord_MMdd_HHmm.json
+            // 生成檔案名稱：TorchPickRecord_MMdd_HHm.json
             var firstRecord = _mapRecords[0];
             var fileName = $"TorchPickRecord_{firstRecord.StartTime:MMdd_HHmm}.json";
             var filePath = Path.Combine(SavedDirectory, fileName);
@@ -467,6 +474,7 @@ public class MapPickRecordManager
         if (_currentMapPickData.TryGetValue(item.Id, out var pickedItem))
         {
             pickedItem.Name = item.Name;
+            pickedItem.Like = item.Like;
         }
 
         foreach (var mapRecord in _mapRecords)
@@ -474,6 +482,7 @@ public class MapPickRecordManager
             if (mapRecord.PickRecord != null && mapRecord.PickRecord.TryGetValue(item.Id, out var pickedItemInRecord))
             {
                 pickedItemInRecord.Name = item.Name;
+                pickedItem.Like = item.Like;
             }
         }
     }
