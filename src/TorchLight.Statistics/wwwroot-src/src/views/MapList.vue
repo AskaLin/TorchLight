@@ -34,7 +34,7 @@
           </div>
 
           <div v-if="record.mapTicket" class="info-item">
-            <span class="label">🎟️ 迴響:</span>
+            <span class="label">🎲 迴響:</span>
             <span class="value">{{ record.resonance }}</span>
           </div>
 

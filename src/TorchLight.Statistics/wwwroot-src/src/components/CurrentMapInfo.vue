@@ -50,7 +50,7 @@
         <div class="material-item" v-if="mapStore.currentMapInfo.resonance > 0">
           <div class="material-content">
             <div class="material-header">
-              <span class="material-icon">🎟️</span>
+              <span class="material-icon">🎲</span>
               <span class="material-label">異界迴響</span>
             </div>
             <span class="material-value">{{ resonance }}</span>

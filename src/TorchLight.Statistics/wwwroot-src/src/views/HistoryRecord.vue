@@ -64,17 +64,17 @@
   const sortedRecords = computed(() => {
     return records.value.map(record => {
       const sortedTopItems = record.topItems ? [...record.topItems].sort((a, b) => {
-  // 先按 like 降序排序
+        // 先按 like 降序排序
         if ((b.like || 0) !== (a.like || 0)) {
           return (b.like || 0) - (a.like || 0)
         }
-    // like 相同時，按 totalQuantity 降序排序
+        // like 相同時，按 totalQuantity 降序排序
         return b.totalQuantity - a.totalQuantity
-    }) : []
-    
+      }) : []
+
       return {
-     ...record,
-   topItems: sortedTopItems
+        ...record,
+        topItems: sortedTopItems
       }
     })
   })
@@ -87,9 +87,9 @@
     loading.value = true
     error.value = null
     try {
-    const data = await apiCall('GetHistoryRecords')
+      const data = await apiCall('GetHistoryRecords')
       if (data && !data.error) {
-records.value = data
+        records.value = data
       } else {
         error.value = data?.error || '載入失敗'
       }

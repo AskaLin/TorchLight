@@ -39,12 +39,16 @@
           </div>
         </div>
 
-        <div v-if="detail.mapTicket || detail.compass.length > 0 || detail.probe" class="detail-section">
+        <div v-if="detail.mapTicket || detail.compass.length > 0 || detail.probe || detail.resonance > 0" class="detail-section">
           <h3>使用材料</h3>
           <div class="materials">
             <div v-if="detail.mapTicket" class="material-item">
               <span class="material-icon">🎟️</span>
               <span>{{ detail.mapTicket }}</span>
+            </div>
+            <div v-if="detail.resonance > 0" class="material-item">
+              <span class="material-icon">🎲</span>
+              <span>{{ resonance }}</span>
             </div>
             <div v-for="(compass, index) in detail.compass" :key="index" class="material-item">
               <span class="material-icon">🧭</span>
@@ -104,7 +108,11 @@
     })
   })
 
-  onMounted(async () => {
+  const resonance = computed(() => {
+    return `${detail.value.resonance} 個迴響，額外 ${Math.log2(detail.value.resonance + 1)} 條詞綴 `
+  })
+
+  onMounted(async () => {    
     fromHistory.value = route.query.fromHistory === 'true'
 
     if (fromHistory.value) {
@@ -112,7 +120,7 @@
         const historyRecordStr = sessionStorage.getItem('historyRecord')
         const historyDataStr = sessionStorage.getItem('historyData')
 
-        if (historyRecordStr) {
+        if (historyRecordStr) {          
           const record = JSON.parse(historyRecordStr)
           detail.value = {
             ...record,
@@ -123,6 +131,7 @@
             endTime: record.endTime,
             useTime: record.useTime,
             mapTicket: record.mapTicket || '',
+            resonance: record.resonance || 0,
             compass: record.compass || [],
             probe: record.probe || '',
             items: record.pickRecord ? Object.values(record.pickRecord) : []
@@ -131,12 +140,12 @@
         } else if (historyDataStr) {
           const historyData = JSON.parse(historyDataStr)
           const recordId = route.params.id
-          const record = historyData.records?.find(r => r.recordId === recordId)
-
+          const record = historyData.records?.find(r => r.recordId === recordId)          
           if (record) {
             detail.value = {
               ...record,
               name: record.name,
+              resonance: record.resonance || 0,
               compass: record.compass || [],
               items: Object.values(record.pickRecord || {})
             }
@@ -149,7 +158,7 @@
       loading.value = false
     } else {
       const recordId = route.params.id
-      detail.value = await mapStore.getMapDetail(recordId)
+      detail.value = await mapStore.getMapDetail(recordId)      
       loading.value = false
     }
   })

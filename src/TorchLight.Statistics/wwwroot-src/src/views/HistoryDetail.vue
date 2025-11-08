@@ -42,16 +42,16 @@
         </div>
 
         <div v-if="historyData.summary.mostPickedItems && historyData.summary.mostPickedItems.length > 0" class="top-items">
-<h4>最常拾取物品 Top 10</h4>
-  <div class="items-grid">
+          <h4>最常拾取物品 Top 10</h4>
+          <div class="items-grid">
             <div v-for="item in sortedSummaryItems" :key="item.baseId" class="item-chip">
-    <span class="item-name">
-    <ItemStarIcon :like="item.like" />
+              <span class="item-name">
+                <ItemStarIcon :like="item.like" />
                 {{ item.name }}
-   </span>
-   <span class="item-quantity">{{ item.totalQuantity }}</span>
-   </div>
-    </div>
+              </span>
+              <span class="item-quantity">{{ item.totalQuantity }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -72,6 +72,11 @@
               <div v-if="record.mapTicket" class="info-item">
                 <span class="label">🎟️ 門票:</span>
                 <span class="value">{{ record.mapTicket }}</span>
+              </div>
+
+              <div v-if="record.resonance > 0" class="info-item">
+                <span class="label">🎲 迴響:</span>
+                <span class="value">{{ `${record.resonance} 個迴響，額外 ${Math.log2(record.resonance + 1)} 條詞綴 ` }}</span>
               </div>
 
               <div v-if="record.compass && record.compass.length > 0" class="info-item">
@@ -125,16 +130,16 @@
     }
     const firstRecord = historyData.value.records[0]
     const date = new Date(firstRecord.startTime)
-  return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} 的記錄`
+    return `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')} 的記錄`
   })
 
   // ✅ 排序摘要中的最常拾取物品
   const sortedSummaryItems = computed(() => {
     if (!historyData.value?.summary?.mostPickedItems) return []
-  return [...historyData.value.summary.mostPickedItems].sort((a, b) => {
-    // 先按 like 降序排序
+    return [...historyData.value.summary.mostPickedItems].sort((a, b) => {
+      // 先按 like 降序排序
       if ((b.like || 0) !== (a.like || 0)) {
-    return (b.like || 0) - (a.like || 0)
+        return (b.like || 0) - (a.like || 0)
       }
       // like 相同時，按 totalQuantity 降序排序
       return b.totalQuantity - a.totalQuantity
@@ -147,7 +152,7 @@
       new Date(b.startTime) - new Date(a.startTime)
     )
   })
-
+  
   onMounted(async () => {
     loading.value = true
     error.value = null
