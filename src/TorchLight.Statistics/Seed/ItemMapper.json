@@ -1,4 +1,4 @@
-﻿[
+﻿[  
   {
     "Id": 6002,
     "Name": "寒淵的秘密",
@@ -324,8 +324,53 @@
     "Like": 0
   },
   {
+    "Id": 260203,
+    "Name": "知識之神的神格",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260301,
+    "Name": "征戰之神的神格",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260302,
+    "Name": "征戰之神的神格",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260505,
+    "Name": "巨力之神的神格",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 260506,
     "Name": "巨神之力的神格",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 261005,
+    "Name": "神性一角",
     "Type": "DivinitySlate",
     "PageIdType": "Equipment",
     "Enable": true,
@@ -465,7 +510,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 0
+    "Like": 1
   },
   {
     "Id": 200028,
@@ -492,7 +537,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 0
+    "Like": 1
   },
   {
     "Id": 300006,
@@ -501,7 +546,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 0
+    "Like": 1
   },
   {
     "Id": 5140,
@@ -609,7 +654,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 0
+    "Like": 2
   },
   {
     "Id": 5310,
@@ -2187,9 +2232,36 @@
     "Like": 0
   },
   {
+    "Id": 3809,
+    "Name": "巫神視界",
+    "Type": "EquipmentHead",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3810,
+    "Name": "萬法之寶冠",
+    "Type": "EquipmentHead",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 3811,
     "Name": "邪龍頭冠",
     "Type": "EquipmentHead",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3308,
+    "Name": "宗師之手",
+    "Type": "EquipmentGloves",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,
@@ -2223,6 +2295,33 @@
     "Like": 0
   },
   {
+    "Id": 4108,
+    "Name": "君王恩賜",
+    "Type": "EquipmentBoots",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 1113,
+    "Name": "至高一瞥",
+    "Type": "EquipmentWeapon",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 1119,
+    "Name": "切割大地之斧",
+    "Type": "EquipmentWeapon",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 1707,
     "Name": "雷爾夫的野心",
     "Type": "EquipmentWeapon",
@@ -2235,6 +2334,24 @@
     "Id": 4522,
     "Name": "偽神之蛻",
     "Type": "EquipmentNecklace",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4533,
+    "Name": "霜獄雷鳴",
+    "Type": "EquipmentNecklace",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4639,
+    "Name": "世界流轉",
+    "Type": "EquipmentRing",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,

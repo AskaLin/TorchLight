@@ -64,13 +64,13 @@ namespace TorchLight.Statistics
                 var filePath = GetLogFilePath();
                 var isTest = true;
                 //測試用, 讀取現有日誌內容 進行處理
-                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                using StreamReader sr = new(fs, Encoding.UTF8);
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    _logProcessor.ProcessLine(line);
-                }
+                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                //using StreamReader sr = new(fs, Encoding.UTF8);
+                //string line;
+                //while ((line = sr.ReadLine()) != null)
+                //{
+                //    _logProcessor.ProcessLine(line);
+                //}
                 isTest = true;
 
                 if (isTest)
