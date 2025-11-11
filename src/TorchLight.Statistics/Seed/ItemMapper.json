@@ -1,4 +1,130 @@
-﻿[  
+﻿[
+  {
+    "Id": 1119,
+    "Name": "未知物件(1119)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3009,
+    "Name": "未知物件(3009)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3204,
+    "Name": "未知物件(3204)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3212,
+    "Name": "未知物件(3212)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3709,
+    "Name": "未知物件(3709)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3710,
+    "Name": "未知物件(3710)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4527,
+    "Name": "未知物件(4527)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4532,
+    "Name": "未知物件(4532)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4635,
+    "Name": "未知物件(4635)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260002,
+    "Name": "未知物件(260002)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260302,
+    "Name": "未知物件(260302)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 261005,
+    "Name": "未知物件(261005)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 7706,
+    "Name": "未知物件(7706)",
+    "Type": "Unknown101",
+    "PageIdType": "Skill",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 330002,
+    "Name": "未知物件(330002)",
+    "Type": "Unknown102",
+    "PageIdType": "Currency",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
   {
     "Id": 6002,
     "Name": "寒淵的秘密",
@@ -324,34 +450,7 @@
     "Like": 0
   },
   {
-    "Id": 260203,
-    "Name": "知識之神的神格",
-    "Type": "DivinitySlate",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 260301,
-    "Name": "征戰之神的神格",
-    "Type": "DivinitySlate",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 260302,
-    "Name": "征戰之神的神格",
-    "Type": "DivinitySlate",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 260505,
+    "Id": 260501,
     "Name": "巨力之神的神格",
     "Type": "DivinitySlate",
     "PageIdType": "Equipment",
@@ -362,15 +461,6 @@
   {
     "Id": 260506,
     "Name": "巨神之力的神格",
-    "Type": "DivinitySlate",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 261005,
-    "Name": "神性一角",
     "Type": "DivinitySlate",
     "PageIdType": "Equipment",
     "Enable": true,
@@ -510,7 +600,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 1
+    "Like": 0
   },
   {
     "Id": 200028,
@@ -537,7 +627,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 1
+    "Like": 0
   },
   {
     "Id": 300006,
@@ -546,7 +636,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 1
+    "Like": 0
   },
   {
     "Id": 5140,
@@ -654,7 +744,7 @@
     "PageIdType": "Currency",
     "Enable": true,
     "Watch": false,
-    "Like": 2
+    "Like": 0
   },
   {
     "Id": 5310,
@@ -2232,8 +2322,8 @@
     "Like": 0
   },
   {
-    "Id": 3809,
-    "Name": "巫神視界",
+    "Id": 3610,
+    "Name": "甦醒頭顱",
     "Type": "EquipmentHead",
     "PageIdType": "Equipment",
     "Enable": true,
@@ -2241,8 +2331,8 @@
     "Like": 0
   },
   {
-    "Id": 3810,
-    "Name": "萬法之寶冠",
+    "Id": 3611,
+    "Name": "愚人的帝冕",
     "Type": "EquipmentHead",
     "PageIdType": "Equipment",
     "Enable": true,
@@ -2251,8 +2341,26 @@
   },
   {
     "Id": 3811,
-    "Name": "邪龍頭冠",
+    "Name": "蛛網奧秘頭巾",
     "Type": "EquipmentHead",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3210,
+    "Name": "薄暮籠罩法袍",
+    "Type": "EquipmentChest",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3211,
+    "Name": "煞星",
+    "Type": "EquipmentChest",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,
@@ -2286,6 +2394,15 @@
     "Like": 0
   },
   {
+    "Id": 3505,
+    "Name": "仇惡之手",
+    "Type": "EquipmentGloves",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 3510,
     "Name": "真知之握",
     "Type": "EquipmentGloves",
@@ -2295,8 +2412,8 @@
     "Like": 0
   },
   {
-    "Id": 4108,
-    "Name": "君王恩賜",
+    "Id": 3910,
+    "Name": "炎魔的焚步",
     "Type": "EquipmentBoots",
     "PageIdType": "Equipment",
     "Enable": true,
@@ -2304,18 +2421,9 @@
     "Like": 0
   },
   {
-    "Id": 1113,
-    "Name": "至高一瞥",
-    "Type": "EquipmentWeapon",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 1119,
-    "Name": "切割大地之斧",
-    "Type": "EquipmentWeapon",
+    "Id": 4010,
+    "Name": "追跡者步履",
+    "Type": "EquipmentBoots",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,
@@ -2340,8 +2448,8 @@
     "Like": 0
   },
   {
-    "Id": 4533,
-    "Name": "霜獄雷鳴",
+    "Id": 4528,
+    "Name": "溯寒者的鳴泣",
     "Type": "EquipmentNecklace",
     "PageIdType": "Equipment",
     "Enable": true,
@@ -2349,9 +2457,18 @@
     "Like": 0
   },
   {
-    "Id": 4639,
-    "Name": "世界流轉",
+    "Id": 4638,
+    "Name": "混亂終焉",
     "Type": "EquipmentRing",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4722,
+    "Name": "熱夜的輕擁",
+    "Type": "EquipmentBelt",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,
