@@ -13,7 +13,7 @@ public class MapPickRecordManager
 {
     private readonly List<MapRecordModel> _mapRecords = [];
     private MapRecordModel _currentMapRecord = new();
-    private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];    
+    private Dictionary<int, PickedItemDataModel> _currentMapPickData = [];
     private static readonly JsonSerializerOptions _ops = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -29,15 +29,15 @@ public class MapPickRecordManager
     /// 是否在地圖中 (正常開始的地圖記錄)
     /// </summary>
     public bool IsInMap { get; private set; }
-    
+
     /// <summary>
     /// 是否有未完成的地圖記錄 (異常結束：遊戲關閉、斷線等)
     /// 此狀態表示玩家在地圖中但未正常返回藏身處
     /// </summary>
     public bool IsIncomplete { get; private set; }
-    
+
     public string CurrentMapName { get; private set; } = string.Empty;
-    
+
     /// <summary>
     /// 返回避難所時間
     /// </summary>
@@ -50,7 +50,7 @@ public class MapPickRecordManager
         _currentMapRecord.RecordId = token;
         Log.Debug("設定 Map Token {tok}", _currentMapRecord.RecordId);
     }
-    public void SetMapId(int mapId)
+    public void SetMapId(int mapId, string mapType = null)
     {
         _currentMapRecord.MapId = mapId;
         var mapIdConfig = MapInfoMapper.GetMapInfo(mapId);
@@ -58,6 +58,23 @@ public class MapPickRecordManager
         {
             _currentMapRecord.Name = mapIdConfig.GetDisplayName();
             _currentMapRecord.Type = mapIdConfig.Type;
+        }
+        else if (!string.IsNullOrEmpty(mapType))
+        {
+            // s4 地圖特殊處理
+            var s4MapName = string.Empty;
+            if (mapType == "S4LocalMap")
+            {
+                s4MapName = mapId > 8080 ? "永恆殘垣：廣袤" : "永恆殘垣：豐饒";
+            }
+            else if (mapType == "S4GlobalMap")
+            {
+                s4MapName = "永恆迷城";
+            }
+
+            MapInfoMapper.AddMapMappingByName(s4MapName, mapId, MapType.Season);
+            _currentMapRecord.Name = s4MapName;
+            _currentMapRecord.Type = MapType.Season;
         }
         else
         {
@@ -86,7 +103,7 @@ public class MapPickRecordManager
             case ItemType.MapTicket:
             case ItemType.BossTicket:
             case ItemType.GameplayTicket:
-                _currentMapRecord.MapTicket = item.Name;                
+                _currentMapRecord.MapTicket = item.Name;
                 Log.Debug("[開圖材料] 門票: {TicketName}", item.Name);
                 break;
 
@@ -198,7 +215,7 @@ public class MapPickRecordManager
         {
             Log.Debug("[拾取統計] 物品 {ItemId} 已停用，跳過記錄", configBaseId);
             return null;
-        }     
+        }
 
         // ✅ 取得物品資訊（包含 Like 值和 ItemType）
         var itemInfo = ItemInfoMapper.GetItemInfo(configBaseId);
@@ -396,6 +413,11 @@ public class MapPickRecordManager
     // 🆕 生成統計摘要
     private RecordSummary GenerateSummary()
     {
+        foreach(var r in _mapRecords)
+        {
+            Log.Error("{id}, {name}, {s}, {d}", r.MapId, r.Name, r.StartTime, r.EndTime);
+        }
+        
         var totalPlayTime = TimeSpan.FromSeconds(_mapRecords.Sum(r => (r.EndTime - r.StartTime).TotalSeconds));
 
         // 收集所有拾取的物品

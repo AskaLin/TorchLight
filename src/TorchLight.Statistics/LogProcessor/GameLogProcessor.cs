@@ -463,11 +463,12 @@ public class GameLogProcessor
         else
         {
             Log.Information("沒有返回避難所時間, 使用新地圖開始時間作為上一張地圖的結束時間");
+            _mapPickRecordManager.ReturnTime = newMapStartTime;
         }
 
         _mapPickRecordManager.EndMapRecord(newMapStartTime);
         NotifyNewMapRecord();
-        _mapPickRecordManager.ReturnTime = DateTime.MinValue;
+        _mapPickRecordManager.ReturnTime = DateTime.MinValue;        
     }
 
     /// <summary>
@@ -478,7 +479,7 @@ public class GameLogProcessor
         try
         {
             _mapPickRecordManager.SetMapToken(context.Token);
-            _mapPickRecordManager.SetMapId(context.MapId);
+            _mapPickRecordManager.SetMapId(context.MapId, context.MapType);
 
             if (_mapPickRecordManager.CurrentMapRecordInfoComplete())
             {

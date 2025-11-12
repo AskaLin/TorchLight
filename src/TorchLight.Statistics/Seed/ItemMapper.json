@@ -324,7 +324,25 @@
     "Like": 0
   },
   {
+    "Id": 260003,
+    "Name": "狩獵之神的神格",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 260004,
+    "Name": "狩獵之神的神格",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260005,
     "Name": "狩獵之神的神格",
     "Type": "DivinitySlate",
     "PageIdType": "Equipment",
@@ -2251,8 +2269,17 @@
   },
   {
     "Id": 3811,
-    "Name": "蛛網奧秘頭巾",
+    "Name": "邪龍頭冠",
     "Type": "EquipmentHead",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 3001,
+    "Name": "虛空堤岸",
+    "Type": "EquipmentChest",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,
@@ -2405,6 +2432,15 @@
   {
     "Id": 4722,
     "Name": "熱夜的輕擁",
+    "Type": "EquipmentBelt",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4728,
+    "Name": "獵光腰帶",
     "Type": "EquipmentBelt",
     "PageIdType": "Equipment",
     "Enable": true,

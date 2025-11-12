@@ -43,7 +43,7 @@ public static partial class LineRegex
     /// Ex: [12345] => 12345
     /// </summary>
     /// <returns></returns>
-    [GeneratedRegex(@"\[(\d+)\]")]
+    [GeneratedRegex(@"\[(.*?)\]")]
     public static partial Regex GetCellValue();
 
     /// <summary>

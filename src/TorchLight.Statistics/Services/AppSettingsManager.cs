@@ -96,8 +96,7 @@ public class AppSettingsManager
                     var jsonDoc = JsonNode.Parse(jsonContent);
                     if (jsonDoc != null)
                     {
-                        // 移除序列化產生的 serilog 屬性，替換為原始設定
-                        jsonDoc["serilog"] = null;
+                        // 移除序列化產生的 serilog 屬性，替換為原始設定                        
                         jsonDoc["Serilog"] = _originalSerilogConfig.DeepClone();
 
                         // 重新序列化

@@ -54,7 +54,12 @@ public class OpenS4MapProcessor: BaseLogProcessor
         else if (LineParser.IsCurrentOpenMapIDLine(line, "+mapId [", out int mapId))
         {
             _currentMapEvent.MapId = mapId;
-            Log.Debug("賽季地圖 ID: {MapId}", mapId);
+            Log.Debug("賽季地圖 ID: {MapId}", mapId);            
+        }
+        else if(LineParser.GetCellValue(line, "+maptype [", out string mapType))
+        {
+            _currentMapEvent.MapType = mapType;
+            Log.Debug("S4 賽季地圖Type: {type}", mapType);
         }
     }
 

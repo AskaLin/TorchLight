@@ -10,6 +10,7 @@ public class OpenMapEvent(DateTime startTime)
     public string Token { get; set; }
     public int MapId { get; set; }
     public int LevelId { get; set; }
+    public string MapType { get; set; }
     public DateTime StartTime { get; set; } = startTime;
 }
 
