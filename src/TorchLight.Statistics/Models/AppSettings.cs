@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Text.Json.Serialization;
 
 namespace TorchLight.Statistics.Models;
 
@@ -18,9 +19,9 @@ public class AppSettings
     public EnvironmentSettings Environment { get; set; } = new();
 
     /// <summary>
-    /// 🆕 Serilog 日誌設定
+    /// ✅ 移除：Serilog 日誌設定（改用原始 JSON 格式，不序列化）
     /// </summary>
-    public SerilogSettings Serilog { get; set; } = new();
+    // public SerilogSettings Serilog { get; set; } = new();
 
     /// <summary>
     /// 🆕 浮動統計窗體設定
@@ -60,7 +61,7 @@ public class ExecuteLineSettings
     public int Stage2Percentage { get; set; } = 15;
 
     /// <summary>
-    /// 第二階段顏色（十六進位格式，例如：#FFA500）
+ /// 第二階段顏色（十六進位格式，例如：#FFA500）
     /// </summary>
     public string Stage2Color { get; set; } = "#FFA500";
 
@@ -70,7 +71,7 @@ public class ExecuteLineSettings
     public int Stage3Percentage { get; set; } = 15;
 
     /// <summary>
-    /// 第三階段顏色（十六進位格式，例如：#FFFF00）
+ /// 第三階段顏色（十六進位格式，例如：#FFFF00）
     /// </summary>
     public string Stage3Color { get; set; } = "#FFFF00";
 
@@ -122,7 +123,7 @@ public class ExecuteLineSettings
     /// </summary>
     public int GetRemainingPercentage()
     {
-        return Math.Max(0, 100 - Stage1Percentage - Stage2Percentage - Stage3Percentage);
+     return Math.Max(0, 100 - Stage1Percentage - Stage2Percentage - Stage3Percentage);
     }
 
     /// <summary>
@@ -141,13 +142,13 @@ public class ExecuteLineSettings
         }
         catch
         {
-            return fallback;
+   return fallback;
         }
-    }
+  }
 
     /// <summary>
     /// 從 Color 物件設定顏色
-    /// </summary>
+/// </summary>
     public void SetStage1Color(Color color) => Stage1Color = ColorTranslator.ToHtml(color);
     public void SetStage2Color(Color color) => Stage2Color = ColorTranslator.ToHtml(color);
     public void SetStage3Color(Color color) => Stage3Color = ColorTranslator.ToHtml(color);
@@ -155,35 +156,18 @@ public class ExecuteLineSettings
 }
 
 /// <summary>
-/// 🆕 Serilog 日誌設定
+/// ✅ 註解：不再使用這個類別，Serilog 設定使用原始 JSON 格式
 /// </summary>
+/*
 public class SerilogSettings
 {
-    /// <summary>
-    /// 最小日誌等級 (Verbose, Debug, Information, Warning, Error, Fatal)
-    /// </summary>
     public string MinimumLevel { get; set; } = "Information";
-
-    /// <summary>
-    /// 是否輸出到控制台
-    /// </summary>
     public bool WriteToConsole { get; set; } = true;
-
-    /// <summary>
-    /// 是否輸出到檔案
-    /// </summary>
     public bool WriteToFile { get; set; } = true;
-
-    /// <summary>
-    /// 日誌檔案路徑模板
-    /// </summary>
     public string FilePathTemplate { get; set; } = "logs/torchlight-.txt";
-
-    /// <summary>
-    /// 日誌滾動間隔 (Infinite, Year, Month, Day, Hour, Minute)
-    /// </summary>
     public string RollingInterval { get; set; } = "Day";
 }
+*/
 
 /// <summary>
 /// 🆕 浮動統計窗體設定
@@ -211,7 +195,7 @@ public class FloatingStatsSettings
     public int Height { get; set; } = 50;  // ✅ 預設橫列高度
 
     /// <summary>
-    /// 是否顯示
+  /// 是否顯示
     /// </summary>
     public bool IsVisible { get; set; } = false;
 
