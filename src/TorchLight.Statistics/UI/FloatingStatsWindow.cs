@@ -55,6 +55,28 @@ public class FloatingStatsWindow : Form
         InitializeStatItems();
     }
 
+    /// <summary>
+    /// 🆕 獲取當前設定（用於儲存）
+    /// </summary>
+    public (Point location, Size size, double opacity, DisplayModePublic displayMode) GetSettings()
+    {
+        return (Location, Size, Opacity, (DisplayModePublic)_displayMode);
+    }
+
+    /// <summary>
+    /// 🆕 套用設定（從 appsettings.json 載入）
+    /// </summary>
+    public void ApplySettings(Point location, Size size, double opacity, DisplayModePublic displayMode)
+    {
+        Location = location;
+        Size = size;
+        Opacity = opacity;
+        _displayMode = (DisplayMode)displayMode;
+
+        RecalculateItemPositions();
+        Invalidate();
+    }
+
     private void InitializeWindow()
     {
         // 窗體基本設定
@@ -568,14 +590,23 @@ public class FloatingStatsWindow : Form
 
     #endregion
 
-    // ?? 顯示模式列舉
+    // 🆕 顯示模式列舉
     private enum DisplayMode
     {
         Vertical,    // 直排
         Horizontal   // 橫列
     }
 
-    // ?? 釋放資源
+    /// <summary>
+    /// 🆕 公開 DisplayMode 列舉（用於序列化）
+    /// </summary>
+    public enum DisplayModePublic
+    {
+        Vertical,
+        Horizontal
+    }
+
+    // 🆕 釋放資源
     protected override void Dispose(bool disposing)
     {
         if (disposing)
@@ -606,7 +637,7 @@ public class FloatingStatsWindow : Form
 }
 
 /// <summary>
-/// ?? 監控物品資訊
+/// 🆕 監控物品資訊
 /// </summary>
 public class WatchedItemInfo
 {

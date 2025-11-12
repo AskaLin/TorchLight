@@ -76,8 +76,32 @@ public class MainWindow : Form
         // 這樣它才能真正獨立顯示在最上層
         _floatingStatsWindow.Owner = null;
 
-        // 預設關閉 顯示窗體
-        _floatingStatsWindow.Hide();
+        // 🆕 載入設定
+        var settings = Services.AppSettingsManager.GetSettings();
+        var floatingSettings = settings.FloatingStats;
+
+        // 🆕 解析 DisplayMode
+        var displayMode = floatingSettings.DisplayMode.ToLower() == "vertical"
+            ? FloatingStatsWindow.DisplayModePublic.Vertical
+            : FloatingStatsWindow.DisplayModePublic.Horizontal;
+
+        // 🆕 套用設定
+        _floatingStatsWindow.ApplySettings(
+            new Point(floatingSettings.LocationX, floatingSettings.LocationY),
+            new Size(floatingSettings.Width, floatingSettings.Height),
+            floatingSettings.Opacity,
+            displayMode
+        );
+
+        // 🆕 根據設定決定是否顯示
+        if (floatingSettings.IsVisible)
+        {
+            _floatingStatsWindow.Show();
+        }
+        else
+        {
+            _floatingStatsWindow.Hide();
+        }
 
         // 🆕 強制將懸浮窗體帶到前面
         _floatingStatsWindow.BringToFront();
@@ -396,6 +420,22 @@ public class MainWindow : Form
     {
         if (disposing)
         {
+            // 🆕 關閉前儲存浮動統計窗體的位置和大小
+            if (_floatingStatsWindow != null && !_floatingStatsWindow.IsDisposed)
+            {
+                var (location, size, opacity, displayMode) = _floatingStatsWindow.GetSettings();
+
+                var settings = Services.AppSettingsManager.GetSettings();
+                settings.FloatingStats.LocationX = location.X;
+                settings.FloatingStats.LocationY = location.Y;
+                settings.FloatingStats.Width = size.Width;
+                settings.FloatingStats.Height = size.Height;
+                settings.FloatingStats.Opacity = opacity;
+                settings.FloatingStats.DisplayMode = displayMode.ToString();
+                settings.FloatingStats.IsVisible = _floatingStatsWindow.Visible;
+                Services.AppSettingsManager.SaveSettings(settings);
+            }
+
             // 關閉前儲存斬殺線視窗的位置和大小
             if (_executeLineWindow != null && !_executeLineWindow.IsDisposed)
             {

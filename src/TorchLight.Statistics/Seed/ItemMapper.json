@@ -1,131 +1,5 @@
 ﻿[
   {
-    "Id": 1119,
-    "Name": "未知物件(1119)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 3009,
-    "Name": "未知物件(3009)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 3204,
-    "Name": "未知物件(3204)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 3212,
-    "Name": "未知物件(3212)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 3709,
-    "Name": "未知物件(3709)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 3710,
-    "Name": "未知物件(3710)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 4527,
-    "Name": "未知物件(4527)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 4532,
-    "Name": "未知物件(4532)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 4635,
-    "Name": "未知物件(4635)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 260002,
-    "Name": "未知物件(260002)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 260302,
-    "Name": "未知物件(260302)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 261005,
-    "Name": "未知物件(261005)",
-    "Type": "Unknown100",
-    "PageIdType": "Equipment",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 7706,
-    "Name": "未知物件(7706)",
-    "Type": "Unknown101",
-    "PageIdType": "Skill",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
-    "Id": 330002,
-    "Name": "未知物件(330002)",
-    "Type": "Unknown102",
-    "PageIdType": "Currency",
-    "Enable": true,
-    "Watch": false,
-    "Like": 0
-  },
-  {
     "Id": 6002,
     "Name": "寒淵的秘密",
     "Type": "MemoryFirefly",
@@ -2340,6 +2214,15 @@
     "Like": 0
   },
   {
+    "Id": 3809,
+    "Name": "巫神視界",
+    "Type": "EquipmentHead",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 3811,
     "Name": "蛛網奧秘頭巾",
     "Type": "EquipmentHead",
@@ -2430,9 +2313,27 @@
     "Like": 0
   },
   {
+    "Id": 414,
+    "Name": "臨別索求",
+    "Type": "EquipmentWeapon",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 1707,
     "Name": "雷爾夫的野心",
     "Type": "EquipmentWeapon",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 4521,
+    "Name": "磐岩的汪洋",
+    "Type": "EquipmentNecklace",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,

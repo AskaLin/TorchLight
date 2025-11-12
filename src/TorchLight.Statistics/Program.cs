@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Microsoft.Extensions.Configuration;
+using Serilog;
 using System.Text;
 using TorchLight.Statistics.Configuration;
 using TorchLight.Statistics.LogProcessor;
@@ -18,11 +19,15 @@ namespace TorchLight.Statistics
         [STAThread]
         static void Main()
         {
-            // 初始化 Serilog
+            // 🆕 建立配置
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                .Build();
+
+            // 🆕 初始化 Serilog（從 appsettings.json 讀取，如無設定則使用預設值）
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .WriteTo.Console()
-                .WriteTo.File("logs/torchlight-.txt", rollingInterval: RollingInterval.Day)
+                .ReadFrom.Configuration(configuration)
                 .CreateLogger();
 
             Log.Information("╔════════════════════════════════════════╗");
@@ -36,7 +41,7 @@ namespace TorchLight.Statistics
                 // 初始化核心組件
                 Log.Information("正在初始化...");
 
-                // 🆕 載入應用程式設定
+                // 載入應用程式設定
                 Services.AppSettingsManager.LoadSettings();
                 Log.Information("已載入應用程式設定");
 
@@ -52,25 +57,13 @@ namespace TorchLight.Statistics
                 // 創建 WebViewHub（需要在 MainWindow 中初始化）
                 _webViewHub = new WebViewHub();
 
-
                 Log.Information("已載入 {ItemCount} 個物品定義", ItemInfoMapper.GetItemTable().Count);
-
 
                 _logProcessor = new GameLogProcessor(_webViewHub);
                 Log.Information("核心組件初始化完成");
 
-
                 // 🆕 嘗試啟動日誌監聽器（如果路徑有效）
                 var filePath = GetLogFilePath();
-
-                // 測試用, 讀取現有日誌內容 進行處理
-                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                //using StreamReader sr = new(fs, Encoding.UTF8);
-                //string line;
-                //while ((line = sr.ReadLine()) != null)
-                //{
-                //    _logProcessor.ProcessLine(line);
-                //}
 
                 if (File.Exists(filePath))
                 {
@@ -82,7 +75,6 @@ namespace TorchLight.Statistics
                     Log.Information("請在設定頁面中設定正確的日誌檔案路徑");
                 }
 
-
                 Log.Information("════════════════════════════════════════");
                 Log.Information("監聽已啟動，等待遊戲事件...");
                 Log.Information("提示：進入異界地圖後會自動開始統計拾取物品");
@@ -92,10 +84,6 @@ namespace TorchLight.Statistics
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-
-
-                // 設定 GameLogProcessor 使用 WebViewHub
-                // _logProcessor.SetWebViewHub(_webViewHub);
 
                 // 創建 MainWindow 並傳入 WebViewHub
                 var mainWindow = new MainWindow(_logProcessor.MapPickRecordManager, _logProcessor, _webViewHub);
@@ -223,7 +211,7 @@ namespace TorchLight.Statistics
         static string GetLogFilePath()
         {
             // 1. 優先從 appsettings.json 讀取使用者設定的路徑
-            var settings = Services.AppSettingsManager.GetSettings();
+            var settings = AppSettingsManager.GetSettings();
             var configuredPath = settings?.Environment?.GameLogPath;
 
             if (!string.IsNullOrWhiteSpace(configuredPath) && File.Exists(configuredPath))

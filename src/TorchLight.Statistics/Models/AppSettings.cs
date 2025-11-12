@@ -16,6 +16,16 @@ public class AppSettings
     /// 環境參數設定
     /// </summary>
     public EnvironmentSettings Environment { get; set; } = new();
+
+    /// <summary>
+    /// 🆕 Serilog 日誌設定
+    /// </summary>
+    public SerilogSettings Serilog { get; set; } = new();
+
+    /// <summary>
+    /// 🆕 浮動統計窗體設定
+    /// </summary>
+    public FloatingStatsSettings FloatingStats { get; set; } = new();
 }
 
 /// <summary>
@@ -142,4 +152,76 @@ public class ExecuteLineSettings
     public void SetStage2Color(Color color) => Stage2Color = ColorTranslator.ToHtml(color);
     public void SetStage3Color(Color color) => Stage3Color = ColorTranslator.ToHtml(color);
     public void SetDefaultColor(Color color) => DefaultColor = ColorTranslator.ToHtml(color);
+}
+
+/// <summary>
+/// 🆕 Serilog 日誌設定
+/// </summary>
+public class SerilogSettings
+{
+    /// <summary>
+    /// 最小日誌等級 (Verbose, Debug, Information, Warning, Error, Fatal)
+    /// </summary>
+    public string MinimumLevel { get; set; } = "Information";
+
+    /// <summary>
+    /// 是否輸出到控制台
+    /// </summary>
+    public bool WriteToConsole { get; set; } = true;
+
+    /// <summary>
+    /// 是否輸出到檔案
+    /// </summary>
+    public bool WriteToFile { get; set; } = true;
+
+    /// <summary>
+    /// 日誌檔案路徑模板
+    /// </summary>
+    public string FilePathTemplate { get; set; } = "logs/torchlight-.txt";
+
+    /// <summary>
+    /// 日誌滾動間隔 (Infinite, Year, Month, Day, Hour, Minute)
+    /// </summary>
+    public string RollingInterval { get; set; } = "Day";
+}
+
+/// <summary>
+/// 🆕 浮動統計窗體設定
+/// </summary>
+public class FloatingStatsSettings
+{
+    /// <summary>
+    /// 視窗位置 X
+    /// </summary>
+    public int LocationX { get; set; } = 100;
+
+    /// <summary>
+    /// 視窗位置 Y
+    /// </summary>
+    public int LocationY { get; set; } = 100;
+
+    /// <summary>
+    /// 視窗寬度
+    /// </summary>
+    public int Width { get; set; } = 900;  // ✅ 預設橫列寬度
+
+    /// <summary>
+    /// 視窗高度
+    /// </summary>
+    public int Height { get; set; } = 50;  // ✅ 預設橫列高度
+
+    /// <summary>
+    /// 是否顯示
+    /// </summary>
+    public bool IsVisible { get; set; } = false;
+
+    /// <summary>
+    /// 透明度（0.0-1.0）
+    /// </summary>
+    public double Opacity { get; set; } = 0.9;
+
+    /// <summary>
+    /// 顯示模式（Vertical 或 Horizontal）
+    /// </summary>
+    public string DisplayMode { get; set; } = "Horizontal";  // ✅ 預設橫列
 }
