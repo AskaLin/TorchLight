@@ -62,8 +62,19 @@ namespace TorchLight.Statistics
                 _logProcessor = new GameLogProcessor(_webViewHub);
                 Log.Information("核心組件初始化完成");
 
+           
+
                 // 🆕 嘗試啟動日誌監聽器（如果路徑有效）
                 var filePath = GetLogFilePath();
+
+                //測試用, 讀取現有日誌內容 進行處理
+                //using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                //using StreamReader sr = new(fs, Encoding.UTF8);
+                //string line;
+                //while ((line = sr.ReadLine()) != null)
+                //{
+                //    _logProcessor.ProcessLine(line);
+                //}
 
                 if (File.Exists(filePath))
                 {

@@ -25,6 +25,7 @@ public class GameLogProcessor
     private readonly PushItemProcessor _pushItemProcessor;
     private readonly OpenMapProcessor _openMapProcessor;
     private readonly OpenSeasonMapProcessor _openSeasonMapProcessor;
+    private readonly OpenS4MapProcessor _openS4MapProcessor;
 
     /// <summary>
     /// 當檢測到 "已開啟日誌" 訊息時觸發
@@ -56,6 +57,7 @@ public class GameLogProcessor
 
         _openMapProcessor = new OpenMapProcessor();
         _openSeasonMapProcessor = new OpenSeasonMapProcessor();
+        _openS4MapProcessor = new OpenS4MapProcessor();
 
         // 🆕 建立處理器鏈（優先級由高到低）
         _processorChain =
@@ -64,7 +66,8 @@ public class GameLogProcessor
             _pickedItemProcessor,        // 2. 拾取物品
             _pushItemProcessor,          // 3. 推送物品
             _openMapProcessor,           // 4. 開啟地圖
-            _openSeasonMapProcessor      // 5. 開啟賽季地圖
+            _openSeasonMapProcessor,      // 5. 開啟賽季地圖
+            _openS4MapProcessor,         // 6. 開啟S4賽季地圖（最低優先級）
         ];
 
         RegisterEventHandlers();
@@ -94,6 +97,9 @@ public class GameLogProcessor
         // 開啟賽季地圖事件
         _openSeasonMapProcessor.OnMapStart += HandleMapInfoStart;
         _openSeasonMapProcessor.OnMapComplete += HandleMapInfoComplete;
+
+        _openS4MapProcessor.OnMapStart += HandleMapInfoStart;
+        _openS4MapProcessor.OnMapComplete += HandleMapInfoComplete;
     }
 
     /// <summary>
