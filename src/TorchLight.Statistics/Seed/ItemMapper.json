@@ -1,5 +1,23 @@
 ﻿[
   {
+    "Id": 4109,
+    "Name": "未知物件(4109)",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260204,
+    "Name": "知識之神的神格",
+    "Type": "Unknown100",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 6002,
     "Name": "寒淵的秘密",
     "Type": "MemoryFirefly",
@@ -299,6 +317,15 @@
   {
     "Id": 1012,
     "Name": "蛾火燎原之刻",
+    "Type": "DivinitySlate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 260004,
+    "Name": "狩獵之神的神格",
     "Type": "DivinitySlate",
     "PageIdType": "Equipment",
     "Enable": true,
@@ -2232,6 +2259,15 @@
     "Like": 0
   },
   {
+    "Id": 3009,
+    "Name": "不破胸甲",
+    "Type": "EquipmentChest",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
     "Id": 3210,
     "Name": "薄暮籠罩法袍",
     "Type": "EquipmentChest",
@@ -2370,6 +2406,33 @@
     "Id": 4722,
     "Name": "熱夜的輕擁",
     "Type": "EquipmentBelt",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 350019,
+    "Name": "小型宿命：連續攻擊機率",
+    "Type": "EquipmentFate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 350024,
+    "Name": "小型宿命：灌注速度",
+    "Type": "EquipmentFate",
+    "PageIdType": "Equipment",
+    "Enable": true,
+    "Watch": false,
+    "Like": 0
+  },
+  {
+    "Id": 350307,
+    "Name": "中型宿命：力量",
+    "Type": "EquipmentFate",
     "PageIdType": "Equipment",
     "Enable": true,
     "Watch": false,
