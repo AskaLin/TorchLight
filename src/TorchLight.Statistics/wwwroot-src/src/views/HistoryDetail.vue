@@ -90,6 +90,17 @@
               </div>
             </div>
 
+            <!-- 🆕 顯示 like > 0 的物品 -->
+            <div v-if="getLikedItems(record).length > 0" class="liked-items-section">
+              <div class="liked-items-grid">
+                <div v-for="item in getLikedItems(record)" :key="item.baseId" class="liked-item-chip">
+                  <ItemStarIcon :like="item.like" />
+                  <span class="liked-item-name">{{ item.name }}</span>
+                  <span class="liked-item-quantity">×{{ item.total }}</span>
+                </div>
+              </div>
+            </div>
+
             <div class="record-stats">
               <div class="stat-item">
                 <span class="stat-label">用時</span>
@@ -218,6 +229,22 @@
   const getTotalQuantity = (record) => {
     if (!record.pickRecord) return 0
     return Object.values(record.pickRecord).reduce((sum, item) => sum + item.total, 0)
+  }
+
+  // 🆕 獲取 like > 0 的物品，並按 like 降序排序
+  const getLikedItems = (record) => {
+    if (!record.pickRecord) return []
+    
+    return Object.values(record.pickRecord)
+      .filter(item => item.like && item.like > 0)
+      .sort((a, b) => {
+        // 先按 like 降序排序
+        if (b.like !== a.like) {
+          return b.like - a.like
+        }
+        // like 相同時，按數量降序排序
+        return b.total - a.total
+      })
   }
 </script>
 
@@ -443,6 +470,48 @@
 
   .value {
     opacity: 0.8;
+  }
+
+  /* 🆕 喜愛物品區域樣式 */
+  .liked-items-section {
+    margin: 12px 0;
+    padding: 12px;
+    background: rgba(255, 215, 0, 0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.2);
+  }
+
+  .liked-items-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .liked-item-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+
+    .liked-item-chip:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: scale(1.05);
+    }
+
+  .liked-item-name {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+  }
+
+  .liked-item-quantity {
+    color: #ffd700;
+    font-weight: 600;
+    font-size: 0.8rem;
   }
 
   .record-stats {
