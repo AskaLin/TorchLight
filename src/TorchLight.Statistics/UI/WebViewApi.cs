@@ -374,6 +374,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                         MapType.Netherrealm => "🌌 異界",
                         MapType.SecretRealm => "🔮 秘境",
                         MapType.Boss => "👑 首領",
+                        MapType.Season => "🔥 賽季",
                         _ => t.ToString()
                     },
                     Description = t switch
@@ -382,6 +383,7 @@ public class WebViewApi(MapPickRecordManager mapPickRecordManager, GameLogProces
                         MapType.Netherrealm => "可統計拾取的地圖",
                         MapType.SecretRealm => "特殊秘境地圖",
                         MapType.Boss => "首領地圖",
+                        MapType.Season => "賽季地圖",
                         _ => ""
                     }
                 }).ToArray();

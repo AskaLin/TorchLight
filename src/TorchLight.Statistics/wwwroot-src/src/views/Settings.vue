@@ -2,13 +2,13 @@
   <div class="settings-page">
     <!-- Tab 切換 -->
     <div class="tabs">
-      <button :class="['tab-btn', { active: activeTab === 'maps' }]"
-              @click="activeTab = 'maps'">
-        地圖設定
-      </button>
       <button :class="['tab-btn', { active: activeTab === 'statistics' }]"
               @click="activeTab = 'statistics'">
         拾取物品設定
+      </button>
+      <button :class="['tab-btn', { active: activeTab === 'maps' }]"
+              @click="activeTab = 'maps'">
+        地圖設定
       </button>
       <button :class="['tab-btn', { active: activeTab === 'executeLine' }]"
               @click="activeTab = 'executeLine'">
@@ -48,7 +48,7 @@
   import PickupStatisticsSettings from '../components/PickupStatisticsSettings.vue'
   import ExecuteLineSettings from '../components/ExecuteLineSettings.vue'
 
-  const activeTab = ref('environment')
+  const activeTab = ref('statistics')
 </script>
 
 <style scoped>
