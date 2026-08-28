@@ -638,23 +638,6 @@ public static readonly string[] CandidateLogPaths =
 
 MIT License - 詳見 [LICENSE](LICENSE)
 
-## 🤝 貢獻
-
-歡迎提交 Issue 和 Pull Request！
-
-**貢獻指南：**
-1. Fork 本專案
-2. 建立功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交變更 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 開啟 Pull Request
-
-## 📞 聯絡方式
-
-- **GitHub**: [@AskaLin](https://github.com/AskaLin)
-- **專案**: [TorchLight](https://github.com/AskaLin/TorchLight)
-- **Issues**: [問題回報](https://github.com/AskaLin/TorchLight/issues)
-
 ---
 
 ## 🙏 致謝
